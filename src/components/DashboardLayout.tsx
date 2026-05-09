@@ -1,18 +1,23 @@
-import { ChevronDown, Search, Bell } from "lucide-react";
+import { useState } from "react";
+import { ChevronDown, Search, Bell, Menu, Building2 } from "lucide-react";
 import { CinematicBackground } from "./CinematicBackground";
-import { AppSidebar } from "./AppSidebar";
+import { AppSidebar, MobileSidebar } from "./AppSidebar";
 
 export function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
   return (
     <div className="relative min-h-screen text-foreground">
       <CinematicBackground />
+
+      <MobileSidebar open={mobileOpen} onOpenChange={setMobileOpen} />
 
       <div className="flex">
         <AppSidebar />
 
         <div className="flex-1 min-w-0">
-          <Header />
-          <main className="px-5 md:px-8 py-6 md:py-8 max-w-[1400px] mx-auto animate-fade-in-up">
+          <Header onOpenMenu={() => setMobileOpen(true)} />
+          <main className="px-4 sm:px-5 md:px-8 py-5 md:py-8 max-w-[1400px] mx-auto animate-fade-in-up">
             {children}
           </main>
         </div>
@@ -21,9 +26,26 @@ export function DashboardLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-function Header() {
+function Header({ onOpenMenu }: { onOpenMenu: () => void }) {
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center gap-4 border-b border-border/60 bg-background/40 px-5 md:px-8 backdrop-blur-xl">
+    <header className="sticky top-0 z-20 flex h-14 md:h-16 items-center gap-2 sm:gap-4 border-b border-border/60 bg-background/40 px-3 sm:px-5 md:px-8 backdrop-blur-xl">
+      {/* Mobile hamburger */}
+      <button
+        onClick={onOpenMenu}
+        aria-label="Buka menu"
+        className="md:hidden grid h-9 w-9 place-items-center rounded-lg border border-border/60 bg-secondary/50 text-muted-foreground hover:text-foreground transition"
+      >
+        <Menu className="h-4.5 w-4.5" />
+      </button>
+
+      {/* Mobile brand */}
+      <div className="md:hidden flex items-center gap-2">
+        <div className="relative grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-green)]">
+          <Building2 className="h-4 w-4 text-[oklch(0.15_0.03_250)]" />
+        </div>
+        <p className="text-sm font-semibold tracking-wide">BUMDes</p>
+      </div>
+
       <div className="hidden md:flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
         <span className="h-1.5 w-1.5 rounded-full bg-[var(--neon-green)] shadow-[0_0_10px_var(--neon-green)] animate-pulse-glow" />
         Live · Sistem Konsolidasi BUMDes
@@ -37,12 +59,12 @@ function Header() {
         />
       </div>
 
-      <button className="relative grid h-9 w-9 place-items-center rounded-lg border border-border/60 bg-secondary/50 text-muted-foreground hover:text-foreground transition">
+      <button className="ml-auto lg:ml-0 relative grid h-9 w-9 place-items-center rounded-lg border border-border/60 bg-secondary/50 text-muted-foreground hover:text-foreground transition">
         <Bell className="h-4 w-4" />
         <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-[var(--neon-cyan)] shadow-[0_0_8px_var(--neon-cyan)]" />
       </button>
 
-      <button className="flex items-center gap-2 rounded-lg border border-border/60 bg-secondary/50 px-2 py-1.5 pr-3 hover:border-[var(--neon-cyan)]/50 transition">
+      <button className="flex items-center gap-2 rounded-lg border border-border/60 bg-secondary/50 px-2 py-1.5 sm:pr-3 hover:border-[var(--neon-cyan)]/50 transition">
         <div className="grid h-7 w-7 place-items-center rounded-md bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-green)] text-[oklch(0.15_0.03_250)] text-xs font-bold">
           AD
         </div>
@@ -50,7 +72,7 @@ function Header() {
           <p className="text-xs font-medium">Admin Direktur</p>
           <p className="text-[10px] text-muted-foreground">BUMDes Pusat</p>
         </div>
-        <ChevronDown className="h-4 w-4 text-muted-foreground" />
+        <ChevronDown className="hidden sm:block h-4 w-4 text-muted-foreground" />
       </button>
     </header>
   );
@@ -66,17 +88,17 @@ export function PageHeader({
   actions?: React.ReactNode;
 }) {
   return (
-    <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+    <div className="mb-5 md:mb-6 flex flex-wrap items-end justify-between gap-3 md:gap-4">
       <div>
-        <p className="text-xs uppercase tracking-[0.2em] text-[var(--neon-cyan)]/80 text-glow-cyan">
+        <p className="text-[10px] md:text-xs uppercase tracking-[0.2em] text-[var(--neon-cyan)]/80 text-glow-cyan">
           BUMDes · Admin Pusat
         </p>
-        <h1 className="mt-1 text-2xl md:text-3xl font-semibold">{title}</h1>
+        <h1 className="mt-1 text-xl sm:text-2xl md:text-3xl font-semibold">{title}</h1>
         {subtitle && (
-          <p className="mt-1 text-sm text-muted-foreground">{subtitle}</p>
+          <p className="mt-1 text-xs sm:text-sm text-muted-foreground">{subtitle}</p>
         )}
       </div>
-      {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
+      {actions && <div className="flex flex-wrap gap-2 w-full sm:w-auto">{actions}</div>}
     </div>
   );
 }
