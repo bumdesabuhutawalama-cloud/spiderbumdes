@@ -14,7 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      coa_accounts: {
+        Row: {
+          code: string
+          created_at: string
+          entry_type: string
+          id: string
+          name: string
+          normal_balance: string
+          status: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          entry_type: string
+          id?: string
+          name: string
+          normal_balance: string
+          status?: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          entry_type?: string
+          id?: string
+          name?: string
+          normal_balance?: string
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
