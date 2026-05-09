@@ -41,8 +41,8 @@ function CoaPage() {
           </button>
         </div>
 
-        <div className="mt-5 overflow-hidden rounded-xl border border-border/60">
-          <table className="w-full text-sm">
+        <div className="mt-5 overflow-x-auto rounded-xl border border-border/60">
+          <table className="w-full min-w-[560px] text-sm">
             <thead>
               <tr className="bg-background/40 text-left text-[11px] uppercase tracking-wider text-muted-foreground">
                 <th className="px-4 py-3 font-medium">Kode</th>
