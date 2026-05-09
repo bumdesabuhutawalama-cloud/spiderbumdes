@@ -42,8 +42,8 @@ export function ReportPage({
       />
 
       <div className="glass-card rounded-2xl p-5">
-        <div className="overflow-hidden rounded-xl border border-border/60">
-          <table className="w-full text-sm">
+        <div className="overflow-x-auto rounded-xl border border-border/60">
+          <table className="w-full min-w-[640px] text-sm">
             <thead>
               <tr className="bg-background/40 text-left text-[11px] uppercase tracking-wider text-muted-foreground">
                 {columns.map((c, i) => (
