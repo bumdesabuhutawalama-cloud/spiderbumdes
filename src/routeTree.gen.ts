@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as PengaturanRouteImport } from './routes/pengaturan'
 import { Route as CoaRouteImport } from './routes/coa'
+import { Route as CatatKegiatanRouteImport } from './routes/catat-kegiatan'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as LaporanNeracaPusatRouteImport } from './routes/laporan.neraca-pusat'
 import { Route as LaporanNeracaKonsolidasiRouteImport } from './routes/laporan.neraca-konsolidasi'
@@ -25,6 +26,11 @@ const PengaturanRoute = PengaturanRouteImport.update({
 const CoaRoute = CoaRouteImport.update({
   id: '/coa',
   path: '/coa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatatKegiatanRoute = CatatKegiatanRouteImport.update({
+  id: '/catat-kegiatan',
+  path: '/catat-kegiatan',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -56,6 +62,7 @@ const LaporanBagiHasilRoute = LaporanBagiHasilRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/catat-kegiatan': typeof CatatKegiatanRoute
   '/coa': typeof CoaRoute
   '/pengaturan': typeof PengaturanRoute
   '/laporan/bagi-hasil': typeof LaporanBagiHasilRoute
@@ -65,6 +72,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/catat-kegiatan': typeof CatatKegiatanRoute
   '/coa': typeof CoaRoute
   '/pengaturan': typeof PengaturanRoute
   '/laporan/bagi-hasil': typeof LaporanBagiHasilRoute
@@ -75,6 +83,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/catat-kegiatan': typeof CatatKegiatanRoute
   '/coa': typeof CoaRoute
   '/pengaturan': typeof PengaturanRoute
   '/laporan/bagi-hasil': typeof LaporanBagiHasilRoute
@@ -86,6 +95,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/catat-kegiatan'
     | '/coa'
     | '/pengaturan'
     | '/laporan/bagi-hasil'
@@ -95,6 +105,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/catat-kegiatan'
     | '/coa'
     | '/pengaturan'
     | '/laporan/bagi-hasil'
@@ -104,6 +115,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/catat-kegiatan'
     | '/coa'
     | '/pengaturan'
     | '/laporan/bagi-hasil'
@@ -114,6 +126,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CatatKegiatanRoute: typeof CatatKegiatanRoute
   CoaRoute: typeof CoaRoute
   PengaturanRoute: typeof PengaturanRoute
   LaporanBagiHasilRoute: typeof LaporanBagiHasilRoute
@@ -136,6 +149,13 @@ declare module '@tanstack/react-router' {
       path: '/coa'
       fullPath: '/coa'
       preLoaderRoute: typeof CoaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/catat-kegiatan': {
+      id: '/catat-kegiatan'
+      path: '/catat-kegiatan'
+      fullPath: '/catat-kegiatan'
+      preLoaderRoute: typeof CatatKegiatanRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -178,6 +198,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CatatKegiatanRoute: CatatKegiatanRoute,
   CoaRoute: CoaRoute,
   PengaturanRoute: PengaturanRoute,
   LaporanBagiHasilRoute: LaporanBagiHasilRoute,
