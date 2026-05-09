@@ -5,6 +5,7 @@ import {
   BookOpenText,
   FileBarChart,
   Settings,
+  ClipboardList,
   LogOut,
   ChevronDown,
   Building2,
@@ -92,6 +93,11 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
           </div>
         </div>
 
+        <NavLink
+          item={{ to: "/catat-kegiatan", label: "Catat Kegiatan", icon: ClipboardList }}
+          active={isActive("/catat-kegiatan")}
+          onNavigate={onNavigate}
+        />
         <NavLink
           item={{ to: "/pengaturan", label: "Pengaturan", icon: Settings }}
           active={isActive("/pengaturan")}
