@@ -9,38 +9,135 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PengaturanRouteImport } from './routes/pengaturan'
+import { Route as CoaRouteImport } from './routes/coa'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as LaporanNeracaPusatRouteImport } from './routes/laporan.neraca-pusat'
+import { Route as LaporanNeracaKonsolidasiRouteImport } from './routes/laporan.neraca-konsolidasi'
+import { Route as LaporanLabaRugiRouteImport } from './routes/laporan.laba-rugi'
+import { Route as LaporanBagiHasilRouteImport } from './routes/laporan.bagi-hasil'
 
+const PengaturanRoute = PengaturanRouteImport.update({
+  id: '/pengaturan',
+  path: '/pengaturan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoaRoute = CoaRouteImport.update({
+  id: '/coa',
+  path: '/coa',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LaporanNeracaPusatRoute = LaporanNeracaPusatRouteImport.update({
+  id: '/laporan/neraca-pusat',
+  path: '/laporan/neraca-pusat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LaporanNeracaKonsolidasiRoute =
+  LaporanNeracaKonsolidasiRouteImport.update({
+    id: '/laporan/neraca-konsolidasi',
+    path: '/laporan/neraca-konsolidasi',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LaporanLabaRugiRoute = LaporanLabaRugiRouteImport.update({
+  id: '/laporan/laba-rugi',
+  path: '/laporan/laba-rugi',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LaporanBagiHasilRoute = LaporanBagiHasilRouteImport.update({
+  id: '/laporan/bagi-hasil',
+  path: '/laporan/bagi-hasil',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/coa': typeof CoaRoute
+  '/pengaturan': typeof PengaturanRoute
+  '/laporan/bagi-hasil': typeof LaporanBagiHasilRoute
+  '/laporan/laba-rugi': typeof LaporanLabaRugiRoute
+  '/laporan/neraca-konsolidasi': typeof LaporanNeracaKonsolidasiRoute
+  '/laporan/neraca-pusat': typeof LaporanNeracaPusatRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/coa': typeof CoaRoute
+  '/pengaturan': typeof PengaturanRoute
+  '/laporan/bagi-hasil': typeof LaporanBagiHasilRoute
+  '/laporan/laba-rugi': typeof LaporanLabaRugiRoute
+  '/laporan/neraca-konsolidasi': typeof LaporanNeracaKonsolidasiRoute
+  '/laporan/neraca-pusat': typeof LaporanNeracaPusatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/coa': typeof CoaRoute
+  '/pengaturan': typeof PengaturanRoute
+  '/laporan/bagi-hasil': typeof LaporanBagiHasilRoute
+  '/laporan/laba-rugi': typeof LaporanLabaRugiRoute
+  '/laporan/neraca-konsolidasi': typeof LaporanNeracaKonsolidasiRoute
+  '/laporan/neraca-pusat': typeof LaporanNeracaPusatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/coa'
+    | '/pengaturan'
+    | '/laporan/bagi-hasil'
+    | '/laporan/laba-rugi'
+    | '/laporan/neraca-konsolidasi'
+    | '/laporan/neraca-pusat'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/coa'
+    | '/pengaturan'
+    | '/laporan/bagi-hasil'
+    | '/laporan/laba-rugi'
+    | '/laporan/neraca-konsolidasi'
+    | '/laporan/neraca-pusat'
+  id:
+    | '__root__'
+    | '/'
+    | '/coa'
+    | '/pengaturan'
+    | '/laporan/bagi-hasil'
+    | '/laporan/laba-rugi'
+    | '/laporan/neraca-konsolidasi'
+    | '/laporan/neraca-pusat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CoaRoute: typeof CoaRoute
+  PengaturanRoute: typeof PengaturanRoute
+  LaporanBagiHasilRoute: typeof LaporanBagiHasilRoute
+  LaporanLabaRugiRoute: typeof LaporanLabaRugiRoute
+  LaporanNeracaKonsolidasiRoute: typeof LaporanNeracaKonsolidasiRoute
+  LaporanNeracaPusatRoute: typeof LaporanNeracaPusatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/pengaturan': {
+      id: '/pengaturan'
+      path: '/pengaturan'
+      fullPath: '/pengaturan'
+      preLoaderRoute: typeof PengaturanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coa': {
+      id: '/coa'
+      path: '/coa'
+      fullPath: '/coa'
+      preLoaderRoute: typeof CoaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +145,46 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/laporan/neraca-pusat': {
+      id: '/laporan/neraca-pusat'
+      path: '/laporan/neraca-pusat'
+      fullPath: '/laporan/neraca-pusat'
+      preLoaderRoute: typeof LaporanNeracaPusatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/laporan/neraca-konsolidasi': {
+      id: '/laporan/neraca-konsolidasi'
+      path: '/laporan/neraca-konsolidasi'
+      fullPath: '/laporan/neraca-konsolidasi'
+      preLoaderRoute: typeof LaporanNeracaKonsolidasiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/laporan/laba-rugi': {
+      id: '/laporan/laba-rugi'
+      path: '/laporan/laba-rugi'
+      fullPath: '/laporan/laba-rugi'
+      preLoaderRoute: typeof LaporanLabaRugiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/laporan/bagi-hasil': {
+      id: '/laporan/bagi-hasil'
+      path: '/laporan/bagi-hasil'
+      fullPath: '/laporan/bagi-hasil'
+      preLoaderRoute: typeof LaporanBagiHasilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CoaRoute: CoaRoute,
+  PengaturanRoute: PengaturanRoute,
+  LaporanBagiHasilRoute: LaporanBagiHasilRoute,
+  LaporanLabaRugiRoute: LaporanLabaRugiRoute,
+  LaporanNeracaKonsolidasiRoute: LaporanNeracaKonsolidasiRoute,
+  LaporanNeracaPusatRoute: LaporanNeracaPusatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
