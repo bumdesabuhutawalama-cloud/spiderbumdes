@@ -409,3 +409,266 @@ function PreviewRow({
     </div>
   );
 }
+
+function BelanjaAsetDialog({ onClose }: { onClose: () => void }) {
+  const qc = useQueryClient();
+  const today = new Date().toISOString().slice(0, 10);
+  const [tanggal, setTanggal] = useState(today);
+  const [asetId, setAsetId] = useState("");
+  const [kasBankId, setKasBankId] = useState("");
+  const [jumlah, setJumlah] = useState<string>("");
+  const [keterangan, setKeterangan] = useState("");
+
+  const asetRef = useRef<HTMLSelectElement>(null);
+  const kasRef = useRef<HTMLSelectElement>(null);
+  const jumlahRef = useRef<HTMLInputElement>(null);
+  const keteranganRef = useRef<HTMLTextAreaElement>(null);
+
+  const { data: accounts, isLoading } = useQuery({
+    queryKey: ["coa_accounts_belanja_aset"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("coa_accounts")
+        .select("*")
+        .eq("status", "Aktif")
+        .eq("entry_type", "Detail")
+        .order("code")
+        .limit(1000);
+      if (error) throw error;
+      return data as Account[];
+    },
+  });
+
+  // Akun aset/modal: aset tetap (1.2.x) dan aset lainnya non-kas/bank
+  const asetAccounts = useMemo(
+    () =>
+      (accounts ?? []).filter(
+        (a) =>
+          a.type === "ASET" &&
+          (a.code.startsWith("1.2.") || a.code.startsWith("1.3.")) &&
+          !/akumulasi|penyusutan/i.test(a.name),
+      ),
+    [accounts],
+  );
+
+  const kasBankAccounts = useMemo(
+    () =>
+      (accounts ?? []).filter(
+        (a) => a.type === "ASET" && (a.code.startsWith("1.1.01.") || a.code.startsWith("1.1.02.")),
+      ),
+    [accounts],
+  );
+
+  const aset = asetAccounts.find((a) => a.id === asetId);
+  const kasBank = kasBankAccounts.find((a) => a.id === kasBankId);
+  const nominal = Number(jumlah.replace(/[^\d]/g, "")) || 0;
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      if (!aset || !kasBank) throw new Error("Pilih akun aset dan sumber kas/bank");
+      if (nominal <= 0) throw new Error("Jumlah belanja harus lebih dari 0");
+
+      const { data: je, error: jeErr } = await supabase
+        .from("journal_entries")
+        .insert({
+          transaction_date: tanggal,
+          transaction_type: "BELANJA_ASET",
+          description: keterangan || `Belanja aset ${aset.name}`,
+          total_amount: nominal,
+        })
+        .select("id")
+        .single();
+      if (jeErr) throw jeErr;
+
+      const { error: linesErr } = await supabase.from("journal_entry_lines").insert([
+        {
+          journal_entry_id: je.id,
+          account_id: aset.id,
+          account_code: aset.code,
+          account_name: aset.name,
+          debit: nominal,
+          credit: 0,
+          line_order: 1,
+        },
+        {
+          journal_entry_id: je.id,
+          account_id: kasBank.id,
+          account_code: kasBank.code,
+          account_name: kasBank.name,
+          debit: 0,
+          credit: nominal,
+          line_order: 2,
+        },
+      ]);
+      if (linesErr) throw linesErr;
+    },
+    onSuccess: () => {
+      toast.success("Belanja aset/modal berhasil dicatat");
+      qc.invalidateQueries({ queryKey: ["journal_entries"] });
+      qc.invalidateQueries({ queryKey: ["balances"] });
+      onClose();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="glass-card relative w-full sm:max-w-3xl max-h-[96vh] overflow-hidden rounded-t-2xl sm:rounded-2xl border border-white/10 p-4 sm:p-5 shadow-[0_0_60px_rgba(34,211,238,0.25)] animate-in slide-in-from-bottom-4 duration-300"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-lg bg-secondary/60 hover:bg-secondary transition"
+        >
+          <X className="h-4 w-4" />
+        </button>
+
+        <div className="mb-3">
+          <h2 className="text-base sm:text-lg font-semibold flex items-center gap-2">
+            <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-[var(--neon-green)] to-amber-300 text-[oklch(0.15_0.03_250)]">
+              <Package className="h-4 w-4" />
+            </span>
+            Catat Belanja Aset / Modal
+          </h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Pembelian aset tetap atau belanja modal. Sistem akan otomatis menyiapkan jurnal.
+          </p>
+        </div>
+
+        {isLoading ? (
+          <div className="grid place-items-center py-10">
+            <Loader2 className="h-6 w-6 animate-spin text-[var(--neon-cyan)]" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <Field label="Tanggal Transaksi">
+              <input
+                type="date"
+                value={tanggal}
+                onChange={(e) => {
+                  setTanggal(e.target.value);
+                  if (e.target.value) asetRef.current?.focus();
+                }}
+                className="input-glass"
+              />
+            </Field>
+
+            <Field label="Aset / Belanja Modal">
+              <select
+                ref={asetRef}
+                value={asetId}
+                onChange={(e) => {
+                  setAsetId(e.target.value);
+                  if (e.target.value) kasRef.current?.focus();
+                }}
+                className="input-glass"
+              >
+                <option value="">Pilih akun aset</option>
+                {asetAccounts.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.code} — {a.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+
+            <Field label="Sumber Pembayaran">
+              <select
+                ref={kasRef}
+                value={kasBankId}
+                onChange={(e) => {
+                  setKasBankId(e.target.value);
+                  if (e.target.value) jumlahRef.current?.focus();
+                }}
+                className="input-glass"
+              >
+                <option value="">Pilih kas atau bank</option>
+                {kasBankAccounts.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.code} — {a.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+
+            <Field label="Jumlah Belanja">
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                  Rp
+                </span>
+                <input
+                  ref={jumlahRef}
+                  inputMode="numeric"
+                  value={jumlah ? Number(jumlah.replace(/[^\d]/g, "")).toLocaleString("id-ID") : ""}
+                  onChange={(e) => setJumlah(e.target.value.replace(/[^\d]/g, ""))}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      keteranganRef.current?.focus();
+                    }
+                  }}
+                  placeholder="0"
+                  className="input-glass pl-9"
+                />
+              </div>
+            </Field>
+
+            <div className="sm:col-span-2">
+              <Field label="Keterangan">
+                <textarea
+                  ref={keteranganRef}
+                  value={keterangan}
+                  onChange={(e) => setKeterangan(e.target.value)}
+                  rows={2}
+                  placeholder="Catatan tambahan (opsional)"
+                  className="input-glass resize-none"
+                />
+              </Field>
+            </div>
+
+            <div className="sm:col-span-2 rounded-xl border border-[var(--neon-cyan)]/30 bg-[var(--neon-cyan)]/5 p-2.5">
+              <div className="text-[10px] uppercase tracking-wide text-[var(--neon-cyan)] mb-1.5">
+                Preview Pencatatan Otomatis
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <PreviewRow
+                  icon={<ArrowDownCircle className="h-4 w-4 text-[var(--neon-green)]" />}
+                  label="Aset Bertambah"
+                  account={aset ? `${aset.code} — ${aset.name}` : "—"}
+                  amount={nominal}
+                />
+                <PreviewRow
+                  icon={<ArrowUpCircle className="h-4 w-4 text-[var(--neon-cyan)]" />}
+                  label="Kas / Bank Berkurang"
+                  account={kasBank ? `${kasBank.code} — ${kasBank.name}` : "—"}
+                  amount={nominal}
+                />
+              </div>
+            </div>
+
+            <div className="sm:col-span-2 flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-1">
+              <button
+                onClick={onClose}
+                className="rounded-lg border border-white/10 bg-secondary/40 px-4 py-2 text-sm hover:bg-secondary transition"
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => mutation.mutate()}
+                disabled={mutation.isPending || !asetId || !kasBankId || nominal <= 0}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[var(--neon-green)] to-amber-300 px-5 py-2 text-sm font-medium text-[oklch(0.15_0.03_250)] glow-cyan hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                Simpan Transaksi
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
