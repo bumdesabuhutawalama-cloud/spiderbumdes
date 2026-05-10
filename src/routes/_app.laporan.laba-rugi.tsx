@@ -29,12 +29,27 @@ function LabaRugiPage() {
   const [start, setStart] = useState(`${year}-01-01`);
   const [end, setEnd] = useState(`${year}-12-31`);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [exporting, setExporting] = useState(false);
+  const reportRef = useRef<HTMLDivElement>(null);
   const toggle = (k: string) =>
     setExpanded((prev) => {
       const next = new Set(prev);
       next.has(k) ? next.delete(k) : next.add(k);
       return next;
     });
+
+  const handleExport = async () => {
+    if (!reportRef.current) return;
+    try {
+      setExporting(true);
+      await exportElementToPdf(reportRef.current, buildReportFilename("Laporan Laba Rugi", `${start}_${end}`));
+      toast.success("PDF berhasil diunduh");
+    } catch (e) {
+      toast.error("Gagal export PDF: " + (e as Error).message);
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const prevStart = `${Number(start.slice(0, 4)) - 1}${start.slice(4)}`;
   const prevEnd = `${Number(end.slice(0, 4)) - 1}${end.slice(4)}`;
