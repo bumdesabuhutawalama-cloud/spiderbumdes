@@ -202,28 +202,28 @@ function PenyertaanModalDialog({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center overflow-y-auto bg-black/70 backdrop-blur-sm p-0 sm:p-6 animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="glass-card relative w-full sm:max-w-3xl rounded-t-2xl sm:rounded-2xl border border-white/10 p-5 sm:p-6 shadow-[0_0_60px_rgba(34,211,238,0.25)] animate-in slide-in-from-bottom-4 duration-300"
+        className="glass-card relative w-full sm:max-w-3xl max-h-[96vh] overflow-hidden rounded-t-2xl sm:rounded-2xl border border-white/10 p-4 sm:p-5 shadow-[0_0_60px_rgba(34,211,238,0.25)] animate-in slide-in-from-bottom-4 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute right-4 top-4 grid h-8 w-8 place-items-center rounded-lg bg-secondary/60 hover:bg-secondary transition"
+          className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-lg bg-secondary/60 hover:bg-secondary transition"
         >
           <X className="h-4 w-4" />
         </button>
 
-        <div className="mb-4">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
+        <div className="mb-3">
+          <h2 className="text-base sm:text-lg font-semibold flex items-center gap-2">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-green)] text-[oklch(0.15_0.03_250)]">
               <TrendingUp className="h-4 w-4" />
             </span>
             Catat Penyertaan Modal
           </h2>
-          <p className="mt-1 text-xs text-muted-foreground">
+          <p className="mt-0.5 text-xs text-muted-foreground">
             Isi data berikut. Sistem akan otomatis menyiapkan pencatatan keuangan.
           </p>
         </div>
@@ -233,20 +233,27 @@ function PenyertaanModalDialog({ onClose }: { onClose: () => void }) {
             <Loader2 className="h-6 w-6 animate-spin text-[var(--neon-cyan)]" />
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <Field label="Tanggal Transaksi">
               <input
                 type="date"
                 value={tanggal}
-                onChange={(e) => setTanggal(e.target.value)}
+                onChange={(e) => {
+                  setTanggal(e.target.value);
+                  if (e.target.value) sumberRef.current?.focus();
+                }}
                 className="input-glass"
               />
             </Field>
 
             <Field label="Sumber Modal">
               <select
+                ref={sumberRef}
                 value={sumberModalId}
-                onChange={(e) => setSumberModalId(e.target.value)}
+                onChange={(e) => {
+                  setSumberModalId(e.target.value);
+                  if (e.target.value) kasRef.current?.focus();
+                }}
                 className="input-glass"
               >
                 <option value="">Pilih akun modal</option>
@@ -260,8 +267,12 @@ function PenyertaanModalDialog({ onClose }: { onClose: () => void }) {
 
             <Field label="Disimpan ke Rekening">
               <select
+                ref={kasRef}
                 value={kasBankId}
-                onChange={(e) => setKasBankId(e.target.value)}
+                onChange={(e) => {
+                  setKasBankId(e.target.value);
+                  if (e.target.value) jumlahRef.current?.focus();
+                }}
                 className="input-glass"
               >
                 <option value="">Pilih kas atau bank</option>
@@ -279,9 +290,16 @@ function PenyertaanModalDialog({ onClose }: { onClose: () => void }) {
                   Rp
                 </span>
                 <input
+                  ref={jumlahRef}
                   inputMode="numeric"
                   value={jumlah ? Number(jumlah.replace(/[^\d]/g, "")).toLocaleString("id-ID") : ""}
                   onChange={(e) => setJumlah(e.target.value.replace(/[^\d]/g, ""))}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      keteranganRef.current?.focus();
+                    }
+                  }}
                   placeholder="0"
                   className="input-glass pl-9"
                 />
@@ -291,6 +309,7 @@ function PenyertaanModalDialog({ onClose }: { onClose: () => void }) {
             <div className="sm:col-span-2">
               <Field label="Keterangan">
                 <textarea
+                  ref={keteranganRef}
                   value={keterangan}
                   onChange={(e) => setKeterangan(e.target.value)}
                   rows={2}
@@ -301,8 +320,8 @@ function PenyertaanModalDialog({ onClose }: { onClose: () => void }) {
             </div>
 
             {/* Preview */}
-            <div className="sm:col-span-2 rounded-xl border border-[var(--neon-cyan)]/30 bg-[var(--neon-cyan)]/5 p-3">
-              <div className="text-[10px] uppercase tracking-wide text-[var(--neon-cyan)] mb-2">
+            <div className="sm:col-span-2 rounded-xl border border-[var(--neon-cyan)]/30 bg-[var(--neon-cyan)]/5 p-2.5">
+              <div className="text-[10px] uppercase tracking-wide text-[var(--neon-cyan)] mb-1.5">
                 Preview Pencatatan Otomatis
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
