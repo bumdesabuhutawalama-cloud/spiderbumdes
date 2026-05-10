@@ -29,6 +29,7 @@ function CatatKegiatanPage() {
   const [openPenyertaan, setOpenPenyertaan] = useState(false);
   const [openBelanjaAset, setOpenBelanjaAset] = useState(false);
   const [openPenerimaan, setOpenPenerimaan] = useState(false);
+  const [openPengeluaran, setOpenPengeluaran] = useState(false);
 
   return (
     <>
