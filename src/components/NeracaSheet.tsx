@@ -133,6 +133,24 @@ export function NeracaSheet({
               </div>
             )}
 
+            {!isLoading && !error && computed && !computed.isBalanced && (
+              <div className="mb-3 flex items-start gap-2 rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-[12px] text-rose-700">
+                <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                <div>
+                  <div className="font-semibold">Neraca tidak seimbang</div>
+                  <div className="text-[11px]">
+                    Selisih: {formatRpOrDash(computed.diff)} (Aset {formatRpOrDash(computed.totAset)} ≠ Kewajiban + Ekuitas {formatRpOrDash(computed.totKew + computed.totEku)})
+                  </div>
+                </div>
+              </div>
+            )}
+            {!isLoading && !error && computed && computed.isBalanced && (
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-[11px] text-emerald-700">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Neraca seimbang (Aset = Kewajiban + Ekuitas)
+              </div>
+            )}
+
             {!isLoading && !error && computed && (
               <table className="w-full border-collapse text-[12px]">
                 <thead>
