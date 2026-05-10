@@ -277,7 +277,9 @@ export function NeracaSheet({
                         </tr>,
                       );
 
-                      const sectionAccounts = computed.neracaAccounts.filter((a) => a.type === section.type);
+                      const sectionAccounts = computed.neracaAccounts.filter(
+                        (a) => a.type === section.type && computed.activeIds.has(a.id),
+                      );
                       // Total per seksi memakai sumByType agar akun kontra dikurangkan dengan benar.
                       let secCur = sumByType(accounts ?? [], computed.signedCur, [section.type]);
                       let secPrev = sumByType(accounts ?? [], computed.signedPrev, [section.type]);
