@@ -81,7 +81,8 @@ function LabaRugiPage() {
     if (!accounts || !balCur || !balPrev) return null;
     const cur = computeSignedBalances(accounts, balCur);
     const prev = computeSignedBalances(accounts, balPrev);
-    return { cur, prev };
+    const activeIds = computeActiveAccountIds(accounts, [balCur, balPrev], [cur, prev]);
+    return { cur, prev, activeIds };
   }, [accounts, balCur, balPrev]);
 
   return (
