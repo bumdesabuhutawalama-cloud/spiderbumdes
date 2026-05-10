@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, ChevronRight, Download, Loader2 } from "lucide-react";
+import { AlertTriangle, Calendar, CheckCircle2, ChevronRight, Download, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
