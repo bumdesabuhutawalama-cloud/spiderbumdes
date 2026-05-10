@@ -101,6 +101,33 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
           </div>
         </div>
 
+        <button
+          onClick={() => setUspOpen((v) => !v)}
+          className={cn(
+            "group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all",
+            "hover:bg-secondary/60 hover:text-foreground",
+            path.startsWith("/usp") ? "bg-secondary/70 text-foreground" : "text-muted-foreground",
+          )}
+        >
+          <HandCoins className="h-4 w-4 transition-colors group-hover:text-[var(--neon-cyan)]" />
+          <span className="flex-1 text-left">Unit Simpan Pinjam</span>
+          <ChevronDown className={cn("h-4 w-4 transition-transform duration-300", uspOpen && "rotate-180")} />
+        </button>
+        <div
+          className={cn(
+            "grid overflow-hidden transition-all duration-300 ease-out",
+            uspOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+          )}
+        >
+          <div className="min-h-0">
+            <div className="ml-3 mt-1 space-y-0.5 border-l border-border/60 pl-3">
+              {uspItems.map((r) => (
+                <NavLink key={r.to} item={r} active={isActive(r.to)} dense onNavigate={onNavigate} />
+              ))}
+            </div>
+          </div>
+        </div>
+
         <NavLink
           item={{ to: "/catat-kegiatan", label: "Catat Kegiatan", icon: ClipboardList }}
           active={isActive("/catat-kegiatan")}
