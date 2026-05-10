@@ -28,6 +28,7 @@ const formatRp = (n: number) =>
 function CatatKegiatanPage() {
   const [openPenyertaan, setOpenPenyertaan] = useState(false);
   const [openBelanjaAset, setOpenBelanjaAset] = useState(false);
+  const [openPenerimaan, setOpenPenerimaan] = useState(false);
 
   return (
     <>
