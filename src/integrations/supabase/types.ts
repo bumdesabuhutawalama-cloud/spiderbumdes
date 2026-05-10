@@ -164,6 +164,112 @@ export type Database = {
           },
         ]
       }
+      loan_installments: {
+        Row: {
+          created_at: string
+          due_date: string
+          id: string
+          installment_no: number
+          interest_due: number
+          is_paid: boolean
+          loan_id: string
+          paid_amount: number
+          paid_date: string | null
+          principal_due: number
+          total_due: number
+        }
+        Insert: {
+          created_at?: string
+          due_date: string
+          id?: string
+          installment_no: number
+          interest_due?: number
+          is_paid?: boolean
+          loan_id: string
+          paid_amount?: number
+          paid_date?: string | null
+          principal_due?: number
+          total_due?: number
+        }
+        Update: {
+          created_at?: string
+          due_date?: string
+          id?: string
+          installment_no?: number
+          interest_due?: number
+          is_paid?: boolean
+          loan_id?: string
+          paid_amount?: number
+          paid_date?: string | null
+          principal_due?: number
+          total_due?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loan_installments_loan_id_fkey"
+            columns: ["loan_id"]
+            isOneToOne: false
+            referencedRelation: "loans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loans: {
+        Row: {
+          borrower_name: string
+          created_at: string
+          id: string
+          interest_rate: number
+          monthly_installment: number
+          notes: string | null
+          outstanding_principal: number
+          principal_amount: number
+          start_date: string
+          status: string
+          tenure_months: number
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          borrower_name: string
+          created_at?: string
+          id?: string
+          interest_rate?: number
+          monthly_installment?: number
+          notes?: string | null
+          outstanding_principal?: number
+          principal_amount?: number
+          start_date: string
+          status?: string
+          tenure_months?: number
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          borrower_name?: string
+          created_at?: string
+          id?: string
+          interest_rate?: number
+          monthly_installment?: number
+          notes?: string | null
+          outstanding_principal?: number
+          principal_amount?: number
+          start_date?: string
+          status?: string
+          tenure_months?: number
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loans_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       report_cache: {
         Row: {
           generated_at: string

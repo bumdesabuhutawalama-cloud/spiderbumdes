@@ -1,93 +1,66 @@
-## Tujuan
+## Module USP — Unit Simpan Pinjam
 
-Mempercepat pemuatan laporan **Neraca** & **Laba Rugi** dari pembacaan langsung `journal_entry_lines` menjadi pembacaan **saldo termaterialisasi** + **cache laporan**, dengan tetap mempertahankan logika Activity → Journal yang sudah berjalan.
+Implementasi modul USP penuh dengan Activity-Based Accounting, terintegrasi dengan COA & jurnal otomatis.
 
-## Pendekatan
+### 1. Database (1 migration)
 
-### 1. Tabel baru: `account_balances` (materialized ledger)
+**Akun COA baru** (insert ke `coa_accounts`):
+- `1.1.03.04` Piutang Pinjaman USP (ASET / DEBIT / Detail) — bila perlu pisahkan dari `1.1.03.03`
+- `6.1.10.01` Beban Operasional USP (BEBAN / DEBIT / Detail)
+- Akun lain sudah tersedia: Kas USP (`1.1.01.06`), Bank USP (`1.1.01.07`), Pendapatan Bunga USP (`4.1.08.02`), Pendapatan Denda USP (`4.1.08.03`)
 
-Kolom:
-- `id` uuid PK
-- `account_id` uuid (akun di `coa_accounts`)
-- `unit_id` uuid nullable (untuk pusat = NULL; multi-unit menyusul saat kolom unit ada di journal)
-- `period` text (`YYYY-MM`)
-- `debit_total` numeric default 0
-- `credit_total` numeric default 0
-- `ending_balance` numeric default 0 (signed sesuai `normal_balance`)
-- `updated_at` timestamptz
+**Unit USP** (insert ke `units`): `Unit Simpan Pinjam`, code `USP`.
 
-Unique index: `(account_id, COALESCE(unit_id, '00000000-...'), period)`.
-Index tambahan: `(period)`, `(account_id, period)`.
-RLS: public read, authenticated write (sama pola dengan tabel jurnal).
+**Tabel baru:**
+```
+loans (id, unit_id, borrower_name, principal_amount, interest_rate,
+       tenure_months, start_date, monthly_installment,
+       outstanding_principal, status, created_at, updated_at)
 
-### 2. Posting otomatis via trigger DB
+loan_installments (id, loan_id, installment_no, due_date,
+                   principal_due, interest_due, total_due,
+                   is_paid, paid_date, created_at)
+```
+RLS: read publik, write authenticated (mengikuti pola tabel lain).
 
-Buat trigger `AFTER INSERT/UPDATE/DELETE` pada `journal_entry_lines` yang:
-- Ambil `transaction_date` dari `journal_entries` parent → derive `period = to_char(date, 'YYYY-MM')`.
-- Ambil `normal_balance` dari `coa_accounts`.
-- `UPSERT` ke `account_balances`:
-  - tambah/kurangi `debit_total`, `credit_total`
-  - hitung ulang `ending_balance` = (normal D ? debit-credit : credit-debit) untuk baris periode itu.
-- Untuk DELETE: kurangi nilainya.
+### 2. Activity Cards (di `/catat-kegiatan`)
 
-Trigger berjalan otomatis di background — tidak ubah kode posting di `_app.catat-kegiatan.tsx`.
+Tambah 4 kartu USP — tiap card buka dialog, submit menjalankan **satu** transaksi yang membuat `journal_entries` + `journal_entry_lines` (dan loan/installment record bila perlu) lewat `Promise.all` / RPC.
 
-Backfill: jalankan satu kali di migration untuk mengisi `account_balances` dari data `journal_entry_lines` yang sudah ada.
+| Card | Jurnal otomatis |
+|---|---|
+| Pencairan Pinjaman | D Piutang Pinjaman / K Kas USP atau Bank USP. Sekaligus buat `loans` + jadwal `loan_installments` (anuitas/flat sederhana). |
+| Terima Angsuran | Pilih loan aktif → input nominal & tanggal. Sistem alokasi pokok+bunga dari installment terdekat. D Kas USP / K Piutang Pinjaman (pokok) + K Pendapatan Bunga USP. Update `outstanding_principal`, tandai installment paid, set status=closed bila lunas. |
+| Terima Denda | D Kas USP / K Pendapatan Denda USP. |
+| Beban Operasional USP | D Beban Operasional USP / K Kas USP. |
 
-### 3. Tabel baru: `report_cache`
+### 3. Halaman Baru
 
-Kolom:
-- `id` uuid PK
-- `report_type` text (`BS`, `PL`, `CONSOLIDATED`)
-- `unit_id` uuid nullable
-- `period` text (`YYYY-MM`, untuk BS = "as of"; untuk PL = "end period")
-- `period_start` text nullable (untuk PL)
-- `report_json` jsonb
-- `generated_at` timestamptz default now()
+- **`/usp` — Dashboard USP**
+  - Ringkasan: Outstanding Pinjaman, Saldo Kas USP, Pendapatan Bunga (bulan ini), Pendapatan Denda (bulan ini), Laba Bersih USP.
+  - Statistik: jumlah pinjaman aktif, jumlah peminjam, angsuran jatuh tempo bulan ini, overdue.
+  - 10 aktivitas USP terbaru.
+- **`/usp/pinjaman` — Data Pinjaman**
+  - Tabel: Peminjam, Pokok, Outstanding, Angsuran/bln, Status, Jatuh Tempo Berikutnya.
+  - Klik baris → detail: jadwal angsuran + riwayat pembayaran.
 
-Unique: `(report_type, COALESCE(unit_id,...), period, COALESCE(period_start,''))`.
+### 4. Sidebar
 
-### 4. Invalidasi cache via trigger
+Tambah grup **Unit Simpan Pinjam** dengan child: Dashboard USP, Data Pinjaman, dan link ke Catat Kegiatan + Laporan (filter unit).
 
-Trigger `AFTER INSERT/UPDATE/DELETE` pada `journal_entries`:
-- Hapus baris `report_cache` di mana `period >= to_char(transaction_date,'YYYY-MM')` (semua tipe laporan; multi-unit: filter unit_id bila tersedia, sementara hapus semua).
+### 5. Catatan Teknis
 
-### 5. Refactor hook saldo (`src/lib/account-balances.ts`)
+- Tetap pakai pola activity-based existing (tidak edit core jurnal).
+- Saldo & laporan tetap baca dari `journal_entry_lines` lewat `account-balances.ts` (sudah filter tanggal). Filter unit_id belum dipakai di engine balance saat ini → Dashboard USP memfilter berdasar set akun (Kas USP, Piutang Pinjaman, Pendapatan Bunga/Denda USP, Beban Operasional USP) untuk angka unit.
+- Schedule angsuran: metode flat (bunga × pokok / 12) untuk kesederhanaan.
+- Tidak ada manual debit/kredit di UI.
 
-Ganti implementasi `useAccountBalances(asOfDate)` & `useAccountBalancesPeriod(start,end)` agar membaca dari `account_balances`:
-- `useAccountBalances(asOfDate)`: `SELECT account_id, SUM(debit_total) d, SUM(credit_total) c FROM account_balances WHERE period <= to_char(asOfDate,'YYYY-MM') GROUP BY account_id`. Kembalikan `BalanceMap` (sama signature) sehingga komponen Neraca/Laba-Rugi tidak berubah.
-- `useAccountBalancesPeriod(start,end)`: filter `period BETWEEN start_month AND end_month`.
+### Files
 
-Karena signature & return shape tetap, `NeracaSheet.tsx` dan `_app.laporan.laba-rugi.tsx` tidak perlu diubah.
-
-### 6. Cache laporan di sisi client
-
-QueryClient TanStack Query sudah berperan sebagai cache di sesi browser (staleTime 5m). Untuk persistence lintas user, tambahkan helper `src/lib/report-cache.ts`:
-- `getOrBuildReport(type, unit, period[, periodStart], builder)`:
-  1. `SELECT report_json FROM report_cache WHERE ... LIMIT 1`. Jika ada → return.
-  2. Jika tidak: jalankan `builder()` (yang membaca `account_balances`) → `INSERT` ke `report_cache` → return.
-- Invalidasi otomatis di sisi DB (trigger di langkah 4).
-
-Catatan: untuk iterasi ini, hook membaca `account_balances` saja sudah memenuhi target < 1 dtk untuk skala BUMDes; `report_cache` disiapkan tetapi pemakaian penuh dari `report_json` di Neraca/Laba-Rugi bisa diadopsi setelahnya tanpa mengubah API hook.
-
-### 7. Lazy loading report tree (UI)
-
-Tambahkan prop `defaultCollapsed` pada `NeracaSheet`:
-- Di awal hanya tampilkan section header: ASET, KEWAJIBAN, EKUITAS (BS) / PENDAPATAN, BEBAN (PL) dengan baris total.
-- Klik header → expand untuk menampilkan baris akun di section tersebut.
-- Implementasi pakai state lokal `Set<sectionKey>` → tidak ada fetch tambahan (data sudah satu kali ambil), tapi mengurangi DOM render awal sehingga TTI cepat.
-
-## File yang dibuat/diubah
-
-- **Migration baru**: tabel `account_balances`, `report_cache`, indeks, RLS, trigger posting, trigger invalidasi cache, backfill awal.
-- **Edit**: `src/lib/account-balances.ts` (sumber data → `account_balances`).
-- **Baru**: `src/lib/report-cache.ts` (helper getOrBuildReport).
-- **Edit**: `src/components/NeracaSheet.tsx` (lazy expand sections).
-- **Edit**: `src/routes/_app.laporan.laba-rugi.tsx` (lazy expand sections).
-
-## Hasil akhir
-
-- Pembukaan Neraca & Laba Rugi membaca tabel ringkas (puluhan/ratusan baris) bukan ribuan baris jurnal.
-- Posting Activity baru otomatis memperbarui `account_balances` dan menghapus cache lewat trigger DB — tanpa perubahan kode di Catat Kegiatan.
-- Tampilan awal laporan ringan (hanya section), detail akun dimuat saat user expand.
-- Logika Activity → Journal & struktur COA tetap utuh.
+- Migration baru (akun COA + tables `loans`, `loan_installments`)
+- Insert unit USP via supabase--insert
+- `src/routes/_app.catat-kegiatan.tsx` — tambah 4 card + 4 dialog USP
+- `src/routes/_app.usp.tsx` — layout
+- `src/routes/_app.usp.index.tsx` — Dashboard USP
+- `src/routes/_app.usp.pinjaman.tsx` — Data Pinjaman + detail panel
+- `src/components/AppSidebar.tsx` — menu USP
