@@ -67,21 +67,30 @@ function reduceRows(rows: BalanceRow[]): BalanceMap {
 }
 
 /** Saldo akumulasi sejak awal hingga `asOfDate` (untuk Neraca). */
-export function useAccountBalances(asOfDate?: string) {
+export function useAccountBalances(
+  asOfDate?: string,
+  mode: UnitMode = "pusat",
+  unitId?: string | null,
+) {
   const end = toMonth(asOfDate);
   return useQuery({
-    queryKey: ["balances", "asof", end ?? "all"],
-    queryFn: async () => reduceRows(await fetchBalances(undefined, end)),
+    queryKey: ["balances", "asof", end ?? "all", mode, unitId ?? ""],
+    queryFn: async () => reduceRows(await fetchBalances(undefined, end, mode, unitId)),
   });
 }
 
 /** Saldo dalam rentang tanggal (untuk Laba Rugi). */
-export function useAccountBalancesPeriod(start?: string, end?: string) {
+export function useAccountBalancesPeriod(
+  start?: string,
+  end?: string,
+  mode: UnitMode = "pusat",
+  unitId?: string | null,
+) {
   const s = toMonth(start);
   const e = toMonth(end);
   return useQuery({
-    queryKey: ["balances", "period", s ?? "", e ?? ""],
-    queryFn: async () => reduceRows(await fetchBalances(s, e)),
+    queryKey: ["balances", "period", s ?? "", e ?? "", mode, unitId ?? ""],
+    queryFn: async () => reduceRows(await fetchBalances(s, e, mode, unitId)),
   });
 }
 
