@@ -410,17 +410,33 @@ function PreviewRow({
   );
 }
 
+type AsetCategory = {
+  key: string;
+  label: string;
+  prefix: string; // prefix kode akun aset di COA
+  hint: string;
+};
+
+const ASET_CATEGORIES: AsetCategory[] = [
+  { key: "tanah", label: "Tanah", prefix: "1.3.01.", hint: "Pembelian tanah" },
+  { key: "kendaraan", label: "Kendaraan", prefix: "1.3.02.", hint: "Mobil, motor operasional" },
+  { key: "peralatan", label: "Peralatan & Mesin", prefix: "1.3.03.", hint: "Mesin, alat produksi" },
+  { key: "meubelair", label: "Meubelair", prefix: "1.3.04.", hint: "Furnitur kantor" },
+  { key: "bangunan", label: "Gedung & Bangunan", prefix: "1.3.05.", hint: "Pembangunan gedung" },
+  { key: "konstruksi", label: "Konstruksi Berjalan", prefix: "1.3.06.", hint: "Pekerjaan belum selesai" },
+  { key: "investasi", label: "Investasi / Deposito", prefix: "1.2.01.", hint: "Investasi jangka panjang" },
+  { key: "lainnya", label: "Aset Lainnya", prefix: "1.3.99.", hint: "Aset tetap lainnya" },
+];
+
 function BelanjaAsetDialog({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient();
   const today = new Date().toISOString().slice(0, 10);
   const [tanggal, setTanggal] = useState(today);
-  const [asetId, setAsetId] = useState("");
+  const [categoryKey, setCategoryKey] = useState<string>("");
   const [kasBankId, setKasBankId] = useState("");
   const [jumlah, setJumlah] = useState<string>("");
   const [keterangan, setKeterangan] = useState("");
 
-  const asetRef = useRef<HTMLSelectElement>(null);
-  const kasRef = useRef<HTMLSelectElement>(null);
   const jumlahRef = useRef<HTMLInputElement>(null);
   const keteranganRef = useRef<HTMLTextAreaElement>(null);
 
@@ -439,18 +455,6 @@ function BelanjaAsetDialog({ onClose }: { onClose: () => void }) {
     },
   });
 
-  // Akun aset/modal: aset tetap (1.2.x) dan aset lainnya non-kas/bank
-  const asetAccounts = useMemo(
-    () =>
-      (accounts ?? []).filter(
-        (a) =>
-          a.type === "ASET" &&
-          (a.code.startsWith("1.2.") || a.code.startsWith("1.3.")) &&
-          !/akumulasi|penyusutan/i.test(a.name),
-      ),
-    [accounts],
-  );
-
   const kasBankAccounts = useMemo(
     () =>
       (accounts ?? []).filter(
@@ -459,7 +463,25 @@ function BelanjaAsetDialog({ onClose }: { onClose: () => void }) {
     [accounts],
   );
 
-  const aset = asetAccounts.find((a) => a.id === asetId);
+  // Auto-default kas/bank ke "Kas Tunai" jika belum dipilih
+  if (!kasBankId && kasBankAccounts.length > 0) {
+    const def = kasBankAccounts.find((a) => /kas tunai/i.test(a.name)) ?? kasBankAccounts[0];
+    queueMicrotask(() => setKasBankId(def.id));
+  }
+
+  const category = ASET_CATEGORIES.find((c) => c.key === categoryKey);
+  // Auto-pasang akun aset detail berdasarkan prefix kode kategori.
+  const aset = useMemo(() => {
+    if (!category || !accounts) return undefined;
+    const candidates = accounts.filter(
+      (a) =>
+        a.type === "ASET" &&
+        a.code.startsWith(category.prefix) &&
+        !/akumulasi|penyusutan/i.test(a.name),
+    );
+    return candidates[0];
+  }, [category, accounts]);
+
   const kasBank = kasBankAccounts.find((a) => a.id === kasBankId);
   const nominal = Number(jumlah.replace(/[^\d]/g, "")) || 0;
 
@@ -549,41 +571,15 @@ function BelanjaAsetDialog({ onClose }: { onClose: () => void }) {
               <input
                 type="date"
                 value={tanggal}
-                onChange={(e) => {
-                  setTanggal(e.target.value);
-                  if (e.target.value) asetRef.current?.focus();
-                }}
+                onChange={(e) => setTanggal(e.target.value)}
                 className="input-glass"
               />
             </Field>
 
-            <Field label="Aset / Belanja Modal">
-              <select
-                ref={asetRef}
-                value={asetId}
-                onChange={(e) => {
-                  setAsetId(e.target.value);
-                  if (e.target.value) kasRef.current?.focus();
-                }}
-                className="input-glass"
-              >
-                <option value="">Pilih akun aset</option>
-                {asetAccounts.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.code} — {a.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
-
             <Field label="Sumber Pembayaran">
               <select
-                ref={kasRef}
                 value={kasBankId}
-                onChange={(e) => {
-                  setKasBankId(e.target.value);
-                  if (e.target.value) jumlahRef.current?.focus();
-                }}
+                onChange={(e) => setKasBankId(e.target.value)}
                 className="input-glass"
               >
                 <option value="">Pilih kas atau bank</option>
@@ -594,6 +590,45 @@ function BelanjaAsetDialog({ onClose }: { onClose: () => void }) {
                 ))}
               </select>
             </Field>
+
+            <div className="sm:col-span-2">
+              <Field label="Jenis Aset / Belanja Modal">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {ASET_CATEGORIES.map((c) => {
+                    const active = c.key === categoryKey;
+                    return (
+                      <button
+                        key={c.key}
+                        type="button"
+                        onClick={() => {
+                          setCategoryKey(c.key);
+                          queueMicrotask(() => jumlahRef.current?.focus());
+                        }}
+                        className={
+                          "rounded-lg border px-2.5 py-2 text-left transition " +
+                          (active
+                            ? "border-[var(--neon-green)] bg-[var(--neon-green)]/10 shadow-[0_0_15px_rgba(74,222,128,0.25)]"
+                            : "border-white/10 bg-secondary/40 hover:border-white/20 hover:bg-secondary/60")
+                        }
+                      >
+                        <div className="text-xs font-semibold leading-tight">{c.label}</div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{c.hint}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+                {category && !aset && (
+                  <p className="mt-1 text-[11px] text-amber-400">
+                    Akun untuk kategori ini belum tersedia di COA (prefix {category.prefix}).
+                  </p>
+                )}
+                {aset && (
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    Akun otomatis: <span className="text-foreground font-medium">{aset.code} — {aset.name}</span>
+                  </p>
+                )}
+              </Field>
+            </div>
 
             <Field label="Jumlah Belanja">
               <div className="relative">
@@ -659,7 +694,7 @@ function BelanjaAsetDialog({ onClose }: { onClose: () => void }) {
               </button>
               <button
                 onClick={() => mutation.mutate()}
-                disabled={mutation.isPending || !asetId || !kasBankId || nominal <= 0}
+                disabled={mutation.isPending || !aset || !kasBankId || nominal <= 0}
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[var(--neon-green)] to-amber-300 px-5 py-2 text-sm font-medium text-[oklch(0.15_0.03_250)] glow-cyan hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
