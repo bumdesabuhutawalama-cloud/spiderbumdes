@@ -36,6 +36,10 @@ function CatatKegiatanPage() {
   const [openBelanjaAset, setOpenBelanjaAset] = useState(false);
   const [openPenerimaan, setOpenPenerimaan] = useState(false);
   const [openPengeluaran, setOpenPengeluaran] = useState(false);
+  const [openPencairan, setOpenPencairan] = useState(false);
+  const [openAngsuran, setOpenAngsuran] = useState(false);
+  const [openDenda, setOpenDenda] = useState(false);
+  const [openBebanUsp, setOpenBebanUsp] = useState(false);
 
   return (
     <>
@@ -73,12 +77,44 @@ function CatatKegiatanPage() {
           onClick={() => setOpenPengeluaran(true)}
           accent="from-amber-400 to-rose-400"
         />
+        <ActivityCard
+          icon={<HandCoins className="h-6 w-6" />}
+          title="Pencairan Pinjaman (USP)"
+          description="Cairkan pinjaman ke peminjam, jadwal angsuran otomatis."
+          onClick={() => setOpenPencairan(true)}
+          accent="from-emerald-400 to-[var(--neon-cyan)]"
+        />
+        <ActivityCard
+          icon={<Banknote className="h-6 w-6" />}
+          title="Terima Angsuran (USP)"
+          description="Catat penerimaan angsuran pokok & bunga pinjaman."
+          onClick={() => setOpenAngsuran(true)}
+          accent="from-[var(--neon-cyan)] to-sky-400"
+        />
+        <ActivityCard
+          icon={<AlertTriangle className="h-6 w-6" />}
+          title="Terima Denda (USP)"
+          description="Catat penerimaan denda keterlambatan angsuran."
+          onClick={() => setOpenDenda(true)}
+          accent="from-rose-400 to-amber-300"
+        />
+        <ActivityCard
+          icon={<Receipt className="h-6 w-6" />}
+          title="Beban Operasional (USP)"
+          description="Catat beban operasional Unit Simpan Pinjam."
+          onClick={() => setOpenBebanUsp(true)}
+          accent="from-violet-400 to-fuchsia-400"
+        />
       </div>
 
       {openPenyertaan && <PenyertaanModalDialog onClose={() => setOpenPenyertaan(false)} />}
       {openBelanjaAset && <BelanjaAsetDialog onClose={() => setOpenBelanjaAset(false)} />}
       {openPenerimaan && <PenerimaanKasDialog onClose={() => setOpenPenerimaan(false)} />}
       {openPengeluaran && <PengeluaranOperasionalDialog onClose={() => setOpenPengeluaran(false)} />}
+      {openPencairan && <PencairanPinjamanDialog onClose={() => setOpenPencairan(false)} />}
+      {openAngsuran && <TerimaAngsuranDialog onClose={() => setOpenAngsuran(false)} />}
+      {openDenda && <TerimaDendaDialog onClose={() => setOpenDenda(false)} />}
+      {openBebanUsp && <BebanOperasionalUspDialog onClose={() => setOpenBebanUsp(false)} />}
     </>
   );
 }
