@@ -13,7 +13,7 @@ export function ReportPage({
   rows: (string | number)[][];
 }) {
   return (
-    <DashboardLayout>
+    <>
       <PageHeader
         title={title}
         subtitle={subtitle}
@@ -82,6 +82,6 @@ export function ReportPage({
           </table>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }
