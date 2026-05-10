@@ -277,7 +277,7 @@ export function NeracaSheet({
                         const isHeader = a.entry_type === "Header";
                         const cur = computed.signedCur.get(a.id) ?? 0;
                         const prev = computed.signedPrev.get(a.id) ?? 0;
-                        if (!isOpen) return;
+                        
                         no += 1;
                         const depth = a.code.split(/[.\-]/).filter(Boolean).length;
                         const indent = Math.max(0, depth - 2) * 12;
@@ -315,7 +315,7 @@ export function NeracaSheet({
                       if (section.type === "EKUITAS") {
                         secCur += computed.labaCur;
                         secPrev += computed.labaPrev;
-                        if (isOpen) {
+                        {
                           no += 1;
                           rows.push(
                           <tr key="laba-berjalan" className="border-b border-amber-200/60">
