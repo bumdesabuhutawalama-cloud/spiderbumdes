@@ -75,16 +75,24 @@ export function useAccountBalancesPeriod(start?: string, end?: string) {
   });
 }
 
+/** Sisi normal natural berdasar tipe akun (untuk deteksi akun kontra). */
+const naturalSideOfType = (type: string): "D" | "K" => {
+  const t = (type || "").toUpperCase();
+  if (t === "ASET" || t === "BEBAN") return "D";
+  return "K"; // KEWAJIBAN, EKUITAS, PENDAPATAN
+};
+
 /**
- * Hitung saldo per akun (sesuai normal balance), lalu rollup ke akun Header
- * berdasarkan prefix kode. Returns Map<account_id, signedBalance>.
+ * Hitung saldo per akun (sesuai normal_balance), lalu rollup ke akun Header
+ * berdasarkan prefix kode. Akun kontra (normal_balance berlawanan dengan
+ * sisi natural tipe akun) akan dikurangkan dari total parent.
  */
 export function computeSignedBalances(
   accounts: AccountLite[],
   raw: BalanceMap,
 ): Map<string, number> {
   const out = new Map<string, number>();
-  // Detail accounts
+  // Detail accounts: ending_balance per kaidah normal_balance
   for (const a of accounts) {
     const r = raw.get(a.id);
     if (!r) {
@@ -94,21 +102,26 @@ export function computeSignedBalances(
     const n = normalOf(a.normal_balance ?? a.type);
     out.set(a.id, n === "D" ? r.debit - r.credit : r.credit - r.debit);
   }
-  // Rollup headers: header total = sum of detail descendants whose code starts with header.code + "."
+  // Rollup header: jumlahkan semua detail descendants berdasarkan prefix kode.
+  // Akun kontra (sisi normal berlawanan dengan tipe induknya) dikurangkan.
   for (const h of accounts) {
     if (h.entry_type !== "Header") continue;
     let sum = 0;
     const prefix = h.code + ".";
+    const naturalParent = naturalSideOfType(h.type);
     for (const a of accounts) {
       if (a.id === h.id || a.entry_type === "Header") continue;
-      if (a.code.startsWith(prefix)) sum += out.get(a.id) ?? 0;
+      if (!a.code.startsWith(prefix)) continue;
+      const child = out.get(a.id) ?? 0;
+      const isContra = normalOf(a.normal_balance ?? a.type) !== naturalParent;
+      sum += isContra ? -child : child;
     }
     out.set(h.id, sum);
   }
   return out;
 }
 
-/** Total saldo untuk akun-akun dengan tipe tertentu. */
+/** Total saldo untuk akun-akun dengan tipe tertentu (akun kontra dikurangkan). */
 export function sumByType(
   accounts: AccountLite[],
   signed: Map<string, number>,
@@ -118,7 +131,10 @@ export function sumByType(
   for (const a of accounts) {
     if (a.entry_type === "Header") continue;
     if (!types.includes(a.type)) continue;
-    s += signed.get(a.id) ?? 0;
+    const natural = naturalSideOfType(a.type);
+    const isContra = normalOf(a.normal_balance ?? a.type) !== natural;
+    const v = signed.get(a.id) ?? 0;
+    s += isContra ? -v : v;
   }
   return s;
 }

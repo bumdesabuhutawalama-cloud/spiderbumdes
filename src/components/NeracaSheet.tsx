@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, ChevronRight, Download, Loader2 } from "lucide-react";
+import { AlertTriangle, Calendar, CheckCircle2, ChevronRight, Download, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -70,7 +70,15 @@ export function NeracaSheet({
     const labaPrev = sumByType(accounts, signedPrev, ["PENDAPATAN"]) - sumByType(accounts, signedPrev, ["BEBAN"]);
 
     const neracaAccounts = accounts.filter((a) => ["ASET", "KEWAJIBAN", "EKUITAS"].includes(a.type));
-    return { signedCur, signedPrev, labaCur, labaPrev, neracaAccounts };
+
+    // Validasi persamaan akuntansi: Aset = Kewajiban + Ekuitas (+ Laba berjalan)
+    const totAset = sumByType(accounts, signedCur, ["ASET"]);
+    const totKew = sumByType(accounts, signedCur, ["KEWAJIBAN"]);
+    const totEku = sumByType(accounts, signedCur, ["EKUITAS"]) + labaCur;
+    const diff = totAset - (totKew + totEku);
+    const isBalanced = Math.abs(diff) < 0.5;
+
+    return { signedCur, signedPrev, labaCur, labaPrev, neracaAccounts, totAset, totKew, totEku, diff, isBalanced };
   }, [accounts, balCur, balPrev]);
 
   return (
@@ -125,6 +133,24 @@ export function NeracaSheet({
               </div>
             )}
 
+            {!isLoading && !error && computed && !computed.isBalanced && (
+              <div className="mb-3 flex items-start gap-2 rounded-lg border border-rose-300 bg-rose-50 px-3 py-2 text-[12px] text-rose-700">
+                <AlertTriangle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                <div>
+                  <div className="font-semibold">Neraca tidak seimbang</div>
+                  <div className="text-[11px]">
+                    Selisih: {formatRpOrDash(computed.diff)} (Aset {formatRpOrDash(computed.totAset)} ≠ Kewajiban + Ekuitas {formatRpOrDash(computed.totKew + computed.totEku)})
+                  </div>
+                </div>
+              </div>
+            )}
+            {!isLoading && !error && computed && computed.isBalanced && (
+              <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-emerald-300 bg-emerald-50 px-3 py-1 text-[11px] text-emerald-700">
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Neraca seimbang (Aset = Kewajiban + Ekuitas)
+              </div>
+            )}
+
             {!isLoading && !error && computed && (
               <table className="w-full border-collapse text-[12px]">
                 <thead>
@@ -168,16 +194,13 @@ export function NeracaSheet({
                       );
 
                       const sectionAccounts = computed.neracaAccounts.filter((a) => a.type === section.type);
-                      let secCur = 0;
-                      let secPrev = 0;
+                      // Total per seksi memakai sumByType agar akun kontra dikurangkan dengan benar.
+                      let secCur = sumByType(accounts ?? [], computed.signedCur, [section.type]);
+                      let secPrev = sumByType(accounts ?? [], computed.signedPrev, [section.type]);
                       sectionAccounts.forEach((a) => {
                         const isHeader = a.entry_type === "Header";
                         const cur = computed.signedCur.get(a.id) ?? 0;
                         const prev = computed.signedPrev.get(a.id) ?? 0;
-                        if (!isHeader) {
-                          secCur += cur;
-                          secPrev += prev;
-                        }
                         if (!isOpen) return;
                         no += 1;
                         const depth = a.code.split(/[.\-]/).filter(Boolean).length;
