@@ -21,24 +21,25 @@ const USP_ACCOUNT_CODES = {
 };
 
 function UspPage() {
-  const path = useRouterState({ select: (s) => s.location.pathname });
-  const subPath = path.replace(/^\/usp\/?/, "") || "dashboard";
-
   return (
     <>
       <PageHeader
         title="Unit Simpan Pinjam"
         subtitle="Kelola pinjaman, angsuran, dan kinerja keuangan unit USP."
       />
-
-      <div className="mb-5 flex flex-wrap gap-2">
-        <SubNav to="/usp" icon={<LayoutDashboard className="h-4 w-4" />} label="Dashboard" active={subPath === "dashboard"} />
-        <SubNav to="/usp/pinjaman" icon={<ListChecks className="h-4 w-4" />} label="Data Pinjaman" active={subPath.startsWith("pinjaman")} />
-        <SubNav to="/catat-kegiatan" icon={<ClipboardList className="h-4 w-4" />} label="Catat Kegiatan" />
-      </div>
-
-      {subPath === "dashboard" && <UspDashboard />}
+      <UspSubNav active="dashboard" />
+      <UspDashboard />
     </>
+  );
+}
+
+export function UspSubNav({ active }: { active: "dashboard" | "pinjaman" }) {
+  return (
+    <div className="mb-5 flex flex-wrap gap-2">
+      <SubNav to="/usp" icon={<LayoutDashboard className="h-4 w-4" />} label="Dashboard" active={active === "dashboard"} />
+      <SubNav to="/usp/pinjaman" icon={<ListChecks className="h-4 w-4" />} label="Data Pinjaman" active={active === "pinjaman"} />
+      <SubNav to="/catat-kegiatan" icon={<ClipboardList className="h-4 w-4" />} label="Catat Kegiatan" />
+    </div>
   );
 }
 
