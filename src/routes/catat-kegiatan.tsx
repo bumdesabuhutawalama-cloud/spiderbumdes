@@ -127,13 +127,19 @@ function PenyertaanModalDialog({ onClose }: { onClose: () => void }) {
   const modalAccounts = useMemo(
     () =>
       (accounts ?? []).filter(
-        (a) => a.type === "EKUITAS" && /modal/i.test(a.name) && !/bagi hasil|ikhtisar|saldo/i.test(a.name),
+        (a) =>
+          a.type === "EKUITAS" &&
+          a.code.startsWith("3.1.") &&
+          !/bagi hasil|ikhtisar|saldo|donasi/i.test(a.name),
       ),
     [accounts],
   );
 
   const kasBankAccounts = useMemo(
-    () => (accounts ?? []).filter((a) => a.type === "ASET" && /(kas|bank)/i.test(a.name)),
+    () =>
+      (accounts ?? []).filter(
+        (a) => a.type === "ASET" && (a.code.startsWith("1.1.01.") || a.code.startsWith("1.1.02.")),
+      ),
     [accounts],
   );
 
