@@ -571,41 +571,15 @@ function BelanjaAsetDialog({ onClose }: { onClose: () => void }) {
               <input
                 type="date"
                 value={tanggal}
-                onChange={(e) => {
-                  setTanggal(e.target.value);
-                  if (e.target.value) asetRef.current?.focus();
-                }}
+                onChange={(e) => setTanggal(e.target.value)}
                 className="input-glass"
               />
             </Field>
 
-            <Field label="Aset / Belanja Modal">
-              <select
-                ref={asetRef}
-                value={asetId}
-                onChange={(e) => {
-                  setAsetId(e.target.value);
-                  if (e.target.value) kasRef.current?.focus();
-                }}
-                className="input-glass"
-              >
-                <option value="">Pilih akun aset</option>
-                {asetAccounts.map((a) => (
-                  <option key={a.id} value={a.id}>
-                    {a.code} — {a.name}
-                  </option>
-                ))}
-              </select>
-            </Field>
-
             <Field label="Sumber Pembayaran">
               <select
-                ref={kasRef}
                 value={kasBankId}
-                onChange={(e) => {
-                  setKasBankId(e.target.value);
-                  if (e.target.value) jumlahRef.current?.focus();
-                }}
+                onChange={(e) => setKasBankId(e.target.value)}
                 className="input-glass"
               >
                 <option value="">Pilih kas atau bank</option>
@@ -616,6 +590,45 @@ function BelanjaAsetDialog({ onClose }: { onClose: () => void }) {
                 ))}
               </select>
             </Field>
+
+            <div className="sm:col-span-2">
+              <Field label="Jenis Aset / Belanja Modal">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                  {ASET_CATEGORIES.map((c) => {
+                    const active = c.key === categoryKey;
+                    return (
+                      <button
+                        key={c.key}
+                        type="button"
+                        onClick={() => {
+                          setCategoryKey(c.key);
+                          queueMicrotask(() => jumlahRef.current?.focus());
+                        }}
+                        className={
+                          "rounded-lg border px-2.5 py-2 text-left transition " +
+                          (active
+                            ? "border-[var(--neon-green)] bg-[var(--neon-green)]/10 shadow-[0_0_15px_rgba(74,222,128,0.25)]"
+                            : "border-white/10 bg-secondary/40 hover:border-white/20 hover:bg-secondary/60")
+                        }
+                      >
+                        <div className="text-xs font-semibold leading-tight">{c.label}</div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{c.hint}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+                {category && !aset && (
+                  <p className="mt-1 text-[11px] text-amber-400">
+                    Akun untuk kategori ini belum tersedia di COA (prefix {category.prefix}).
+                  </p>
+                )}
+                {aset && (
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    Akun otomatis: <span className="text-foreground font-medium">{aset.code} — {aset.name}</span>
+                  </p>
+                )}
+              </Field>
+            </div>
 
             <Field label="Jumlah Belanja">
               <div className="relative">
