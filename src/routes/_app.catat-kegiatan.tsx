@@ -708,3 +708,319 @@ function BelanjaAsetDialog({ onClose }: { onClose: () => void }) {
     </div>
   );
 }
+
+type PendapatanCategory = {
+  key: string;
+  label: string;
+  prefix: string;
+  hint: string;
+};
+
+const PENDAPATAN_CATEGORIES: PendapatanCategory[] = [
+  { key: "wisata", label: "Wisata & Tiket", prefix: "4.1.01.", hint: "Tiket, wahana, paket wisata" },
+  { key: "air", label: "Air Bersih", prefix: "4.1.02.", hint: "Pengelolaan air bersih" },
+  { key: "sampah", label: "Sampah", prefix: "4.1.03.", hint: "Pengelolaan sampah" },
+  { key: "sewa", label: "Sewa", prefix: "4.1.04.", hint: "Sewa tempat, gedung, kendaraan" },
+  { key: "jasa", label: "Jasa Pelayanan", prefix: "4.1.05.", hint: "Jasa pembayaran, layanan" },
+  { key: "parkir", label: "Parkir", prefix: "4.1.07.", hint: "Parkir motor & mobil" },
+  { key: "usp", label: "Simpan Pinjam", prefix: "4.1.08.", hint: "Bunga, denda, USP" },
+  { key: "dagang", label: "Penjualan Barang", prefix: "4.2.01.", hint: "Makanan, suvenir, dagangan" },
+  { key: "fnb", label: "Restoran & Kopi", prefix: "4.3.01.", hint: "Katering, restoran, kopi" },
+  { key: "piutang", label: "Penerimaan Piutang", prefix: "1.1.03.", hint: "Pelunasan piutang usaha" },
+];
+
+function PenerimaanKasDialog({ onClose }: { onClose: () => void }) {
+  const qc = useQueryClient();
+  const today = new Date().toISOString().slice(0, 10);
+  const [tanggal, setTanggal] = useState(today);
+  const [categoryKey, setCategoryKey] = useState<string>("");
+  const [sumberId, setSumberId] = useState<string>("");
+  const [kasBankId, setKasBankId] = useState("");
+  const [jumlah, setJumlah] = useState<string>("");
+  const [keterangan, setKeterangan] = useState("");
+
+  const jumlahRef = useRef<HTMLInputElement>(null);
+  const keteranganRef = useRef<HTMLTextAreaElement>(null);
+
+  const { data: accounts, isLoading } = useQuery({
+    queryKey: ["coa_accounts_penerimaan"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("coa_accounts")
+        .select("*")
+        .eq("status", "Aktif")
+        .eq("entry_type", "Detail")
+        .order("code")
+        .limit(1000);
+      if (error) throw error;
+      return data as Account[];
+    },
+  });
+
+  const kasBankAccounts = useMemo(
+    () =>
+      (accounts ?? []).filter(
+        (a) => a.type === "ASET" && (a.code.startsWith("1.1.01.") || a.code.startsWith("1.1.02.")),
+      ),
+    [accounts],
+  );
+
+  if (!kasBankId && kasBankAccounts.length > 0) {
+    const def = kasBankAccounts.find((a) => /kas tunai/i.test(a.name)) ?? kasBankAccounts[0];
+    queueMicrotask(() => setKasBankId(def.id));
+  }
+
+  const category = PENDAPATAN_CATEGORIES.find((c) => c.key === categoryKey);
+
+  // Akun pasangan (kredit): Pendapatan untuk kategori revenue, Piutang Usaha untuk pelunasan piutang.
+  const sumberAccounts = useMemo(() => {
+    if (!category || !accounts) return [];
+    return accounts.filter(
+      (a) => a.code.startsWith(category.prefix) && !/diskon/i.test(a.name),
+    );
+  }, [category, accounts]);
+
+  const sumber = sumberAccounts.find((a) => a.id === sumberId) ?? sumberAccounts[0];
+  const kasBank = kasBankAccounts.find((a) => a.id === kasBankId);
+  const nominal = Number(jumlah.replace(/[^\d]/g, "")) || 0;
+
+  const mutation = useMutation({
+    mutationFn: async () => {
+      if (!sumber || !kasBank) throw new Error("Pilih kategori dan kas/bank tujuan");
+      if (nominal <= 0) throw new Error("Jumlah penerimaan harus lebih dari 0");
+
+      const { data: je, error: jeErr } = await supabase
+        .from("journal_entries")
+        .insert({
+          transaction_date: tanggal,
+          transaction_type: "PENERIMAAN_KAS",
+          description: keterangan || `Penerimaan kas ${sumber.name}`,
+          total_amount: nominal,
+        })
+        .select("id")
+        .single();
+      if (jeErr) throw jeErr;
+
+      // Debit: Kas/Bank (ASET bertambah). Credit: akun sumber (pendapatan = kredit, piutang = aset berkurang juga di kredit).
+      const { error: linesErr } = await supabase.from("journal_entry_lines").insert([
+        {
+          journal_entry_id: je.id,
+          account_id: kasBank.id,
+          account_code: kasBank.code,
+          account_name: kasBank.name,
+          debit: nominal,
+          credit: 0,
+          line_order: 1,
+        },
+        {
+          journal_entry_id: je.id,
+          account_id: sumber.id,
+          account_code: sumber.code,
+          account_name: sumber.name,
+          debit: 0,
+          credit: nominal,
+          line_order: 2,
+        },
+      ]);
+      if (linesErr) throw linesErr;
+    },
+    onSuccess: () => {
+      toast.success("Penerimaan kas berhasil dicatat");
+      qc.invalidateQueries({ queryKey: ["journal_entries"] });
+      qc.invalidateQueries({ queryKey: ["balances"] });
+      onClose();
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200"
+      onClick={onClose}
+    >
+      <div
+        className="glass-card relative w-full sm:max-w-3xl max-h-[96vh] overflow-hidden rounded-t-2xl sm:rounded-2xl border border-white/10 p-4 sm:p-5 shadow-[0_0_60px_rgba(34,211,238,0.25)] animate-in slide-in-from-bottom-4 duration-300"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-lg bg-secondary/60 hover:bg-secondary transition"
+        >
+          <X className="h-4 w-4" />
+        </button>
+
+        <div className="mb-3">
+          <h2 className="text-base sm:text-lg font-semibold flex items-center gap-2">
+            <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-fuchsia-400 to-[var(--neon-cyan)] text-[oklch(0.15_0.03_250)]">
+              <Wallet className="h-4 w-4" />
+            </span>
+            Catat Penerimaan Kas
+          </h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            Pemasukan kas dari operasional. Sistem otomatis menyiapkan jurnal.
+          </p>
+        </div>
+
+        {isLoading ? (
+          <div className="grid place-items-center py-10">
+            <Loader2 className="h-6 w-6 animate-spin text-[var(--neon-cyan)]" />
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+            <Field label="Tanggal Transaksi">
+              <input
+                type="date"
+                value={tanggal}
+                onChange={(e) => setTanggal(e.target.value)}
+                className="input-glass"
+              />
+            </Field>
+
+            <Field label="Diterima di Rekening">
+              <select
+                value={kasBankId}
+                onChange={(e) => setKasBankId(e.target.value)}
+                className="input-glass"
+              >
+                <option value="">Pilih kas atau bank</option>
+                {kasBankAccounts.map((a) => (
+                  <option key={a.id} value={a.id}>
+                    {a.code} — {a.name}
+                  </option>
+                ))}
+              </select>
+            </Field>
+
+            <div className="sm:col-span-2">
+              <Field label="Jenis Penerimaan">
+                <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                  {PENDAPATAN_CATEGORIES.map((c) => {
+                    const active = c.key === categoryKey;
+                    return (
+                      <button
+                        key={c.key}
+                        type="button"
+                        onClick={() => {
+                          setCategoryKey(c.key);
+                          setSumberId("");
+                        }}
+                        className={
+                          "rounded-lg border px-2.5 py-2 text-left transition " +
+                          (active
+                            ? "border-fuchsia-400 bg-fuchsia-400/10 shadow-[0_0_15px_rgba(232,121,249,0.25)]"
+                            : "border-white/10 bg-secondary/40 hover:border-white/20 hover:bg-secondary/60")
+                        }
+                      >
+                        <div className="text-xs font-semibold leading-tight">{c.label}</div>
+                        <div className="text-[10px] text-muted-foreground mt-0.5 leading-tight">{c.hint}</div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </Field>
+            </div>
+
+            {category && (
+              <div className="sm:col-span-2">
+                <Field label="Akun Detail">
+                  {sumberAccounts.length === 0 ? (
+                    <p className="text-[11px] text-amber-400">
+                      Akun untuk kategori ini belum tersedia di COA (prefix {category.prefix}).
+                    </p>
+                  ) : (
+                    <select
+                      value={sumber?.id ?? ""}
+                      onChange={(e) => {
+                        setSumberId(e.target.value);
+                        queueMicrotask(() => jumlahRef.current?.focus());
+                      }}
+                      className="input-glass"
+                    >
+                      {sumberAccounts.map((a) => (
+                        <option key={a.id} value={a.id}>
+                          {a.code} — {a.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </Field>
+              </div>
+            )}
+
+            <Field label="Jumlah Diterima">
+              <div className="relative">
+                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
+                  Rp
+                </span>
+                <input
+                  ref={jumlahRef}
+                  inputMode="numeric"
+                  value={jumlah ? Number(jumlah.replace(/[^\d]/g, "")).toLocaleString("id-ID") : ""}
+                  onChange={(e) => setJumlah(e.target.value.replace(/[^\d]/g, ""))}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      keteranganRef.current?.focus();
+                    }
+                  }}
+                  placeholder="0"
+                  className="input-glass pl-9"
+                />
+              </div>
+            </Field>
+
+            <div className="sm:col-span-2">
+              <Field label="Keterangan">
+                <textarea
+                  ref={keteranganRef}
+                  value={keterangan}
+                  onChange={(e) => setKeterangan(e.target.value)}
+                  rows={2}
+                  placeholder="Catatan tambahan (opsional)"
+                  className="input-glass resize-none"
+                />
+              </Field>
+            </div>
+
+            <div className="sm:col-span-2 rounded-xl border border-[var(--neon-cyan)]/30 bg-[var(--neon-cyan)]/5 p-2.5">
+              <div className="text-[10px] uppercase tracking-wide text-[var(--neon-cyan)] mb-1.5">
+                Preview Pencatatan Otomatis
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <PreviewRow
+                  icon={<ArrowDownCircle className="h-4 w-4 text-[var(--neon-green)]" />}
+                  label="Kas / Bank Bertambah"
+                  account={kasBank ? `${kasBank.code} — ${kasBank.name}` : "—"}
+                  amount={nominal}
+                />
+                <PreviewRow
+                  icon={<ArrowUpCircle className="h-4 w-4 text-[var(--neon-cyan)]" />}
+                  label={category?.key === "piutang" ? "Piutang Berkurang" : "Pendapatan Diakui"}
+                  account={sumber ? `${sumber.code} — ${sumber.name}` : "—"}
+                  amount={nominal}
+                />
+              </div>
+            </div>
+
+            <div className="sm:col-span-2 flex flex-col-reverse sm:flex-row sm:justify-end gap-2 pt-1">
+              <button
+                onClick={onClose}
+                className="rounded-lg border border-white/10 bg-secondary/40 px-4 py-2 text-sm hover:bg-secondary transition"
+              >
+                Batal
+              </button>
+              <button
+                onClick={() => mutation.mutate()}
+                disabled={mutation.isPending || !sumber || !kasBankId || nominal <= 0}
+                className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-fuchsia-400 to-[var(--neon-cyan)] px-5 py-2 text-sm font-medium text-[oklch(0.15_0.03_250)] glow-cyan hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                Simpan Transaksi
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
