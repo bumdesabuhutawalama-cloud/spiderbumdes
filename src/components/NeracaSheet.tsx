@@ -42,7 +42,9 @@ export function NeracaSheet({
   const [asOf, setAsOf] = useState(yearEnd(new Date().getFullYear()));
   const currentYear = Number(asOf.slice(0, 4));
   const prevAsOf = yearEnd(currentYear - 1);
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [expanded, setExpanded] = useState<Set<string>>(
+    () => new Set(SECTIONS.map((s) => s.type)),
+  );
   const [mode, setMode] = useState<UnitMode>(defaultMode);
   const [unitId, setUnitId] = useState<string>("");
   const [exporting, setExporting] = useState(false);
