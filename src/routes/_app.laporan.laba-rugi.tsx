@@ -29,7 +29,9 @@ function LabaRugiPage() {
   const year = new Date().getFullYear();
   const [start, setStart] = useState(`${year}-01-01`);
   const [end, setEnd] = useState(`${year}-12-31`);
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [expanded, setExpanded] = useState<Set<string>>(
+    () => new Set(SECTIONS.map((s) => s.type)),
+  );
   const [exporting, setExporting] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
   const toggle = (k: string) =>
