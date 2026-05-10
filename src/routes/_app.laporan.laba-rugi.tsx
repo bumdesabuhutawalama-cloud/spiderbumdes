@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ReportPage } from "@/components/ReportPage";
 
-export const Route = createFileRoute("/laporan/laba-rugi")({
+export const Route = createFileRoute("/_app/laporan/laba-rugi")({
   head: () => ({ meta: [{ title: "Laba Rugi · BUMDes" }] }),
   component: () => (
     <ReportPage

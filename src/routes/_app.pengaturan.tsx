@@ -1,15 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Upload, Save, Building2 } from "lucide-react";
-import { DashboardLayout, PageHeader } from "@/components/DashboardLayout";
+import { PageHeader } from "@/components/DashboardLayout";
 
-export const Route = createFileRoute("/pengaturan")({
+export const Route = createFileRoute("/_app/pengaturan")({
   head: () => ({ meta: [{ title: "Pengaturan · BUMDes" }] }),
   component: PengaturanPage,
 });
 
 function PengaturanPage() {
   return (
-    <DashboardLayout>
+    <>
       <PageHeader
         title="Pengaturan BUMDes"
         subtitle="Konfigurasi identitas dan struktur organisasi."
@@ -59,7 +59,7 @@ function PengaturanPage() {
           </button>
         </div>
       </form>
-    </DashboardLayout>
+    </>
   );
 }
 

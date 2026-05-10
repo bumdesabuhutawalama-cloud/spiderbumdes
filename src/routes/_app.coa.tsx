@@ -2,11 +2,11 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Plus, Search, Loader2 } from "lucide-react";
-import { DashboardLayout, PageHeader } from "@/components/DashboardLayout";
+import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/coa")({
+export const Route = createFileRoute("/_app/coa")({
   head: () => ({ meta: [{ title: "Bagan Akun · BUMDes" }] }),
   component: CoaPage,
 });
@@ -59,7 +59,7 @@ function CoaPage() {
   }, [data, q]);
 
   return (
-    <DashboardLayout>
+    <>
       <PageHeader
         title="Bagan Akun (Chart of Accounts)"
         subtitle={`Kepmendesa No. 136 Tahun 2022 · ${data?.length ?? 0} akun terdaftar`}
@@ -168,6 +168,6 @@ function CoaPage() {
           </table>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

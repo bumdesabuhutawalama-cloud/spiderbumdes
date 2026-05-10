@@ -1,5 +1,5 @@
 import { Calendar, Download } from "lucide-react";
-import { DashboardLayout, PageHeader } from "@/components/DashboardLayout";
+import { PageHeader } from "@/components/DashboardLayout";
 
 export function ReportPage({
   title,
@@ -13,7 +13,7 @@ export function ReportPage({
   rows: (string | number)[][];
 }) {
   return (
-    <DashboardLayout>
+    <>
       <PageHeader
         title={title}
         subtitle={subtitle}
@@ -82,6 +82,6 @@ export function ReportPage({
           </table>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

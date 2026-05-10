@@ -9,87 +9,93 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as PengaturanRouteImport } from './routes/pengaturan'
-import { Route as CoaRouteImport } from './routes/coa'
-import { Route as CatatKegiatanRouteImport } from './routes/catat-kegiatan'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as LaporanNeracaPusatRouteImport } from './routes/laporan.neraca-pusat'
-import { Route as LaporanNeracaKonsolidasiRouteImport } from './routes/laporan.neraca-konsolidasi'
-import { Route as LaporanLabaRugiRouteImport } from './routes/laporan.laba-rugi'
-import { Route as LaporanBagiHasilRouteImport } from './routes/laporan.bagi-hasil'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as AppIndexRouteImport } from './routes/_app.index'
+import { Route as AppPengaturanRouteImport } from './routes/_app.pengaturan'
+import { Route as AppCoaRouteImport } from './routes/_app.coa'
+import { Route as AppCatatKegiatanRouteImport } from './routes/_app.catat-kegiatan'
+import { Route as AppLaporanNeracaPusatRouteImport } from './routes/_app.laporan.neraca-pusat'
+import { Route as AppLaporanNeracaKonsolidasiRouteImport } from './routes/_app.laporan.neraca-konsolidasi'
+import { Route as AppLaporanLabaRugiRouteImport } from './routes/_app.laporan.laba-rugi'
+import { Route as AppLaporanBagiHasilRouteImport } from './routes/_app.laporan.bagi-hasil'
 
-const PengaturanRoute = PengaturanRouteImport.update({
-  id: '/pengaturan',
-  path: '/pengaturan',
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CoaRoute = CoaRouteImport.update({
-  id: '/coa',
-  path: '/coa',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CatatKegiatanRoute = CatatKegiatanRouteImport.update({
-  id: '/catat-kegiatan',
-  path: '/catat-kegiatan',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const IndexRoute = IndexRouteImport.update({
+const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
-const LaporanNeracaPusatRoute = LaporanNeracaPusatRouteImport.update({
+const AppPengaturanRoute = AppPengaturanRouteImport.update({
+  id: '/pengaturan',
+  path: '/pengaturan',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCoaRoute = AppCoaRouteImport.update({
+  id: '/coa',
+  path: '/coa',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppCatatKegiatanRoute = AppCatatKegiatanRouteImport.update({
+  id: '/catat-kegiatan',
+  path: '/catat-kegiatan',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLaporanNeracaPusatRoute = AppLaporanNeracaPusatRouteImport.update({
   id: '/laporan/neraca-pusat',
   path: '/laporan/neraca-pusat',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
-const LaporanNeracaKonsolidasiRoute =
-  LaporanNeracaKonsolidasiRouteImport.update({
+const AppLaporanNeracaKonsolidasiRoute =
+  AppLaporanNeracaKonsolidasiRouteImport.update({
     id: '/laporan/neraca-konsolidasi',
     path: '/laporan/neraca-konsolidasi',
-    getParentRoute: () => rootRouteImport,
+    getParentRoute: () => AppRoute,
   } as any)
-const LaporanLabaRugiRoute = LaporanLabaRugiRouteImport.update({
+const AppLaporanLabaRugiRoute = AppLaporanLabaRugiRouteImport.update({
   id: '/laporan/laba-rugi',
   path: '/laporan/laba-rugi',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
-const LaporanBagiHasilRoute = LaporanBagiHasilRouteImport.update({
+const AppLaporanBagiHasilRoute = AppLaporanBagiHasilRouteImport.update({
   id: '/laporan/bagi-hasil',
   path: '/laporan/bagi-hasil',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/catat-kegiatan': typeof CatatKegiatanRoute
-  '/coa': typeof CoaRoute
-  '/pengaturan': typeof PengaturanRoute
-  '/laporan/bagi-hasil': typeof LaporanBagiHasilRoute
-  '/laporan/laba-rugi': typeof LaporanLabaRugiRoute
-  '/laporan/neraca-konsolidasi': typeof LaporanNeracaKonsolidasiRoute
-  '/laporan/neraca-pusat': typeof LaporanNeracaPusatRoute
+  '/': typeof AppIndexRoute
+  '/catat-kegiatan': typeof AppCatatKegiatanRoute
+  '/coa': typeof AppCoaRoute
+  '/pengaturan': typeof AppPengaturanRoute
+  '/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
+  '/laporan/laba-rugi': typeof AppLaporanLabaRugiRoute
+  '/laporan/neraca-konsolidasi': typeof AppLaporanNeracaKonsolidasiRoute
+  '/laporan/neraca-pusat': typeof AppLaporanNeracaPusatRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/catat-kegiatan': typeof CatatKegiatanRoute
-  '/coa': typeof CoaRoute
-  '/pengaturan': typeof PengaturanRoute
-  '/laporan/bagi-hasil': typeof LaporanBagiHasilRoute
-  '/laporan/laba-rugi': typeof LaporanLabaRugiRoute
-  '/laporan/neraca-konsolidasi': typeof LaporanNeracaKonsolidasiRoute
-  '/laporan/neraca-pusat': typeof LaporanNeracaPusatRoute
+  '/catat-kegiatan': typeof AppCatatKegiatanRoute
+  '/coa': typeof AppCoaRoute
+  '/pengaturan': typeof AppPengaturanRoute
+  '/': typeof AppIndexRoute
+  '/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
+  '/laporan/laba-rugi': typeof AppLaporanLabaRugiRoute
+  '/laporan/neraca-konsolidasi': typeof AppLaporanNeracaKonsolidasiRoute
+  '/laporan/neraca-pusat': typeof AppLaporanNeracaPusatRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/catat-kegiatan': typeof CatatKegiatanRoute
-  '/coa': typeof CoaRoute
-  '/pengaturan': typeof PengaturanRoute
-  '/laporan/bagi-hasil': typeof LaporanBagiHasilRoute
-  '/laporan/laba-rugi': typeof LaporanLabaRugiRoute
-  '/laporan/neraca-konsolidasi': typeof LaporanNeracaKonsolidasiRoute
-  '/laporan/neraca-pusat': typeof LaporanNeracaPusatRoute
+  '/_app': typeof AppRouteWithChildren
+  '/_app/catat-kegiatan': typeof AppCatatKegiatanRoute
+  '/_app/coa': typeof AppCoaRoute
+  '/_app/pengaturan': typeof AppPengaturanRoute
+  '/_app/': typeof AppIndexRoute
+  '/_app/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
+  '/_app/laporan/laba-rugi': typeof AppLaporanLabaRugiRoute
+  '/_app/laporan/neraca-konsolidasi': typeof AppLaporanNeracaKonsolidasiRoute
+  '/_app/laporan/neraca-pusat': typeof AppLaporanNeracaPusatRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -104,107 +110,125 @@ export interface FileRouteTypes {
     | '/laporan/neraca-pusat'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/catat-kegiatan'
     | '/coa'
     | '/pengaturan'
+    | '/'
     | '/laporan/bagi-hasil'
     | '/laporan/laba-rugi'
     | '/laporan/neraca-konsolidasi'
     | '/laporan/neraca-pusat'
   id:
     | '__root__'
-    | '/'
-    | '/catat-kegiatan'
-    | '/coa'
-    | '/pengaturan'
-    | '/laporan/bagi-hasil'
-    | '/laporan/laba-rugi'
-    | '/laporan/neraca-konsolidasi'
-    | '/laporan/neraca-pusat'
+    | '/_app'
+    | '/_app/catat-kegiatan'
+    | '/_app/coa'
+    | '/_app/pengaturan'
+    | '/_app/'
+    | '/_app/laporan/bagi-hasil'
+    | '/_app/laporan/laba-rugi'
+    | '/_app/laporan/neraca-konsolidasi'
+    | '/_app/laporan/neraca-pusat'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  CatatKegiatanRoute: typeof CatatKegiatanRoute
-  CoaRoute: typeof CoaRoute
-  PengaturanRoute: typeof PengaturanRoute
-  LaporanBagiHasilRoute: typeof LaporanBagiHasilRoute
-  LaporanLabaRugiRoute: typeof LaporanLabaRugiRoute
-  LaporanNeracaKonsolidasiRoute: typeof LaporanNeracaKonsolidasiRoute
-  LaporanNeracaPusatRoute: typeof LaporanNeracaPusatRoute
+  AppRoute: typeof AppRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/pengaturan': {
-      id: '/pengaturan'
-      path: '/pengaturan'
-      fullPath: '/pengaturan'
-      preLoaderRoute: typeof PengaturanRouteImport
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/coa': {
-      id: '/coa'
-      path: '/coa'
-      fullPath: '/coa'
-      preLoaderRoute: typeof CoaRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/catat-kegiatan': {
-      id: '/catat-kegiatan'
-      path: '/catat-kegiatan'
-      fullPath: '/catat-kegiatan'
-      preLoaderRoute: typeof CatatKegiatanRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
+    '/_app/': {
+      id: '/_app/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/laporan/neraca-pusat': {
-      id: '/laporan/neraca-pusat'
+    '/_app/pengaturan': {
+      id: '/_app/pengaturan'
+      path: '/pengaturan'
+      fullPath: '/pengaturan'
+      preLoaderRoute: typeof AppPengaturanRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/coa': {
+      id: '/_app/coa'
+      path: '/coa'
+      fullPath: '/coa'
+      preLoaderRoute: typeof AppCoaRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/catat-kegiatan': {
+      id: '/_app/catat-kegiatan'
+      path: '/catat-kegiatan'
+      fullPath: '/catat-kegiatan'
+      preLoaderRoute: typeof AppCatatKegiatanRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/laporan/neraca-pusat': {
+      id: '/_app/laporan/neraca-pusat'
       path: '/laporan/neraca-pusat'
       fullPath: '/laporan/neraca-pusat'
-      preLoaderRoute: typeof LaporanNeracaPusatRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppLaporanNeracaPusatRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/laporan/neraca-konsolidasi': {
-      id: '/laporan/neraca-konsolidasi'
+    '/_app/laporan/neraca-konsolidasi': {
+      id: '/_app/laporan/neraca-konsolidasi'
       path: '/laporan/neraca-konsolidasi'
       fullPath: '/laporan/neraca-konsolidasi'
-      preLoaderRoute: typeof LaporanNeracaKonsolidasiRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppLaporanNeracaKonsolidasiRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/laporan/laba-rugi': {
-      id: '/laporan/laba-rugi'
+    '/_app/laporan/laba-rugi': {
+      id: '/_app/laporan/laba-rugi'
       path: '/laporan/laba-rugi'
       fullPath: '/laporan/laba-rugi'
-      preLoaderRoute: typeof LaporanLabaRugiRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppLaporanLabaRugiRouteImport
+      parentRoute: typeof AppRoute
     }
-    '/laporan/bagi-hasil': {
-      id: '/laporan/bagi-hasil'
+    '/_app/laporan/bagi-hasil': {
+      id: '/_app/laporan/bagi-hasil'
       path: '/laporan/bagi-hasil'
       fullPath: '/laporan/bagi-hasil'
-      preLoaderRoute: typeof LaporanBagiHasilRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppLaporanBagiHasilRouteImport
+      parentRoute: typeof AppRoute
     }
   }
 }
 
+interface AppRouteChildren {
+  AppCatatKegiatanRoute: typeof AppCatatKegiatanRoute
+  AppCoaRoute: typeof AppCoaRoute
+  AppPengaturanRoute: typeof AppPengaturanRoute
+  AppIndexRoute: typeof AppIndexRoute
+  AppLaporanBagiHasilRoute: typeof AppLaporanBagiHasilRoute
+  AppLaporanLabaRugiRoute: typeof AppLaporanLabaRugiRoute
+  AppLaporanNeracaKonsolidasiRoute: typeof AppLaporanNeracaKonsolidasiRoute
+  AppLaporanNeracaPusatRoute: typeof AppLaporanNeracaPusatRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppCatatKegiatanRoute: AppCatatKegiatanRoute,
+  AppCoaRoute: AppCoaRoute,
+  AppPengaturanRoute: AppPengaturanRoute,
+  AppIndexRoute: AppIndexRoute,
+  AppLaporanBagiHasilRoute: AppLaporanBagiHasilRoute,
+  AppLaporanLabaRugiRoute: AppLaporanLabaRugiRoute,
+  AppLaporanNeracaKonsolidasiRoute: AppLaporanNeracaKonsolidasiRoute,
+  AppLaporanNeracaPusatRoute: AppLaporanNeracaPusatRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  CatatKegiatanRoute: CatatKegiatanRoute,
-  CoaRoute: CoaRoute,
-  PengaturanRoute: PengaturanRoute,
-  LaporanBagiHasilRoute: LaporanBagiHasilRoute,
-  LaporanLabaRugiRoute: LaporanLabaRugiRoute,
-  LaporanNeracaKonsolidasiRoute: LaporanNeracaKonsolidasiRoute,
-  LaporanNeracaPusatRoute: LaporanNeracaPusatRoute,
+  AppRoute: AppRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

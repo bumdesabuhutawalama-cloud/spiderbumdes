@@ -16,10 +16,10 @@ import {
   Tooltip,
   CartesianGrid,
 } from "recharts";
-import { DashboardLayout, PageHeader } from "@/components/DashboardLayout";
+import { PageHeader } from "@/components/DashboardLayout";
 import { StatCard } from "@/components/StatCard";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_app/")({
   head: () => ({
     meta: [{ title: "Dashboard · Direktur BUMDes" }],
   }),
@@ -50,7 +50,7 @@ const units = [
 
 function DashboardPage() {
   return (
-    <DashboardLayout>
+    <>
       <PageHeader
         title="Dashboard Direktur BUMDes"
         subtitle="Ringkasan eksekutif performa konsolidasi seluruh unit usaha."
@@ -147,6 +147,6 @@ function DashboardPage() {
           </ul>
         </div>
       </section>
-    </DashboardLayout>
+    </>
   );
 }
