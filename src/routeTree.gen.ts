@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
+import { Route as AppUspRouteImport } from './routes/_app.usp'
 import { Route as AppPengaturanRouteImport } from './routes/_app.pengaturan'
 import { Route as AppCoaRouteImport } from './routes/_app.coa'
 import { Route as AppCatatKegiatanRouteImport } from './routes/_app.catat-kegiatan'
@@ -26,6 +27,11 @@ const AppRoute = AppRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppUspRoute = AppUspRouteImport.update({
+  id: '/usp',
+  path: '/usp',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPengaturanRoute = AppPengaturanRouteImport.update({
@@ -70,6 +76,7 @@ export interface FileRoutesByFullPath {
   '/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/coa': typeof AppCoaRoute
   '/pengaturan': typeof AppPengaturanRoute
+  '/usp': typeof AppUspRoute
   '/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
   '/laporan/laba-rugi': typeof AppLaporanLabaRugiRoute
   '/laporan/neraca-konsolidasi': typeof AppLaporanNeracaKonsolidasiRoute
@@ -79,6 +86,7 @@ export interface FileRoutesByTo {
   '/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/coa': typeof AppCoaRoute
   '/pengaturan': typeof AppPengaturanRoute
+  '/usp': typeof AppUspRoute
   '/': typeof AppIndexRoute
   '/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
   '/laporan/laba-rugi': typeof AppLaporanLabaRugiRoute
@@ -91,6 +99,7 @@ export interface FileRoutesById {
   '/_app/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/_app/coa': typeof AppCoaRoute
   '/_app/pengaturan': typeof AppPengaturanRoute
+  '/_app/usp': typeof AppUspRoute
   '/_app/': typeof AppIndexRoute
   '/_app/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
   '/_app/laporan/laba-rugi': typeof AppLaporanLabaRugiRoute
@@ -104,6 +113,7 @@ export interface FileRouteTypes {
     | '/catat-kegiatan'
     | '/coa'
     | '/pengaturan'
+    | '/usp'
     | '/laporan/bagi-hasil'
     | '/laporan/laba-rugi'
     | '/laporan/neraca-konsolidasi'
@@ -113,6 +123,7 @@ export interface FileRouteTypes {
     | '/catat-kegiatan'
     | '/coa'
     | '/pengaturan'
+    | '/usp'
     | '/'
     | '/laporan/bagi-hasil'
     | '/laporan/laba-rugi'
@@ -124,6 +135,7 @@ export interface FileRouteTypes {
     | '/_app/catat-kegiatan'
     | '/_app/coa'
     | '/_app/pengaturan'
+    | '/_app/usp'
     | '/_app/'
     | '/_app/laporan/bagi-hasil'
     | '/_app/laporan/laba-rugi'
@@ -149,6 +161,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/usp': {
+      id: '/_app/usp'
+      path: '/usp'
+      fullPath: '/usp'
+      preLoaderRoute: typeof AppUspRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/pengaturan': {
@@ -207,6 +226,7 @@ interface AppRouteChildren {
   AppCatatKegiatanRoute: typeof AppCatatKegiatanRoute
   AppCoaRoute: typeof AppCoaRoute
   AppPengaturanRoute: typeof AppPengaturanRoute
+  AppUspRoute: typeof AppUspRoute
   AppIndexRoute: typeof AppIndexRoute
   AppLaporanBagiHasilRoute: typeof AppLaporanBagiHasilRoute
   AppLaporanLabaRugiRoute: typeof AppLaporanLabaRugiRoute
@@ -218,6 +238,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCatatKegiatanRoute: AppCatatKegiatanRoute,
   AppCoaRoute: AppCoaRoute,
   AppPengaturanRoute: AppPengaturanRoute,
+  AppUspRoute: AppUspRoute,
   AppIndexRoute: AppIndexRoute,
   AppLaporanBagiHasilRoute: AppLaporanBagiHasilRoute,
   AppLaporanLabaRugiRoute: AppLaporanLabaRugiRoute,
@@ -233,3 +254,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
