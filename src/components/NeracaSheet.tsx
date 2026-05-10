@@ -168,16 +168,13 @@ export function NeracaSheet({
                       );
 
                       const sectionAccounts = computed.neracaAccounts.filter((a) => a.type === section.type);
-                      let secCur = 0;
-                      let secPrev = 0;
+                      // Total per seksi memakai sumByType agar akun kontra dikurangkan dengan benar.
+                      let secCur = sumByType(accounts ?? [], computed.signedCur, [section.type]);
+                      let secPrev = sumByType(accounts ?? [], computed.signedPrev, [section.type]);
                       sectionAccounts.forEach((a) => {
                         const isHeader = a.entry_type === "Header";
                         const cur = computed.signedCur.get(a.id) ?? 0;
                         const prev = computed.signedPrev.get(a.id) ?? 0;
-                        if (!isHeader) {
-                          secCur += cur;
-                          secPrev += prev;
-                        }
                         if (!isOpen) return;
                         no += 1;
                         const depth = a.code.split(/[.\-]/).filter(Boolean).length;
