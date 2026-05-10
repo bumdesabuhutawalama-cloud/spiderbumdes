@@ -109,10 +109,10 @@ function PenyertaanModalDialog({ onClose }: { onClose: () => void }) {
   const [jumlah, setJumlah] = useState<string>("");
   const [keterangan, setKeterangan] = useState("");
 
-  const sumberRef = React.useRef<HTMLSelectElement>(null);
-  const kasRef = React.useRef<HTMLSelectElement>(null);
-  const jumlahRef = React.useRef<HTMLInputElement>(null);
-  const keteranganRef = React.useRef<HTMLTextAreaElement>(null);
+  const sumberRef = useRef<HTMLSelectElement>(null);
+  const kasRef = useRef<HTMLSelectElement>(null);
+  const jumlahRef = useRef<HTMLInputElement>(null);
+  const keteranganRef = useRef<HTMLTextAreaElement>(null);
 
   const { data: accounts, isLoading } = useQuery({
     queryKey: ["coa_accounts_penyertaan"],
