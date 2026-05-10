@@ -189,7 +189,9 @@ function LabaRugiPage() {
 
                       let secCur = 0;
                       let secPrev = 0;
-                      const sectionAccounts = accounts.filter((a) => a.type === section.type);
+                      const sectionAccounts = accounts.filter(
+                        (a) => a.type === section.type && computed.activeIds.has(a.id),
+                      );
                       sectionAccounts.forEach((a) => {
                         const isHeader = a.entry_type === "Header";
                         const cur = computed.cur.get(a.id) ?? 0;
