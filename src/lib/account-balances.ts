@@ -73,10 +73,9 @@ export function useAccountBalances(
   mode: UnitMode = "pusat",
   unitId?: string | null,
 ) {
-  const end = toMonth(asOfDate);
   return useQuery({
-    queryKey: ["balances", "asof", end ?? "all", mode, unitId ?? ""],
-    queryFn: async () => reduceRows(await fetchBalances(undefined, end, mode, unitId)),
+    queryKey: ["balances", "asof", asOfDate ?? "all", mode, unitId ?? ""],
+    queryFn: async () => reduceRows(await fetchBalances(undefined, asOfDate, mode, unitId)),
   });
 }
 
@@ -87,11 +86,9 @@ export function useAccountBalancesPeriod(
   mode: UnitMode = "pusat",
   unitId?: string | null,
 ) {
-  const s = toMonth(start);
-  const e = toMonth(end);
   return useQuery({
-    queryKey: ["balances", "period", s ?? "", e ?? "", mode, unitId ?? ""],
-    queryFn: async () => reduceRows(await fetchBalances(s, e, mode, unitId)),
+    queryKey: ["balances", "period", start ?? "", end ?? "", mode, unitId ?? ""],
+    queryFn: async () => reduceRows(await fetchBalances(start, end, mode, unitId)),
   });
 }
 
