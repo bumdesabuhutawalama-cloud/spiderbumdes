@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { buildReportFilename, exportElementToPdf } from "@/lib/pdf-export";
 import {
   type AccountLite,
+  computeActiveAccountIds,
   computeSignedBalances,
   formatRpOrDash,
   useAccountBalancesPeriod,
@@ -28,7 +29,9 @@ function LabaRugiPage() {
   const year = new Date().getFullYear();
   const [start, setStart] = useState(`${year}-01-01`);
   const [end, setEnd] = useState(`${year}-12-31`);
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [expanded, setExpanded] = useState<Set<string>>(
+    () => new Set(SECTIONS.map((s) => s.type)),
+  );
   const [exporting, setExporting] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
   const toggle = (k: string) =>
@@ -78,7 +81,8 @@ function LabaRugiPage() {
     if (!accounts || !balCur || !balPrev) return null;
     const cur = computeSignedBalances(accounts, balCur);
     const prev = computeSignedBalances(accounts, balPrev);
-    return { cur, prev };
+    const activeIds = computeActiveAccountIds(accounts, [balCur, balPrev], [cur, prev]);
+    return { cur, prev, activeIds };
   }, [accounts, balCur, balPrev]);
 
   return (
@@ -185,7 +189,9 @@ function LabaRugiPage() {
 
                       let secCur = 0;
                       let secPrev = 0;
-                      const sectionAccounts = accounts.filter((a) => a.type === section.type);
+                      const sectionAccounts = accounts.filter(
+                        (a) => a.type === section.type && computed.activeIds.has(a.id),
+                      );
                       sectionAccounts.forEach((a) => {
                         const isHeader = a.entry_type === "Header";
                         const cur = computed.cur.get(a.id) ?? 0;

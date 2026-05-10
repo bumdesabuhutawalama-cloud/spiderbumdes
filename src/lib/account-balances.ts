@@ -138,6 +138,54 @@ export function computeSignedBalances(
   return out;
 }
 
+/**
+ * Tentukan akun mana yang "aktif" (punya aktivitas / saldo non-nol) pada
+ * salah satu set saldo yang diberikan. Header dianggap aktif jika ada
+ * descendant (berdasar prefix kode) yang aktif. Ambang threshold 0.5
+ * mengikuti pembulatan tampilan.
+ */
+export function computeActiveAccountIds(
+  accounts: AccountLite[],
+  rawMaps: BalanceMap[],
+  signedMaps: Map<string, number>[],
+): Set<string> {
+  const active = new Set<string>();
+  for (const a of accounts) {
+    if (a.entry_type === "Header") continue;
+    let isActive = false;
+    for (const r of rawMaps) {
+      const b = r.get(a.id);
+      if (b && (b.debit > 0.5 || b.credit > 0.5)) {
+        isActive = true;
+        break;
+      }
+    }
+    if (!isActive) {
+      for (const s of signedMaps) {
+        if (Math.abs(s.get(a.id) ?? 0) > 0.5) {
+          isActive = true;
+          break;
+        }
+      }
+    }
+    if (isActive) active.add(a.id);
+  }
+  // Headers: aktif jika ada detail descendant aktif
+  for (const h of accounts) {
+    if (h.entry_type !== "Header") continue;
+    const prefix = h.code + ".";
+    for (const a of accounts) {
+      if (a.id === h.id || a.entry_type === "Header") continue;
+      if (!a.code.startsWith(prefix)) continue;
+      if (active.has(a.id)) {
+        active.add(h.id);
+        break;
+      }
+    }
+  }
+  return active;
+}
+
 /** Total saldo untuk akun-akun dengan tipe tertentu (akun kontra dikurangkan). */
 export function sumByType(
   accounts: AccountLite[],

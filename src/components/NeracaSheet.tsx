@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import {
   type AccountLite,
   type UnitMode,
+  computeActiveAccountIds,
   computeSignedBalances,
   formatRpOrDash,
   sumByType,
@@ -41,7 +42,9 @@ export function NeracaSheet({
   const [asOf, setAsOf] = useState(yearEnd(new Date().getFullYear()));
   const currentYear = Number(asOf.slice(0, 4));
   const prevAsOf = yearEnd(currentYear - 1);
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [expanded, setExpanded] = useState<Set<string>>(
+    () => new Set(SECTIONS.map((s) => s.type)),
+  );
   const [mode, setMode] = useState<UnitMode>(defaultMode);
   const [unitId, setUnitId] = useState<string>("");
   const [exporting, setExporting] = useState(false);
@@ -105,6 +108,11 @@ export function NeracaSheet({
     if (!accounts || !balCur || !balPrev) return null;
     const signedCur = computeSignedBalances(accounts, balCur);
     const signedPrev = computeSignedBalances(accounts, balPrev);
+    const activeIds = computeActiveAccountIds(
+      accounts,
+      [balCur, balPrev],
+      [signedCur, signedPrev],
+    );
     // Laba tahun berjalan = pendapatan - beban
     const labaCur = sumByType(accounts, signedCur, ["PENDAPATAN"]) - sumByType(accounts, signedCur, ["BEBAN"]);
     const labaPrev = sumByType(accounts, signedPrev, ["PENDAPATAN"]) - sumByType(accounts, signedPrev, ["BEBAN"]);
@@ -118,7 +126,7 @@ export function NeracaSheet({
     const diff = totAset - (totKew + totEku);
     const isBalanced = Math.abs(diff) < 0.5;
 
-    return { signedCur, signedPrev, labaCur, labaPrev, neracaAccounts, totAset, totKew, totEku, diff, isBalanced };
+    return { signedCur, signedPrev, labaCur, labaPrev, neracaAccounts, activeIds, totAset, totKew, totEku, diff, isBalanced };
   }, [accounts, balCur, balPrev]);
 
   return (
@@ -269,7 +277,9 @@ export function NeracaSheet({
                         </tr>,
                       );
 
-                      const sectionAccounts = computed.neracaAccounts.filter((a) => a.type === section.type);
+                      const sectionAccounts = computed.neracaAccounts.filter(
+                        (a) => a.type === section.type && computed.activeIds.has(a.id),
+                      );
                       // Total per seksi memakai sumByType agar akun kontra dikurangkan dengan benar.
                       let secCur = sumByType(accounts ?? [], computed.signedCur, [section.type]);
                       let secPrev = sumByType(accounts ?? [], computed.signedPrev, [section.type]);
