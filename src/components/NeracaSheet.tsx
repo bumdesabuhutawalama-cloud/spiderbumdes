@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, Calendar, CheckCircle2, ChevronRight, Download, Loader2 } from "lucide-react";
+import { AlertTriangle, Calendar, CheckCircle2, Download, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -42,9 +42,6 @@ export function NeracaSheet({
   const [asOf, setAsOf] = useState(yearEnd(new Date().getFullYear()));
   const currentYear = Number(asOf.slice(0, 4));
   const prevAsOf = yearEnd(currentYear - 1);
-  const [expanded, setExpanded] = useState<Set<string>>(
-    () => new Set(SECTIONS.map((s) => s.type)),
-  );
   const [mode, setMode] = useState<UnitMode>(defaultMode);
   const [unitId, setUnitId] = useState<string>("");
   const [exporting, setExporting] = useState(false);
@@ -62,12 +59,6 @@ export function NeracaSheet({
       setExporting(false);
     }
   };
-  const toggle = (k: string) =>
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      next.has(k) ? next.delete(k) : next.add(k);
-      return next;
-    });
 
   const { data: units } = useQuery({
     queryKey: ["units", "active"],
