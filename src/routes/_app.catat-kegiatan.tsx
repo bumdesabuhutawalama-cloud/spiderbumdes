@@ -1,10 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ClipboardList, TrendingUp, Wallet, Loader2, X, ArrowDownCircle, ArrowUpCircle, Package } from "lucide-react";
+import { ClipboardList, TrendingUp, Wallet, Loader2, X, ArrowDownCircle, ArrowUpCircle, Package, HandCoins, Banknote, AlertTriangle, Receipt } from "lucide-react";
 import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import {
+  PencairanPinjamanDialog,
+  TerimaAngsuranDialog,
+  TerimaDendaDialog,
+  BebanOperasionalUspDialog,
+} from "@/components/usp-dialogs";
 
 export const Route = createFileRoute("/_app/catat-kegiatan")({
   head: () => ({ meta: [{ title: "Catat Kegiatan · BUMDes" }] }),
