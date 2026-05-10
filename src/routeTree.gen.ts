@@ -12,7 +12,8 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as PengaturanRouteImport } from './routes/pengaturan'
 import { Route as CoaRouteImport } from './routes/coa'
 import { Route as CatatKegiatanRouteImport } from './routes/catat-kegiatan'
-import { Route as IndexRouteImport } from './routes/index'
+import { Route as AppRouteImport } from './routes/_app'
+import { Route as AppIndexRouteImport } from './routes/_app.index'
 import { Route as LaporanNeracaPusatRouteImport } from './routes/laporan.neraca-pusat'
 import { Route as LaporanNeracaKonsolidasiRouteImport } from './routes/laporan.neraca-konsolidasi'
 import { Route as LaporanLabaRugiRouteImport } from './routes/laporan.laba-rugi'
@@ -33,10 +34,14 @@ const CatatKegiatanRoute = CatatKegiatanRouteImport.update({
   path: '/catat-kegiatan',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
+const AppRoute = AppRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => AppRoute,
 } as any)
 const LaporanNeracaPusatRoute = LaporanNeracaPusatRouteImport.update({
   id: '/laporan/neraca-pusat',
@@ -61,7 +66,7 @@ const LaporanBagiHasilRoute = LaporanBagiHasilRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
+  '/': typeof AppIndexRoute
   '/catat-kegiatan': typeof CatatKegiatanRoute
   '/coa': typeof CoaRoute
   '/pengaturan': typeof PengaturanRoute
@@ -71,7 +76,6 @@ export interface FileRoutesByFullPath {
   '/laporan/neraca-pusat': typeof LaporanNeracaPusatRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/catat-kegiatan': typeof CatatKegiatanRoute
   '/coa': typeof CoaRoute
   '/pengaturan': typeof PengaturanRoute
@@ -79,10 +83,11 @@ export interface FileRoutesByTo {
   '/laporan/laba-rugi': typeof LaporanLabaRugiRoute
   '/laporan/neraca-konsolidasi': typeof LaporanNeracaKonsolidasiRoute
   '/laporan/neraca-pusat': typeof LaporanNeracaPusatRoute
+  '/': typeof AppIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
+  '/_app': typeof AppRouteWithChildren
   '/catat-kegiatan': typeof CatatKegiatanRoute
   '/coa': typeof CoaRoute
   '/pengaturan': typeof PengaturanRoute
@@ -90,6 +95,7 @@ export interface FileRoutesById {
   '/laporan/laba-rugi': typeof LaporanLabaRugiRoute
   '/laporan/neraca-konsolidasi': typeof LaporanNeracaKonsolidasiRoute
   '/laporan/neraca-pusat': typeof LaporanNeracaPusatRoute
+  '/_app/': typeof AppIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -104,7 +110,6 @@ export interface FileRouteTypes {
     | '/laporan/neraca-pusat'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/catat-kegiatan'
     | '/coa'
     | '/pengaturan'
@@ -112,9 +117,10 @@ export interface FileRouteTypes {
     | '/laporan/laba-rugi'
     | '/laporan/neraca-konsolidasi'
     | '/laporan/neraca-pusat'
+    | '/'
   id:
     | '__root__'
-    | '/'
+    | '/_app'
     | '/catat-kegiatan'
     | '/coa'
     | '/pengaturan'
@@ -122,10 +128,11 @@ export interface FileRouteTypes {
     | '/laporan/laba-rugi'
     | '/laporan/neraca-konsolidasi'
     | '/laporan/neraca-pusat'
+    | '/_app/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
+  AppRoute: typeof AppRouteWithChildren
   CatatKegiatanRoute: typeof CatatKegiatanRoute
   CoaRoute: typeof CoaRoute
   PengaturanRoute: typeof PengaturanRoute
@@ -158,12 +165,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CatatKegiatanRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/': {
+      id: '/_app/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof AppIndexRouteImport
+      parentRoute: typeof AppRoute
     }
     '/laporan/neraca-pusat': {
       id: '/laporan/neraca-pusat'
@@ -196,8 +210,18 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AppRouteChildren {
+  AppIndexRoute: typeof AppIndexRoute
+}
+
+const AppRouteChildren: AppRouteChildren = {
+  AppIndexRoute: AppIndexRoute,
+}
+
+const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
+  AppRoute: AppRouteWithChildren,
   CatatKegiatanRoute: CatatKegiatanRoute,
   CoaRoute: CoaRoute,
   PengaturanRoute: PengaturanRoute,
@@ -209,3 +233,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

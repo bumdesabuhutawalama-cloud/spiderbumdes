@@ -6,9 +6,9 @@ import { DashboardLayout, PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/laporan/neraca-pusat")({
-  head: () => ({ meta: [{ title: "Neraca Pusat · BUMDes" }] }),
-  component: NeracaPusatPage,
+export const Route = createFileRoute("/_app/laporan/neraca-konsolidasi")({
+  head: () => ({ meta: [{ title: "Neraca Konsolidasi · BUMDes" }] }),
+  component: NeracaKonsolidasiPage,
 });
 
 type Account = {
@@ -20,17 +20,15 @@ type Account = {
   status: string;
 };
 
-// Sections in display order. We render a Section title (red, bold)
-// followed by all accounts whose code starts with prefix.
 const SECTIONS: { title: string; prefix: string; total: string }[] = [
   { title: "ASET", prefix: "1.", total: "TOTAL ASET" },
   { title: "KEWAJIBAN", prefix: "2.", total: "TOTAL KEWAJIBAN" },
   { title: "EKUITAS", prefix: "3.", total: "TOTAL EKUITAS" },
 ];
 
-function NeracaPusatPage() {
+function NeracaKonsolidasiPage() {
   const { data, isLoading, error } = useQuery({
-    queryKey: ["coa_accounts", "neraca"],
+    queryKey: ["coa_accounts", "neraca-konsolidasi"],
     queryFn: async () => {
       const { data, error } = await supabase
         .from("coa_accounts")
@@ -55,8 +53,8 @@ function NeracaPusatPage() {
   return (
     <DashboardLayout>
       <PageHeader
-        title="Laporan Posisi Keuangan (Neraca Pusat)"
-        subtitle="Format Kantor Pusat BUM Desa · per 31 Desember 20X2 dan 20X1 (dalam Rupiah)"
+        title="Laporan Posisi Keuangan Gabungan / Konsolidasian"
+        subtitle="Format Konsolidasi BUM Desa · per 31 Desember 20X2 dan 20X1 (dalam Rupiah)"
         actions={
           <>
             <div className="inline-flex items-center gap-2 rounded-lg border border-border/60 bg-secondary/60 px-3 py-2 text-sm">
@@ -76,20 +74,13 @@ function NeracaPusatPage() {
       />
 
       <div className="glass-card rounded-2xl p-3 sm:p-5">
-        {/* Document-style sheet (cream) wrapped in glass card */}
         <div className="overflow-x-auto rounded-xl border border-amber-200/40 bg-[oklch(0.96_0.04_85)] text-[oklch(0.2_0.02_50)] shadow-inner">
           <div className="min-w-[640px] p-4 sm:p-6 font-mono text-[13px]">
-            {/* Heading */}
             <div className="text-center mb-4 leading-tight">
               <p className="text-[12px] uppercase tracking-wider text-[oklch(0.4_0.05_50)]">
-                Contoh Format Laporan Posisi Keuangan Kantor Pusat BUM Desa
+                Contoh Format Laporan Posisi Keuangan Gabungan / Konsolidasian
               </p>
-              <p className="text-[14px] font-bold text-[oklch(0.55_0.18_25)]">
-                Nama BUM Desa
-              </p>
-              <p className="text-[13px] font-semibold text-[oklch(0.55_0.18_25)]">
-                KANTOR PUSAT
-              </p>
+              <p className="text-[14px] font-bold text-[oklch(0.55_0.18_25)]">Nama BUM Desa</p>
               <p className="text-[13px] font-bold text-[oklch(0.55_0.18_25)]">
                 LAPORAN POSISI KEUANGAN (NERACA)
               </p>
@@ -126,7 +117,6 @@ function NeracaPusatPage() {
                     let no = 0;
                     return grouped.flatMap((section, si) => {
                       const sectionRows: React.ReactNode[] = [];
-                      // Section title row
                       no += 1;
                       sectionRows.push(
                         <tr key={`s-${si}`} className="bg-[oklch(0.92_0.05_85)]">
@@ -145,7 +135,6 @@ function NeracaPusatPage() {
                       section.rows.forEach((a) => {
                         no += 1;
                         const isHeader = a.entry_type === "Header";
-                        // Indentation depth from code segments (1.1.01.01 → depth)
                         const depth = a.code.split(/[.\-]/).filter(Boolean).length;
                         const indent = Math.max(0, depth - 2) * 12;
                         sectionRows.push(
@@ -156,9 +145,7 @@ function NeracaPusatPage() {
                               isHeader && "bg-[oklch(0.94_0.04_85)]",
                             )}
                           >
-                            <td className="py-1 text-center text-[oklch(0.4_0.05_50)]">
-                              {no}
-                            </td>
+                            <td className="py-1 text-center text-[oklch(0.4_0.05_50)]">{no}</td>
                             <td
                               className={cn(
                                 "py-1 px-2",
@@ -180,7 +167,6 @@ function NeracaPusatPage() {
                         );
                       });
 
-                      // Total row
                       no += 1;
                       sectionRows.push(
                         <tr
@@ -206,7 +192,6 @@ function NeracaPusatPage() {
                     });
                   })()}
 
-                  {/* Grand total Kewajiban + Ekuitas */}
                   {!isLoading && grouped.length > 0 && (
                     <tr className="border-y-2 border-[oklch(0.55_0.18_25)] bg-[oklch(0.88_0.06_85)]">
                       <td colSpan={2} className="py-2 px-2 font-bold text-[oklch(0.55_0.18_25)]">
@@ -227,8 +212,8 @@ function NeracaPusatPage() {
         </div>
 
         <p className="mt-3 text-[11px] text-muted-foreground">
-          Struktur akun diambil otomatis dari Bagan Akun aktif (Kepmendesa No. 136/2022). Nilai
-          XXX akan terisi otomatis setelah modul transaksi/jurnal aktif.
+          Data konsolidasi gabungan kantor pusat dan seluruh unit usaha. Struktur akun mengikuti
+          Bagan Akun aktif (Kepmendesa No. 136/2022).
         </p>
       </div>
     </DashboardLayout>

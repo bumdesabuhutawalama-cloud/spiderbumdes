@@ -19,7 +19,7 @@ import {
 import { DashboardLayout, PageHeader } from "@/components/DashboardLayout";
 import { StatCard } from "@/components/StatCard";
 
-export const Route = createFileRoute("/")({
+export const Route = createFileRoute("/_app/")({
   head: () => ({
     meta: [{ title: "Dashboard · Direktur BUMDes" }],
   }),

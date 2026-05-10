@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Upload, Save, Building2 } from "lucide-react";
 import { DashboardLayout, PageHeader } from "@/components/DashboardLayout";
 
-export const Route = createFileRoute("/pengaturan")({
+export const Route = createFileRoute("/_app/pengaturan")({
   head: () => ({ meta: [{ title: "Pengaturan · BUMDes" }] }),
   component: PengaturanPage,
 });

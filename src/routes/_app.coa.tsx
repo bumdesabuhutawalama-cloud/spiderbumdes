@@ -6,7 +6,7 @@ import { DashboardLayout, PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
-export const Route = createFileRoute("/coa")({
+export const Route = createFileRoute("/_app/coa")({
   head: () => ({ meta: [{ title: "Bagan Akun · BUMDes" }] }),
   component: CoaPage,
 });

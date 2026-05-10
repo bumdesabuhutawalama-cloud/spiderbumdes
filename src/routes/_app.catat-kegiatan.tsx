@@ -6,7 +6,7 @@ import { DashboardLayout, PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
-export const Route = createFileRoute("/catat-kegiatan")({
+export const Route = createFileRoute("/_app/catat-kegiatan")({
   head: () => ({ meta: [{ title: "Catat Kegiatan · BUMDes" }] }),
   component: CatatKegiatanPage,
 });
