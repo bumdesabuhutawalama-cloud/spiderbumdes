@@ -694,7 +694,7 @@ function BelanjaAsetDialog({ onClose }: { onClose: () => void }) {
               </button>
               <button
                 onClick={() => mutation.mutate()}
-                disabled={mutation.isPending || !asetId || !kasBankId || nominal <= 0}
+                disabled={mutation.isPending || !aset || !kasBankId || nominal <= 0}
                 className="inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[var(--neon-green)] to-amber-300 px-5 py-2 text-sm font-medium text-[oklch(0.15_0.03_250)] glow-cyan hover:opacity-90 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
