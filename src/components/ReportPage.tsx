@@ -1,5 +1,5 @@
 import { Calendar, Download } from "lucide-react";
-import { DashboardLayout, PageHeader } from "@/components/DashboardLayout";
+import { PageHeader } from "@/components/DashboardLayout";
 
 export function ReportPage({
   title,
