@@ -56,9 +56,8 @@ function CatatKegiatanPage() {
           icon={<Wallet className="h-6 w-6" />}
           title="Penerimaan Kas"
           description="Catat pemasukan kas dari operasional unit usaha."
-          onClick={() => toast.info("Segera hadir")}
+          onClick={() => setOpenPenerimaan(true)}
           accent="from-fuchsia-400 to-[var(--neon-cyan)]"
-          comingSoon
         />
         <ActivityCard
           icon={<ClipboardList className="h-6 w-6" />}
@@ -72,6 +71,7 @@ function CatatKegiatanPage() {
 
       {openPenyertaan && <PenyertaanModalDialog onClose={() => setOpenPenyertaan(false)} />}
       {openBelanjaAset && <BelanjaAsetDialog onClose={() => setOpenBelanjaAset(false)} />}
+      {openPenerimaan && <PenerimaanKasDialog onClose={() => setOpenPenerimaan(false)} />}
     </>
   );
 }
