@@ -1,21 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import {
-  Wallet,
-  TrendingUp,
-  CircleDollarSign,
-  Building2,
-  Download,
-  ArrowUpRight,
-} from "lucide-react";
-import {
-  ResponsiveContainer,
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  Tooltip,
-  CartesianGrid,
-} from "recharts";
+import { Wallet, TrendingUp, CircleDollarSign, Building2, Download, ArrowUpRight } from "lucide-react";
+import { ResponsiveContainer, AreaChart, Area, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
 import { PageHeader } from "@/components/DashboardLayout";
 import { StatCard } from "@/components/StatCard";
 
@@ -64,7 +49,7 @@ function DashboardPage() {
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="Total Aset Konsolidasi" value="Rp 4,82 M" delta="+8,3%" icon={Wallet} accent="cyan" />
-        <StatCard label="Pendapatan Bulan Ini" value="Rp 412 Jt" delta="+11,7%" icon={TrendingUp} accent="green" />
+        <StatCard label="Pendapatan Bulan Ini" value={`Rp ${dashboard.pendapatan}`} />
         <StatCard label="Total Laba Bersih" value="Rp 138 Jt" delta="+6,4%" icon={CircleDollarSign} accent="cyan" />
         <StatCard label="Unit Usaha Aktif" value="07" delta="+1" icon={Building2} accent="green" />
       </section>
@@ -73,9 +58,7 @@ function DashboardPage() {
         <div className="glass-card rounded-2xl p-5 lg:col-span-2">
           <div className="mb-4 flex items-end justify-between">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-                Tren Pendapatan
-              </p>
+              <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Tren Pendapatan</p>
               <h2 className="mt-1 text-lg font-semibold">Tren Pendapatan Konsolidasi</h2>
             </div>
             <span className="inline-flex items-center gap-1 rounded-full border border-[var(--neon-green)]/40 bg-[var(--neon-green)]/10 px-2.5 py-1 text-xs text-[var(--neon-green)]">
@@ -104,22 +87,14 @@ function DashboardPage() {
                   }}
                   formatter={(v: number) => [`Rp ${v} Jt`, "Pendapatan"]}
                 />
-                <Area
-                  type="monotone"
-                  dataKey="v"
-                  stroke="oklch(0.85 0.18 195)"
-                  strokeWidth={2.5}
-                  fill="url(#grad)"
-                />
+                <Area type="monotone" dataKey="v" stroke="oklch(0.85 0.18 195)" strokeWidth={2.5} fill="url(#grad)" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
         <div className="glass-card rounded-2xl p-5">
-          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-            Performa Unit Usaha
-          </p>
+          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">Performa Unit Usaha</p>
           <h2 className="mt-1 text-lg font-semibold">Top Unit Bulan Ini</h2>
 
           <ul className="mt-4 space-y-3">
@@ -135,9 +110,7 @@ function DashboardPage() {
                 <span
                   className={
                     "text-xs font-semibold " +
-                    (u.growth.startsWith("-")
-                      ? "text-destructive"
-                      : "text-[var(--neon-green)]")
+                    (u.growth.startsWith("-") ? "text-destructive" : "text-[var(--neon-green)]")
                   }
                 >
                   {u.growth}
