@@ -70,7 +70,15 @@ export function NeracaSheet({
     const labaPrev = sumByType(accounts, signedPrev, ["PENDAPATAN"]) - sumByType(accounts, signedPrev, ["BEBAN"]);
 
     const neracaAccounts = accounts.filter((a) => ["ASET", "KEWAJIBAN", "EKUITAS"].includes(a.type));
-    return { signedCur, signedPrev, labaCur, labaPrev, neracaAccounts };
+
+    // Validasi persamaan akuntansi: Aset = Kewajiban + Ekuitas (+ Laba berjalan)
+    const totAset = sumByType(accounts, signedCur, ["ASET"]);
+    const totKew = sumByType(accounts, signedCur, ["KEWAJIBAN"]);
+    const totEku = sumByType(accounts, signedCur, ["EKUITAS"]) + labaCur;
+    const diff = totAset - (totKew + totEku);
+    const isBalanced = Math.abs(diff) < 0.5;
+
+    return { signedCur, signedPrev, labaCur, labaPrev, neracaAccounts, totAset, totKew, totEku, diff, isBalanced };
   }, [accounts, balCur, balPrev]);
 
   return (
