@@ -1,9 +1,11 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AlertTriangle, Calendar, CheckCircle2, ChevronRight, Download, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
+import { buildReportFilename, exportElementToPdf } from "@/lib/pdf-export";
+import { toast } from "sonner";
 import {
   type AccountLite,
   type UnitMode,
@@ -42,6 +44,21 @@ export function NeracaSheet({
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [mode, setMode] = useState<UnitMode>(defaultMode);
   const [unitId, setUnitId] = useState<string>("");
+  const [exporting, setExporting] = useState(false);
+  const reportRef = useRef<HTMLDivElement>(null);
+
+  const handleExport = async () => {
+    if (!reportRef.current) return;
+    try {
+      setExporting(true);
+      await exportElementToPdf(reportRef.current, buildReportFilename(title, asOf));
+      toast.success("PDF berhasil diunduh");
+    } catch (e) {
+      toast.error("Gagal export PDF: " + (e as Error).message);
+    } finally {
+      setExporting(false);
+    }
+  };
   const toggle = (k: string) =>
     setExpanded((prev) => {
       const next = new Set(prev);
@@ -152,16 +169,20 @@ export function NeracaSheet({
                 className="bg-transparent text-sm outline-none [color-scheme:dark]"
               />
             </div>
-            <button className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-green)] px-4 py-2 text-sm font-medium text-[oklch(0.15_0.03_250)] glow-cyan hover:opacity-90 transition">
-              <Download className="h-4 w-4" />
-              Export
+            <button
+              onClick={handleExport}
+              disabled={exporting}
+              className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-green)] px-4 py-2 text-sm font-medium text-[oklch(0.15_0.03_250)] glow-cyan hover:opacity-90 transition disabled:opacity-50"
+            >
+              {exporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
+              {exporting ? "Mengekspor..." : "Export PDF"}
             </button>
           </>
         }
       />
 
       <div className="glass-card rounded-2xl p-3 sm:p-5">
-        <div className="overflow-x-auto rounded-xl border border-amber-200/40 bg-[oklch(0.96_0.04_85)] text-[oklch(0.2_0.02_50)] shadow-inner">
+        <div ref={reportRef} className="overflow-x-auto rounded-xl border border-amber-200/40 bg-[oklch(0.96_0.04_85)] text-[oklch(0.2_0.02_50)] shadow-inner">
           <div className="min-w-[640px] p-4 sm:p-6 font-mono text-[13px]">
             <div className="text-center mb-4 leading-tight">
               <p className="text-[12px] uppercase tracking-wider text-[oklch(0.4_0.05_50)]">{heading.line1}</p>
