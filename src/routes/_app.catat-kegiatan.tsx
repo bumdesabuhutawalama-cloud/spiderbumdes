@@ -189,6 +189,7 @@ function PenyertaanModalDialog({ onClose }: { onClose: () => void }) {
     onSuccess: () => {
       toast.success("Transaksi penyertaan modal berhasil dicatat");
       qc.invalidateQueries({ queryKey: ["journal_entries"] });
+      qc.invalidateQueries({ queryKey: ["balances"] });
       onClose();
     },
     onError: (e: Error) => toast.error(e.message),
