@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, Download, Loader2 } from "lucide-react";
-import { DashboardLayout, PageHeader } from "@/components/DashboardLayout";
+import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -53,7 +53,7 @@ function NeracaPusatPage() {
   }, [data]);
 
   return (
-    <DashboardLayout>
+    <>
       <PageHeader
         title="Laporan Posisi Keuangan (Neraca Pusat)"
         subtitle="Format Kantor Pusat BUM Desa · per 31 Desember 20X2 dan 20X1 (dalam Rupiah)"
@@ -231,6 +231,6 @@ function NeracaPusatPage() {
           XXX akan terisi otomatis setelah modul transaksi/jurnal aktif.
         </p>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Calendar, Download, Loader2 } from "lucide-react";
-import { DashboardLayout, PageHeader } from "@/components/DashboardLayout";
+import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 
@@ -51,7 +51,7 @@ function NeracaKonsolidasiPage() {
   }, [data]);
 
   return (
-    <DashboardLayout>
+    <>
       <PageHeader
         title="Laporan Posisi Keuangan Gabungan / Konsolidasian"
         subtitle="Format Konsolidasi BUM Desa · per 31 Desember 20X2 dan 20X1 (dalam Rupiah)"
@@ -216,6 +216,6 @@ function NeracaKonsolidasiPage() {
           Bagan Akun aktif (Kepmendesa No. 136/2022).
         </p>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

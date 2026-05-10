@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ClipboardList, TrendingUp, Wallet, Loader2, X, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
-import { DashboardLayout, PageHeader } from "@/components/DashboardLayout";
+import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -29,7 +29,7 @@ function CatatKegiatanPage() {
   const [openPenyertaan, setOpenPenyertaan] = useState(false);
 
   return (
-    <DashboardLayout>
+    <>
       <PageHeader
         title="Catat Kegiatan"
         subtitle="Pencatatan aktivitas operasional dan transaksi harian BUM Desa."
@@ -62,7 +62,7 @@ function CatatKegiatanPage() {
       </div>
 
       {openPenyertaan && <PenyertaanModalDialog onClose={() => setOpenPenyertaan(false)} />}
-    </DashboardLayout>
+    </>
   );
 }
 
