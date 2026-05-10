@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, ChevronRight, Download, Loader2 } from "lucide-react";
+import { Calendar, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,17 +29,8 @@ function LabaRugiPage() {
   const year = new Date().getFullYear();
   const [start, setStart] = useState(`${year}-01-01`);
   const [end, setEnd] = useState(`${year}-12-31`);
-  const [expanded, setExpanded] = useState<Set<string>>(
-    () => new Set(SECTIONS.map((s) => s.type)),
-  );
   const [exporting, setExporting] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
-  const toggle = (k: string) =>
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      next.has(k) ? next.delete(k) : next.add(k);
-      return next;
-    });
 
   const handleExport = async () => {
     if (!reportRef.current) return;
