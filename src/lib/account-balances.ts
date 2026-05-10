@@ -33,13 +33,23 @@ const normalOf = (typeOrNormal: string): "D" | "K" => {
 
 const toMonth = (date?: string) => (date ? date.slice(0, 7) : undefined);
 
-async function fetchBalances(startMonth?: string, endMonth?: string): Promise<BalanceRow[]> {
+export type UnitMode = "pusat" | "unit" | "konsolidasi";
+
+async function fetchBalances(
+  startMonth?: string,
+  endMonth?: string,
+  mode: UnitMode = "pusat",
+  unitId?: string | null,
+): Promise<BalanceRow[]> {
   let q = supabase
     .from("account_balances")
-    .select("account_id, period, debit_total, credit_total")
+    .select("account_id, period, debit_total, credit_total, unit_id")
     .limit(20000);
   if (startMonth) q = q.gte("period", startMonth);
   if (endMonth) q = q.lte("period", endMonth);
+  if (mode === "pusat") q = q.is("unit_id", null);
+  else if (mode === "unit" && unitId) q = q.eq("unit_id", unitId);
+  // konsolidasi: tidak difilter unit_id (gabungkan semua)
   const { data, error } = await q;
   if (error) throw error;
   return (data ?? []) as BalanceRow[];
