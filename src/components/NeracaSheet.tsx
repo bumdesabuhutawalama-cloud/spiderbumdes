@@ -32,6 +32,13 @@ export function NeracaSheet({
   const [asOf, setAsOf] = useState(yearEnd(new Date().getFullYear()));
   const currentYear = Number(asOf.slice(0, 4));
   const prevAsOf = yearEnd(currentYear - 1);
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const toggle = (k: string) =>
+    setExpanded((prev) => {
+      const next = new Set(prev);
+      next.has(k) ? next.delete(k) : next.add(k);
+      return next;
+    });
 
   const { data: accounts, isLoading: loadingAcc, error: errAcc } = useQuery({
     queryKey: ["coa_accounts", "neraca-all"],
