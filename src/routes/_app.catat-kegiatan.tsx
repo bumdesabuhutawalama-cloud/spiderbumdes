@@ -64,15 +64,15 @@ function CatatKegiatanPage() {
           icon={<ClipboardList className="h-6 w-6" />}
           title="Pengeluaran Operasional"
           description="Catat pengeluaran operasional harian unit usaha."
-          onClick={() => toast.info("Segera hadir")}
+          onClick={() => setOpenPengeluaran(true)}
           accent="from-amber-400 to-rose-400"
-          comingSoon
         />
       </div>
 
       {openPenyertaan && <PenyertaanModalDialog onClose={() => setOpenPenyertaan(false)} />}
       {openBelanjaAset && <BelanjaAsetDialog onClose={() => setOpenBelanjaAset(false)} />}
       {openPenerimaan && <PenerimaanKasDialog onClose={() => setOpenPenerimaan(false)} />}
+      {openPengeluaran && <PengeluaranOperasionalDialog onClose={() => setOpenPengeluaran(false)} />}
     </>
   );
 }
