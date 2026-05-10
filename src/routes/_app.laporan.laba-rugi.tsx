@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { buildReportFilename, exportElementToPdf } from "@/lib/pdf-export";
 import {
   type AccountLite,
+  computeActiveAccountIds,
   computeSignedBalances,
   formatRpOrDash,
   useAccountBalancesPeriod,
