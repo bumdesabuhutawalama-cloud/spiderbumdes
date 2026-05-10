@@ -36,7 +36,7 @@ export async function getOrBuildReport<T>(opts: {
     unit_id: unitId,
     period,
     period_start: periodStart,
-    report_json: fresh as unknown as object,
+    report_json: JSON.parse(JSON.stringify(fresh)),
   });
   return fresh;
 }
