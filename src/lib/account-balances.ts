@@ -121,7 +121,7 @@ export function computeSignedBalances(
   return out;
 }
 
-/** Total saldo untuk akun-akun dengan tipe tertentu. */
+/** Total saldo untuk akun-akun dengan tipe tertentu (akun kontra dikurangkan). */
 export function sumByType(
   accounts: AccountLite[],
   signed: Map<string, number>,
@@ -131,7 +131,10 @@ export function sumByType(
   for (const a of accounts) {
     if (a.entry_type === "Header") continue;
     if (!types.includes(a.type)) continue;
-    s += signed.get(a.id) ?? 0;
+    const natural = naturalSideOfType(a.type);
+    const isContra = normalOf(a.normal_balance ?? a.type) !== natural;
+    const v = signed.get(a.id) ?? 0;
+    s += isContra ? -v : v;
   }
   return s;
 }
