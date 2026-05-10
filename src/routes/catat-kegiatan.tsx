@@ -200,7 +200,7 @@ function PenyertaanModalDialog({ onClose }: { onClose: () => void }) {
       onClick={onClose}
     >
       <div
-        className="glass-card relative my-auto w-full sm:max-w-2xl max-h-[calc(100vh-3rem)] overflow-y-auto rounded-t-2xl sm:rounded-2xl border border-white/10 p-6 shadow-[0_0_60px_rgba(34,211,238,0.25)] animate-in slide-in-from-bottom-4 duration-300"
+        className="glass-card relative w-full sm:max-w-3xl rounded-t-2xl sm:rounded-2xl border border-white/10 p-5 sm:p-6 shadow-[0_0_60px_rgba(34,211,238,0.25)] animate-in slide-in-from-bottom-4 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         <button
@@ -210,14 +210,14 @@ function PenyertaanModalDialog({ onClose }: { onClose: () => void }) {
           <X className="h-4 w-4" />
         </button>
 
-        <div className="mb-5">
-          <h2 className="text-xl font-semibold flex items-center gap-2">
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
             <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-green)] text-[oklch(0.15_0.03_250)]">
               <TrendingUp className="h-4 w-4" />
             </span>
             Catat Penyertaan Modal
           </h2>
-          <p className="mt-1 text-sm text-muted-foreground">
+          <p className="mt-1 text-xs text-muted-foreground">
             Isi data berikut. Sistem akan otomatis menyiapkan pencatatan keuangan.
           </p>
         </div>
@@ -227,7 +227,7 @@ function PenyertaanModalDialog({ onClose }: { onClose: () => void }) {
             <Loader2 className="h-6 w-6 animate-spin text-[var(--neon-cyan)]" />
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <Field label="Tanggal Transaksi">
               <input
                 type="date"
