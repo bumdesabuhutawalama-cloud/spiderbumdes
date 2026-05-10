@@ -113,13 +113,13 @@ function UspDashboard() {
       const borrowers = new Set(active.map((l) => l.borrower_name)).size;
 
       const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0).toISOString().slice(0, 10);
-      const { data: dueThis } = await supabase
+      const dueRes = await supabase
         .from("loan_installments")
         .select("id", { count: "exact", head: true })
         .eq("is_paid", false)
         .gte("due_date", monthStart)
         .lte("due_date", monthEnd);
-      const { data: overdue } = await supabase
+      const overdueRes = await supabase
         .from("loan_installments")
         .select("id", { count: "exact", head: true })
         .eq("is_paid", false)
@@ -128,8 +128,8 @@ function UspDashboard() {
       return {
         activeLoans: active.length,
         borrowers,
-        dueThisMonth: (dueThis as unknown as { length: number })?.length ?? 0,
-        overdue: (overdue as unknown as { length: number })?.length ?? 0,
+        dueThisMonth: dueRes.count ?? 0,
+        overdue: overdueRes.count ?? 0,
       };
     },
   });
