@@ -13,6 +13,8 @@ import {
   TrendingUp,
   PieChart,
   FileSpreadsheet,
+  HandCoins,
+  ListChecks,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -29,6 +31,11 @@ const reports: Item[] = [
   { to: "/laporan/neraca-konsolidasi", label: "Neraca Konsolidasi", icon: FileSpreadsheet },
   { to: "/laporan/laba-rugi", label: "Laba Rugi", icon: TrendingUp },
   { to: "/laporan/bagi-hasil", label: "Bagi Hasil", icon: PieChart },
+];
+
+const uspItems: Item[] = [
+  { to: "/usp", label: "Dashboard USP", icon: LayoutDashboard },
+  { to: "/usp/pinjaman", label: "Data Pinjaman", icon: ListChecks },
 ];
 
 function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
