@@ -6,11 +6,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import {
   type AccountLite,
+  type UnitMode,
   computeSignedBalances,
   formatRpOrDash,
   sumByType,
   useAccountBalances,
 } from "@/lib/account-balances";
+
+type Unit = { id: string; name: string };
 
 const SECTIONS: { title: string; type: string; total: string }[] = [
   { title: "ASET", type: "ASET", total: "TOTAL ASET" },
@@ -24,21 +27,40 @@ export function NeracaSheet({
   title,
   subtitle,
   heading,
+  defaultMode = "pusat",
+  lockMode = false,
 }: {
   title: string;
   subtitle: string;
   heading: { line1: string; line2?: string; line3: string };
+  defaultMode?: UnitMode;
+  lockMode?: boolean;
 }) {
   const [asOf, setAsOf] = useState(yearEnd(new Date().getFullYear()));
   const currentYear = Number(asOf.slice(0, 4));
   const prevAsOf = yearEnd(currentYear - 1);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [mode, setMode] = useState<UnitMode>(defaultMode);
+  const [unitId, setUnitId] = useState<string>("");
   const toggle = (k: string) =>
     setExpanded((prev) => {
       const next = new Set(prev);
       next.has(k) ? next.delete(k) : next.add(k);
       return next;
     });
+
+  const { data: units } = useQuery({
+    queryKey: ["units", "active"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("units")
+        .select("id,name")
+        .eq("status", "Aktif")
+        .order("name");
+      if (error) throw error;
+      return (data ?? []) as Unit[];
+    },
+  });
 
   const { data: accounts, isLoading: loadingAcc, error: errAcc } = useQuery({
     queryKey: ["coa_accounts", "neraca-all"],
@@ -55,8 +77,9 @@ export function NeracaSheet({
     },
   });
 
-  const { data: balCur, isLoading: loadingCur } = useAccountBalances(asOf);
-  const { data: balPrev, isLoading: loadingPrev } = useAccountBalances(prevAsOf);
+  const effectiveUnitId = mode === "unit" ? unitId || null : null;
+  const { data: balCur, isLoading: loadingCur } = useAccountBalances(asOf, mode, effectiveUnitId);
+  const { data: balPrev, isLoading: loadingPrev } = useAccountBalances(prevAsOf, mode, effectiveUnitId);
 
   const isLoading = loadingAcc || loadingCur || loadingPrev;
   const error = errAcc;
@@ -88,6 +111,38 @@ export function NeracaSheet({
         subtitle={subtitle}
         actions={
           <>
+            {!lockMode && (
+              <div className="inline-flex items-center gap-1 rounded-lg border border-border/60 bg-secondary/60 p-1 text-xs">
+                {(["pusat", "unit", "konsolidasi"] as UnitMode[]).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setMode(m)}
+                    className={cn(
+                      "rounded-md px-2.5 py-1 transition",
+                      mode === m
+                        ? "bg-[var(--neon-cyan)]/20 text-[var(--neon-cyan)]"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {m === "pusat" ? "Pusat" : m === "unit" ? "Unit" : "Konsolidasi"}
+                  </button>
+                ))}
+              </div>
+            )}
+            {!lockMode && mode === "unit" && (
+              <select
+                value={unitId}
+                onChange={(e) => setUnitId(e.target.value)}
+                className="rounded-lg border border-border/60 bg-secondary/60 px-3 py-2 text-sm outline-none"
+              >
+                <option value="">Pilih unit…</option>
+                {(units ?? []).map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name}
+                  </option>
+                ))}
+              </select>
+            )}
             <div className="inline-flex items-center gap-2 rounded-lg border border-border/60 bg-secondary/60 px-3 py-2 text-sm">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <input

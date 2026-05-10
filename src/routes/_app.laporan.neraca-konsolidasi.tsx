@@ -7,6 +7,8 @@ export const Route = createFileRoute("/_app/laporan/neraca-konsolidasi")({
     <NeracaSheet
       title="Laporan Posisi Keuangan Gabungan / Konsolidasian"
       subtitle="Konsolidasi BUM Desa · saldo dihitung otomatis dari jurnal."
+      defaultMode="konsolidasi"
+      lockMode
       heading={{
         line1: "Laporan Posisi Keuangan Gabungan / Konsolidasian",
         line3: "LAPORAN POSISI KEUANGAN (NERACA)",
