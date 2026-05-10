@@ -196,11 +196,11 @@ function PenyertaanModalDialog({ onClose }: { onClose: () => void }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center overflow-y-auto bg-black/70 backdrop-blur-sm p-0 sm:p-6 animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
-        className="glass-card relative w-full sm:max-w-2xl max-h-[95vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl border border-white/10 p-6 shadow-[0_0_60px_rgba(34,211,238,0.25)] animate-in slide-in-from-bottom-4 duration-300"
+        className="glass-card relative my-auto w-full sm:max-w-2xl max-h-[calc(100vh-3rem)] overflow-y-auto rounded-t-2xl sm:rounded-2xl border border-white/10 p-6 shadow-[0_0_60px_rgba(34,211,238,0.25)] animate-in slide-in-from-bottom-4 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         <button
