@@ -410,17 +410,33 @@ function PreviewRow({
   );
 }
 
+type AsetCategory = {
+  key: string;
+  label: string;
+  prefix: string; // prefix kode akun aset di COA
+  hint: string;
+};
+
+const ASET_CATEGORIES: AsetCategory[] = [
+  { key: "tanah", label: "Tanah", prefix: "1.3.01.", hint: "Pembelian tanah" },
+  { key: "kendaraan", label: "Kendaraan", prefix: "1.3.02.", hint: "Mobil, motor operasional" },
+  { key: "peralatan", label: "Peralatan & Mesin", prefix: "1.3.03.", hint: "Mesin, alat produksi" },
+  { key: "meubelair", label: "Meubelair", prefix: "1.3.04.", hint: "Furnitur kantor" },
+  { key: "bangunan", label: "Gedung & Bangunan", prefix: "1.3.05.", hint: "Pembangunan gedung" },
+  { key: "konstruksi", label: "Konstruksi Berjalan", prefix: "1.3.06.", hint: "Pekerjaan belum selesai" },
+  { key: "investasi", label: "Investasi / Deposito", prefix: "1.2.01.", hint: "Investasi jangka panjang" },
+  { key: "lainnya", label: "Aset Lainnya", prefix: "1.3.99.", hint: "Aset tetap lainnya" },
+];
+
 function BelanjaAsetDialog({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient();
   const today = new Date().toISOString().slice(0, 10);
   const [tanggal, setTanggal] = useState(today);
-  const [asetId, setAsetId] = useState("");
+  const [categoryKey, setCategoryKey] = useState<string>("");
   const [kasBankId, setKasBankId] = useState("");
   const [jumlah, setJumlah] = useState<string>("");
   const [keterangan, setKeterangan] = useState("");
 
-  const asetRef = useRef<HTMLSelectElement>(null);
-  const kasRef = useRef<HTMLSelectElement>(null);
   const jumlahRef = useRef<HTMLInputElement>(null);
   const keteranganRef = useRef<HTMLTextAreaElement>(null);
 
@@ -439,18 +455,6 @@ function BelanjaAsetDialog({ onClose }: { onClose: () => void }) {
     },
   });
 
-  // Akun aset/modal: aset tetap (1.2.x) dan aset lainnya non-kas/bank
-  const asetAccounts = useMemo(
-    () =>
-      (accounts ?? []).filter(
-        (a) =>
-          a.type === "ASET" &&
-          (a.code.startsWith("1.2.") || a.code.startsWith("1.3.")) &&
-          !/akumulasi|penyusutan/i.test(a.name),
-      ),
-    [accounts],
-  );
-
   const kasBankAccounts = useMemo(
     () =>
       (accounts ?? []).filter(
@@ -459,7 +463,25 @@ function BelanjaAsetDialog({ onClose }: { onClose: () => void }) {
     [accounts],
   );
 
-  const aset = asetAccounts.find((a) => a.id === asetId);
+  // Auto-default kas/bank ke "Kas Tunai" jika belum dipilih
+  if (!kasBankId && kasBankAccounts.length > 0) {
+    const def = kasBankAccounts.find((a) => /kas tunai/i.test(a.name)) ?? kasBankAccounts[0];
+    queueMicrotask(() => setKasBankId(def.id));
+  }
+
+  const category = ASET_CATEGORIES.find((c) => c.key === categoryKey);
+  // Auto-pasang akun aset detail berdasarkan prefix kode kategori.
+  const aset = useMemo(() => {
+    if (!category || !accounts) return undefined;
+    const candidates = accounts.filter(
+      (a) =>
+        a.type === "ASET" &&
+        a.code.startsWith(category.prefix) &&
+        !/akumulasi|penyusutan/i.test(a.name),
+    );
+    return candidates[0];
+  }, [category, accounts]);
+
   const kasBank = kasBankAccounts.find((a) => a.id === kasBankId);
   const nominal = Number(jumlah.replace(/[^\d]/g, "")) || 0;
 
