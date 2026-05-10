@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Plus, Search, Loader2, Pencil } from "lucide-react";
+import { Plus, Search, Loader2, Pencil, Trash2, Power } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
@@ -43,12 +43,36 @@ const NORMAL_OPTIONS = ["DEBIT", "KREDIT"];
 const ENTRY_OPTIONS = ["Header", "Detail"];
 const STATUS_OPTIONS = ["Aktif", "Nonaktif"];
 
+const COA_KEY = ["coa_accounts"] as const;
+
+/**
+ * Invalidate semua query yang dipengaruhi perubahan COA + bersihkan cache
+ * laporan agar laporan ikut tersegarkan tanpa reload.
+ */
+async function invalidateCoaDependents(qc: ReturnType<typeof useQueryClient>) {
+  await Promise.all([
+    qc.invalidateQueries({ queryKey: COA_KEY }),
+    qc.invalidateQueries({ queryKey: ["balances"] }),
+    qc.invalidateQueries({ queryKey: ["reports"] }),
+    qc.invalidateQueries({ queryKey: ["account_tree"] }),
+  ]);
+  // Hapus seluruh report_cache karena perubahan struktur akun mempengaruhi
+  // semua periode/laporan. Best-effort, abaikan error jika tidak ada baris.
+  try {
+    await supabase.from("report_cache").delete().not("id", "is", null);
+  } catch {
+    // ignore
+  }
+}
+
 function CoaPage() {
   const [q, setQ] = useState("");
   const [editing, setEditing] = useState<Account | null>(null);
+  const [deleting, setDeleting] = useState<Account | null>(null);
+  const qc = useQueryClient();
 
   const { data, isLoading, error } = useQuery({
-    queryKey: ["coa_accounts"],
+    queryKey: COA_KEY,
     queryFn: async () => {
       const { data, error } = await supabase
         .from("coa_accounts")
@@ -59,6 +83,23 @@ function CoaPage() {
       return data as Account[];
     },
   });
+
+  // Realtime: sinkronkan UI ketika tabel coa_accounts berubah dari mana pun.
+  useEffect(() => {
+    const channel = supabase
+      .channel("coa_accounts_changes")
+      .on(
+        "postgres_changes",
+        { event: "*", schema: "public", table: "coa_accounts" },
+        () => {
+          qc.invalidateQueries({ queryKey: COA_KEY });
+        },
+      )
+      .subscribe();
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [qc]);
 
   const filtered = useMemo(() => {
     if (!data) return [];
@@ -71,6 +112,38 @@ function CoaPage() {
         a.type.toLowerCase().includes(term),
     );
   }, [data, q]);
+
+  // Toggle aktif/nonaktif dengan optimistic update.
+  const toggleMutation = useMutation({
+    mutationFn: async (acc: Account) => {
+      const next = acc.status === "Aktif" ? "Nonaktif" : "Aktif";
+      const { data, error } = await supabase
+        .from("coa_accounts")
+        .update({ status: next })
+        .eq("id", acc.id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as Account;
+    },
+    onMutate: async (acc) => {
+      await qc.cancelQueries({ queryKey: COA_KEY });
+      const prev = qc.getQueryData<Account[]>(COA_KEY);
+      const next = acc.status === "Aktif" ? "Nonaktif" : "Aktif";
+      qc.setQueryData<Account[]>(COA_KEY, (old) =>
+        (old ?? []).map((a) => (a.id === acc.id ? { ...a, status: next } : a)),
+      );
+      return { prev };
+    },
+    onError: (e: Error, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(COA_KEY, ctx.prev);
+      toast.error(e.message);
+    },
+    onSuccess: () => {
+      toast.success("Status diperbarui");
+      void invalidateCoaDependents(qc);
+    },
+  });
 
   return (
     <>
@@ -191,13 +264,30 @@ function CoaPage() {
                     </span>
                   </td>
                   <td className="px-4 py-2.5 text-right">
-                    <button
-                      onClick={() => setEditing(a)}
-                      className="inline-flex items-center gap-1.5 rounded-md border border-border/60 bg-secondary/40 px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground hover:border-[var(--neon-cyan)]/50 transition"
-                    >
-                      <Pencil className="h-3.5 w-3.5" />
-                      Edit
-                    </button>
+                    <div className="inline-flex items-center gap-1.5">
+                      <button
+                        onClick={() => toggleMutation.mutate(a)}
+                        disabled={toggleMutation.isPending}
+                        title={a.status === "Aktif" ? "Nonaktifkan" : "Aktifkan"}
+                        className="inline-flex items-center gap-1 rounded-md border border-border/60 bg-secondary/40 px-2 py-1 text-xs text-muted-foreground hover:text-foreground hover:border-[var(--neon-cyan)]/50 transition disabled:opacity-60"
+                      >
+                        <Power className="h-3.5 w-3.5" />
+                      </button>
+                      <button
+                        onClick={() => setEditing(a)}
+                        className="inline-flex items-center gap-1.5 rounded-md border border-border/60 bg-secondary/40 px-2.5 py-1 text-xs text-muted-foreground hover:text-foreground hover:border-[var(--neon-cyan)]/50 transition"
+                      >
+                        <Pencil className="h-3.5 w-3.5" />
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => setDeleting(a)}
+                        title="Hapus"
+                        className="inline-flex items-center gap-1 rounded-md border border-border/60 bg-secondary/40 px-2 py-1 text-xs text-muted-foreground hover:text-rose-400 hover:border-rose-400/50 transition"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}
@@ -207,6 +297,7 @@ function CoaPage() {
       </div>
 
       <EditAccountDialog account={editing} onClose={() => setEditing(null)} />
+      <DeleteAccountDialog account={deleting} onClose={() => setDeleting(null)} />
     </>
   );
 }
@@ -231,37 +322,67 @@ function EditAccountDialog({
       if (!payload.code.trim() || !payload.name.trim()) {
         throw new Error("Kode dan nama akun wajib diisi");
       }
+      const body = {
+        code: payload.code.trim(),
+        name: payload.name.trim(),
+        type: payload.type,
+        normal_balance: payload.normal_balance,
+        entry_type: payload.entry_type,
+        status: payload.status,
+      };
       if (isCreate) {
-        const { error } = await supabase.from("coa_accounts").insert({
-          code: payload.code.trim(),
-          name: payload.name.trim(),
-          type: payload.type,
-          normal_balance: payload.normal_balance,
-          entry_type: payload.entry_type,
-          status: payload.status,
-        });
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
+        const { data, error } = await supabase
           .from("coa_accounts")
-          .update({
-            code: payload.code.trim(),
-            name: payload.name.trim(),
-            type: payload.type,
-            normal_balance: payload.normal_balance,
-            entry_type: payload.entry_type,
-            status: payload.status,
-          })
-          .eq("id", payload.id);
+          .insert(body)
+          .select()
+          .single();
         if (error) throw error;
+        return data as Account;
       }
+      const { data, error } = await supabase
+        .from("coa_accounts")
+        .update(body)
+        .eq("id", payload.id)
+        .select()
+        .single();
+      if (error) throw error;
+      return data as Account;
     },
-    onSuccess: () => {
+    onMutate: async (payload) => {
+      await qc.cancelQueries({ queryKey: COA_KEY });
+      const prev = qc.getQueryData<Account[]>(COA_KEY);
+      // Optimistic: update existing row langsung di cache.
+      if (!isCreate) {
+        qc.setQueryData<Account[]>(COA_KEY, (old) =>
+          (old ?? []).map((a) =>
+            a.id === payload.id
+              ? {
+                  ...a,
+                  ...payload,
+                  code: payload.code.trim(),
+                  name: payload.name.trim(),
+                }
+              : a,
+          ),
+        );
+      }
+      return { prev };
+    },
+    onError: (e: Error, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(COA_KEY, ctx.prev);
+      toast.error(e.message);
+    },
+    onSuccess: (row) => {
       toast.success(isCreate ? "Akun ditambahkan" : "Akun diperbarui");
-      qc.invalidateQueries({ queryKey: ["coa_accounts"] });
+      // Sinkronkan dengan baris yang dikembalikan server.
+      qc.setQueryData<Account[]>(COA_KEY, (old) => {
+        const list = old ?? [];
+        if (isCreate) return [...list, row].sort((a, b) => a.code.localeCompare(b.code));
+        return list.map((a) => (a.id === row.id ? row : a));
+      });
+      void invalidateCoaDependents(qc);
       onClose();
     },
-    onError: (e: Error) => toast.error(e.message),
   });
 
   if (!form) return null;
@@ -343,7 +464,8 @@ function EditAccountDialog({
         <DialogFooter>
           <button
             onClick={onClose}
-            className="rounded-lg border border-border/60 bg-secondary/40 px-4 py-2 text-sm hover:border-border transition"
+            disabled={mutation.isPending}
+            className="rounded-lg border border-border/60 bg-secondary/40 px-4 py-2 text-sm hover:border-border transition disabled:opacity-60"
           >
             Batal
           </button>
@@ -354,6 +476,72 @@ function EditAccountDialog({
           >
             {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
             Simpan
+          </button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function DeleteAccountDialog({
+  account,
+  onClose,
+}: {
+  account: Account | null;
+  onClose: () => void;
+}) {
+  const qc = useQueryClient();
+  const mutation = useMutation({
+    mutationFn: async (acc: Account) => {
+      const { error } = await supabase.from("coa_accounts").delete().eq("id", acc.id);
+      if (error) throw error;
+      return acc.id;
+    },
+    onMutate: async (acc) => {
+      await qc.cancelQueries({ queryKey: COA_KEY });
+      const prev = qc.getQueryData<Account[]>(COA_KEY);
+      qc.setQueryData<Account[]>(COA_KEY, (old) => (old ?? []).filter((a) => a.id !== acc.id));
+      return { prev };
+    },
+    onError: (e: Error, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(COA_KEY, ctx.prev);
+      toast.error(e.message);
+    },
+    onSuccess: () => {
+      toast.success("Akun dihapus");
+      void invalidateCoaDependents(qc);
+      onClose();
+    },
+  });
+
+  if (!account) return null;
+
+  return (
+    <Dialog open={!!account} onOpenChange={(o) => !o && onClose()}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Hapus akun?</DialogTitle>
+        </DialogHeader>
+        <p className="text-sm text-muted-foreground">
+          Akun <span className="font-mono text-[var(--neon-cyan)]">{account.code}</span>{" "}
+          <span className="text-foreground">{account.name}</span> akan dihapus permanen.
+          Tindakan ini tidak dapat dibatalkan.
+        </p>
+        <DialogFooter>
+          <button
+            onClick={onClose}
+            disabled={mutation.isPending}
+            className="rounded-lg border border-border/60 bg-secondary/40 px-4 py-2 text-sm hover:border-border transition disabled:opacity-60"
+          >
+            Batal
+          </button>
+          <button
+            onClick={() => mutation.mutate(account)}
+            disabled={mutation.isPending}
+            className="inline-flex items-center gap-2 rounded-lg bg-rose-500/90 px-4 py-2 text-sm font-medium text-white hover:bg-rose-500 transition disabled:opacity-60"
+          >
+            {mutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+            Hapus
           </button>
         </DialogFooter>
       </DialogContent>
