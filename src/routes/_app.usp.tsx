@@ -1,5 +1,4 @@
-import { createFileRoute, Link, useRouterState } from "@tanstack/react-router";
-import { useMemo } from "react";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { LayoutDashboard, ListChecks, ClipboardList, HandCoins, Banknote, AlertTriangle, Wallet, TrendingUp, Users } from "lucide-react";
 import { PageHeader } from "@/components/DashboardLayout";
