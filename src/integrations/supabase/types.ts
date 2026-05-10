@@ -14,6 +14,39 @@ export type Database = {
   }
   public: {
     Tables: {
+      account_balances: {
+        Row: {
+          account_id: string
+          credit_total: number
+          debit_total: number
+          ending_balance: number
+          id: string
+          period: string
+          unit_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          account_id: string
+          credit_total?: number
+          debit_total?: number
+          ending_balance?: number
+          id?: string
+          period: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          account_id?: string
+          credit_total?: number
+          debit_total?: number
+          ending_balance?: number
+          id?: string
+          period?: string
+          unit_id?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       coa_accounts: {
         Row: {
           code: string
@@ -131,12 +164,45 @@ export type Database = {
           },
         ]
       }
+      report_cache: {
+        Row: {
+          generated_at: string
+          id: string
+          period: string
+          period_start: string | null
+          report_json: Json
+          report_type: string
+          unit_id: string | null
+        }
+        Insert: {
+          generated_at?: string
+          id?: string
+          period: string
+          period_start?: string | null
+          report_json: Json
+          report_type: string
+          unit_id?: string | null
+        }
+        Update: {
+          generated_at?: string
+          id?: string
+          period?: string
+          period_start?: string | null
+          report_json?: Json
+          report_type?: string
+          unit_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      recalc_account_balance: {
+        Args: { p_account_id: string; p_period: string }
+        Returns: undefined
+      }
     }
     Enums: {
       [_ in never]: never

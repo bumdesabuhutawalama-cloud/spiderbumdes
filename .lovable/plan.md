@@ -1,72 +1,93 @@
 ## Tujuan
 
-Mengganti semua nilai placeholder `XXX` di laporan **Neraca Pusat**, **Neraca Konsolidasi**, dan **Laba Rugi** dengan saldo riil yang dihitung otomatis dari jurnal yang terbentuk di **Catat Kegiatan** (tabel `journal_entries` + `journal_entry_lines`).
-
-Setiap kali user mencatat kegiatan (mis. Penyertaan Modal), laporan akan langsung memperlihatkan dampaknya — tanpa input manual.
+Mempercepat pemuatan laporan **Neraca** & **Laba Rugi** dari pembacaan langsung `journal_entry_lines` menjadi pembacaan **saldo termaterialisasi** + **cache laporan**, dengan tetap mempertahankan logika Activity → Journal yang sudah berjalan.
 
 ## Pendekatan
 
-### 1. Helper saldo akun (baru)
+### 1. Tabel baru: `account_balances` (materialized ledger)
 
-Buat `src/lib/account-balances.ts` berisi:
+Kolom:
+- `id` uuid PK
+- `account_id` uuid (akun di `coa_accounts`)
+- `unit_id` uuid nullable (untuk pusat = NULL; multi-unit menyusul saat kolom unit ada di journal)
+- `period` text (`YYYY-MM`)
+- `debit_total` numeric default 0
+- `credit_total` numeric default 0
+- `ending_balance` numeric default 0 (signed sesuai `normal_balance`)
+- `updated_at` timestamptz
 
-- `useAccountBalances(asOfDate?)` — hook React Query yang:
-  - Mengambil semua `journal_entry_lines` join `journal_entries` (filter `transaction_date <= asOfDate`).
-  - Mengembalikan `Map<account_id, { debit, credit, balance }>`.
-  - `balance` dihitung sesuai `normal_balance` akun:
-    - Akun normal **Debit** (Aset, Beban): `debit − credit`
-    - Akun normal **Kredit** (Kewajiban, Ekuitas, Pendapatan): `credit − debit`
-- `useAccountBalancesPeriod(start, end)` — varian untuk Laba Rugi (filter rentang tanggal).
-- `rollupHeader(accounts, balances)` — menjumlahkan saldo anak ke akun **Header** berdasarkan prefix kode (mis. `1.1.01` mendapat total dari semua `1.1.01.xx`).
-- `formatRp(n)` dan `formatRpOrDash(n)` (angka 0 tampil sebagai `-`).
+Unique index: `(account_id, COALESCE(unit_id, '00000000-...'), period)`.
+Index tambahan: `(period)`, `(account_id, period)`.
+RLS: public read, authenticated write (sama pola dengan tabel jurnal).
 
-QueryKey: `["balances", asOfDate]` agar otomatis di-invalidate saat user simpan kegiatan baru (Catat Kegiatan akan memanggil `queryClient.invalidateQueries({ queryKey: ["balances"] })`).
+### 2. Posting otomatis via trigger DB
 
-### 2. Neraca Pusat & Neraca Konsolidasi
+Buat trigger `AFTER INSERT/UPDATE/DELETE` pada `journal_entry_lines` yang:
+- Ambil `transaction_date` dari `journal_entries` parent → derive `period = to_char(date, 'YYYY-MM')`.
+- Ambil `normal_balance` dari `coa_accounts`.
+- `UPSERT` ke `account_balances`:
+  - tambah/kurangi `debit_total`, `credit_total`
+  - hitung ulang `ending_balance` = (normal D ? debit-credit : credit-debit) untuk baris periode itu.
+- Untuk DELETE: kurangi nilainya.
 
-Pada `_app.laporan.neraca-pusat.tsx` dan `_app.laporan.neraca-konsolidasi.tsx`:
+Trigger berjalan otomatis di background — tidak ubah kode posting di `_app.catat-kegiatan.tsx`.
 
-- Ambil saldo via `useAccountBalances(asOfDate)`.
-- Tambahkan **Laba Tahun Berjalan** ke bagian Ekuitas:
-  - Hitung: `Σ saldo akun tipe PENDAPATAN − Σ saldo akun tipe BEBAN` (dari awal hingga `asOfDate`).
-  - Tampilkan sebagai baris tambahan di section EKUITAS.
-- Ganti kolom `20X2` → saldo per `asOfDate` (default akhir tahun berjalan).
-- Ganti kolom `20X1` → saldo per akhir tahun sebelumnya (tahun-1 dari `asOfDate`).
-- Hitung & isi `TOTAL ASET`, `TOTAL KEWAJIBAN`, `TOTAL EKUITAS`, dan `TOTAL KEWAJIBAN DAN EKUITAS`.
-- Saldo `0` ditampilkan `-` agar laporan rapi.
-- Tanggal di header laporan mengikuti input date.
+Backfill: jalankan satu kali di migration untuk mengisi `account_balances` dari data `journal_entry_lines` yang sudah ada.
 
-Catatan multi-unit: skema `journal_entries` saat ini belum punya kolom `unit_id`, jadi Neraca Pusat dan Neraca Konsolidasi sementara menampilkan dataset jurnal yang sama. Ini sudah konsisten dengan kondisi data sekarang; pemisahan per-unit dapat ditambahkan saat kolom unit diperkenalkan.
+### 3. Tabel baru: `report_cache`
 
-### 3. Laba Rugi
+Kolom:
+- `id` uuid PK
+- `report_type` text (`BS`, `PL`, `CONSOLIDATED`)
+- `unit_id` uuid nullable
+- `period` text (`YYYY-MM`, untuk BS = "as of"; untuk PL = "end period")
+- `period_start` text nullable (untuk PL)
+- `report_json` jsonb
+- `generated_at` timestamptz default now()
 
-Refactor `_app.laporan.laba-rugi.tsx` (saat ini pakai `ReportPage` dengan baris hard-coded):
+Unique: `(report_type, COALESCE(unit_id,...), period, COALESCE(period_start,''))`.
 
-- Ubah menjadi komponen sendiri (mirip pola Neraca) dengan tanggal mulai & akhir.
-- Ambil akun dengan `type IN ('PENDAPATAN', 'BEBAN')` dari COA, urut kode.
-- Saldo per akun = `useAccountBalancesPeriod(start, end)`.
-- Section: **PENDAPATAN**, **BEBAN**, lalu baris **LABA / (RUGI) BERSIH** = Total Pendapatan − Total Beban.
-- Kolom: `Periode Ini` (rentang dipilih) dan `Periode Lalu` (rentang yang sama tahun sebelumnya).
-- Gaya visual mengikuti Neraca (sheet cream, header merah) agar konsisten.
+### 4. Invalidasi cache via trigger
 
-### 4. Invalidasi cache setelah simpan kegiatan
+Trigger `AFTER INSERT/UPDATE/DELETE` pada `journal_entries`:
+- Hapus baris `report_cache` di mana `period >= to_char(transaction_date,'YYYY-MM')` (semua tipe laporan; multi-unit: filter unit_id bila tersedia, sementara hapus semua).
 
-Pada handler simpan di `_app.catat-kegiatan.tsx` (mutation Penyertaan Modal):
+### 5. Refactor hook saldo (`src/lib/account-balances.ts`)
 
-- Setelah `insert` sukses, panggil `queryClient.invalidateQueries({ queryKey: ["balances"] })` agar laporan langsung refresh tanpa reload.
+Ganti implementasi `useAccountBalances(asOfDate)` & `useAccountBalancesPeriod(start,end)` agar membaca dari `account_balances`:
+- `useAccountBalances(asOfDate)`: `SELECT account_id, SUM(debit_total) d, SUM(credit_total) c FROM account_balances WHERE period <= to_char(asOfDate,'YYYY-MM') GROUP BY account_id`. Kembalikan `BalanceMap` (sama signature) sehingga komponen Neraca/Laba-Rugi tidak berubah.
+- `useAccountBalancesPeriod(start,end)`: filter `period BETWEEN start_month AND end_month`.
 
-### 5. Dashboard (opsional, lanjutan singkat)
+Karena signature & return shape tetap, `NeracaSheet.tsx` dan `_app.laporan.laba-rugi.tsx` tidak perlu diubah.
 
-Jika nilai-nilai di Dashboard (Kas, Laba berjalan) memakai placeholder, hubungkan juga dengan helper yang sama agar konsisten. Akan dilakukan hanya jika sudah ada komponen yang menampilkannya — tidak menambah fitur baru.
+### 6. Cache laporan di sisi client
 
-## File yang akan dibuat/diubah
+QueryClient TanStack Query sudah berperan sebagai cache di sesi browser (staleTime 5m). Untuk persistence lintas user, tambahkan helper `src/lib/report-cache.ts`:
+- `getOrBuildReport(type, unit, period[, periodStart], builder)`:
+  1. `SELECT report_json FROM report_cache WHERE ... LIMIT 1`. Jika ada → return.
+  2. Jika tidak: jalankan `builder()` (yang membaca `account_balances`) → `INSERT` ke `report_cache` → return.
+- Invalidasi otomatis di sisi DB (trigger di langkah 4).
 
-- **Baru**: `src/lib/account-balances.ts`
-- **Edit**: `src/routes/_app.laporan.neraca-pusat.tsx`
-- **Edit**: `src/routes/_app.laporan.neraca-konsolidasi.tsx`
-- **Rewrite**: `src/routes/_app.laporan.laba-rugi.tsx`
-- **Edit**: `src/routes/_app.catat-kegiatan.tsx` (tambah invalidate `["balances"]` setelah simpan)
+Catatan: untuk iterasi ini, hook membaca `account_balances` saja sudah memenuhi target < 1 dtk untuk skala BUMDes; `report_cache` disiapkan tetapi pemakaian penuh dari `report_json` di Neraca/Laba-Rugi bisa diadopsi setelahnya tanpa mengubah API hook.
+
+### 7. Lazy loading report tree (UI)
+
+Tambahkan prop `defaultCollapsed` pada `NeracaSheet`:
+- Di awal hanya tampilkan section header: ASET, KEWAJIBAN, EKUITAS (BS) / PENDAPATAN, BEBAN (PL) dengan baris total.
+- Klik header → expand untuk menampilkan baris akun di section tersebut.
+- Implementasi pakai state lokal `Set<sectionKey>` → tidak ada fetch tambahan (data sudah satu kali ambil), tapi mengurangi DOM render awal sehingga TTI cepat.
+
+## File yang dibuat/diubah
+
+- **Migration baru**: tabel `account_balances`, `report_cache`, indeks, RLS, trigger posting, trigger invalidasi cache, backfill awal.
+- **Edit**: `src/lib/account-balances.ts` (sumber data → `account_balances`).
+- **Baru**: `src/lib/report-cache.ts` (helper getOrBuildReport).
+- **Edit**: `src/components/NeracaSheet.tsx` (lazy expand sections).
+- **Edit**: `src/routes/_app.laporan.laba-rugi.tsx` (lazy expand sections).
 
 ## Hasil akhir
 
-User mencatat “Penyertaan Modal Rp 10.000.000” → buka Neraca → akun **Kas/Bank** dan **Modal Disetor** otomatis berisi `Rp 10.000.000`, `TOTAL ASET = TOTAL KEWAJIBAN + EKUITAS`. Buka Laba Rugi → bila ada transaksi pendapatan/beban, laba bersih ikut terhitung. Tidak ada lagi `XXX` di laporan.
+- Pembukaan Neraca & Laba Rugi membaca tabel ringkas (puluhan/ratusan baris) bukan ribuan baris jurnal.
+- Posting Activity baru otomatis memperbarui `account_balances` dan menghapus cache lewat trigger DB — tanpa perubahan kode di Catat Kegiatan.
+- Tampilan awal laporan ringan (hanya section), detail akun dimuat saat user expand.
+- Logika Activity → Journal & struktur COA tetap utuh.
