@@ -11,9 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
+import { Route as AppUspRouteImport } from './routes/_app.usp'
 import { Route as AppPengaturanRouteImport } from './routes/_app.pengaturan'
 import { Route as AppCoaRouteImport } from './routes/_app.coa'
 import { Route as AppCatatKegiatanRouteImport } from './routes/_app.catat-kegiatan'
+import { Route as AppUspPinjamanRouteImport } from './routes/_app.usp.pinjaman'
 import { Route as AppLaporanNeracaPusatRouteImport } from './routes/_app.laporan.neraca-pusat'
 import { Route as AppLaporanNeracaKonsolidasiRouteImport } from './routes/_app.laporan.neraca-konsolidasi'
 import { Route as AppLaporanLabaRugiRouteImport } from './routes/_app.laporan.laba-rugi'
@@ -26,6 +28,11 @@ const AppRoute = AppRouteImport.update({
 const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppUspRoute = AppUspRouteImport.update({
+  id: '/usp',
+  path: '/usp',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPengaturanRoute = AppPengaturanRouteImport.update({
@@ -42,6 +49,11 @@ const AppCatatKegiatanRoute = AppCatatKegiatanRouteImport.update({
   id: '/catat-kegiatan',
   path: '/catat-kegiatan',
   getParentRoute: () => AppRoute,
+} as any)
+const AppUspPinjamanRoute = AppUspPinjamanRouteImport.update({
+  id: '/pinjaman',
+  path: '/pinjaman',
+  getParentRoute: () => AppUspRoute,
 } as any)
 const AppLaporanNeracaPusatRoute = AppLaporanNeracaPusatRouteImport.update({
   id: '/laporan/neraca-pusat',
@@ -70,20 +82,24 @@ export interface FileRoutesByFullPath {
   '/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/coa': typeof AppCoaRoute
   '/pengaturan': typeof AppPengaturanRoute
+  '/usp': typeof AppUspRouteWithChildren
   '/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
   '/laporan/laba-rugi': typeof AppLaporanLabaRugiRoute
   '/laporan/neraca-konsolidasi': typeof AppLaporanNeracaKonsolidasiRoute
   '/laporan/neraca-pusat': typeof AppLaporanNeracaPusatRoute
+  '/usp/pinjaman': typeof AppUspPinjamanRoute
 }
 export interface FileRoutesByTo {
   '/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/coa': typeof AppCoaRoute
   '/pengaturan': typeof AppPengaturanRoute
+  '/usp': typeof AppUspRouteWithChildren
   '/': typeof AppIndexRoute
   '/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
   '/laporan/laba-rugi': typeof AppLaporanLabaRugiRoute
   '/laporan/neraca-konsolidasi': typeof AppLaporanNeracaKonsolidasiRoute
   '/laporan/neraca-pusat': typeof AppLaporanNeracaPusatRoute
+  '/usp/pinjaman': typeof AppUspPinjamanRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -91,11 +107,13 @@ export interface FileRoutesById {
   '/_app/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/_app/coa': typeof AppCoaRoute
   '/_app/pengaturan': typeof AppPengaturanRoute
+  '/_app/usp': typeof AppUspRouteWithChildren
   '/_app/': typeof AppIndexRoute
   '/_app/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
   '/_app/laporan/laba-rugi': typeof AppLaporanLabaRugiRoute
   '/_app/laporan/neraca-konsolidasi': typeof AppLaporanNeracaKonsolidasiRoute
   '/_app/laporan/neraca-pusat': typeof AppLaporanNeracaPusatRoute
+  '/_app/usp/pinjaman': typeof AppUspPinjamanRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -104,31 +122,37 @@ export interface FileRouteTypes {
     | '/catat-kegiatan'
     | '/coa'
     | '/pengaturan'
+    | '/usp'
     | '/laporan/bagi-hasil'
     | '/laporan/laba-rugi'
     | '/laporan/neraca-konsolidasi'
     | '/laporan/neraca-pusat'
+    | '/usp/pinjaman'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/catat-kegiatan'
     | '/coa'
     | '/pengaturan'
+    | '/usp'
     | '/'
     | '/laporan/bagi-hasil'
     | '/laporan/laba-rugi'
     | '/laporan/neraca-konsolidasi'
     | '/laporan/neraca-pusat'
+    | '/usp/pinjaman'
   id:
     | '__root__'
     | '/_app'
     | '/_app/catat-kegiatan'
     | '/_app/coa'
     | '/_app/pengaturan'
+    | '/_app/usp'
     | '/_app/'
     | '/_app/laporan/bagi-hasil'
     | '/_app/laporan/laba-rugi'
     | '/_app/laporan/neraca-konsolidasi'
     | '/_app/laporan/neraca-pusat'
+    | '/_app/usp/pinjaman'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -151,6 +175,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/usp': {
+      id: '/_app/usp'
+      path: '/usp'
+      fullPath: '/usp'
+      preLoaderRoute: typeof AppUspRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/pengaturan': {
       id: '/_app/pengaturan'
       path: '/pengaturan'
@@ -171,6 +202,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/catat-kegiatan'
       preLoaderRoute: typeof AppCatatKegiatanRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/_app/usp/pinjaman': {
+      id: '/_app/usp/pinjaman'
+      path: '/pinjaman'
+      fullPath: '/usp/pinjaman'
+      preLoaderRoute: typeof AppUspPinjamanRouteImport
+      parentRoute: typeof AppUspRoute
     }
     '/_app/laporan/neraca-pusat': {
       id: '/_app/laporan/neraca-pusat'
@@ -203,10 +241,22 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AppUspRouteChildren {
+  AppUspPinjamanRoute: typeof AppUspPinjamanRoute
+}
+
+const AppUspRouteChildren: AppUspRouteChildren = {
+  AppUspPinjamanRoute: AppUspPinjamanRoute,
+}
+
+const AppUspRouteWithChildren =
+  AppUspRoute._addFileChildren(AppUspRouteChildren)
+
 interface AppRouteChildren {
   AppCatatKegiatanRoute: typeof AppCatatKegiatanRoute
   AppCoaRoute: typeof AppCoaRoute
   AppPengaturanRoute: typeof AppPengaturanRoute
+  AppUspRoute: typeof AppUspRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
   AppLaporanBagiHasilRoute: typeof AppLaporanBagiHasilRoute
   AppLaporanLabaRugiRoute: typeof AppLaporanLabaRugiRoute
@@ -218,6 +268,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCatatKegiatanRoute: AppCatatKegiatanRoute,
   AppCoaRoute: AppCoaRoute,
   AppPengaturanRoute: AppPengaturanRoute,
+  AppUspRoute: AppUspRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
   AppLaporanBagiHasilRoute: AppLaporanBagiHasilRoute,
   AppLaporanLabaRugiRoute: AppLaporanLabaRugiRoute,
