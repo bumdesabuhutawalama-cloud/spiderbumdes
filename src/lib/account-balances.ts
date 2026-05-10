@@ -14,11 +14,11 @@ export type Balance = { debit: number; credit: number; balance: number };
 
 export type BalanceMap = Map<string, Balance>;
 
-type BalanceRow = {
+type LineRow = {
   account_id: string;
-  period: string;
-  debit_total: number | string;
-  credit_total: number | string;
+  debit: number | string;
+  credit: number | string;
+  journal_entries: { transaction_date: string } | { transaction_date: string }[] | null;
 };
 
 const num = (v: unknown) => (typeof v === "number" ? v : Number(v) || 0);
@@ -31,36 +31,37 @@ const normalOf = (typeOrNormal: string): "D" | "K" => {
   return "K";
 };
 
-const toMonth = (date?: string) => (date ? date.slice(0, 7) : undefined);
-
 export type UnitMode = "pusat" | "unit" | "konsolidasi";
 
+/**
+ * Baca saldo LANGSUNG dari journal_entry_lines (sumber kebenaran).
+ * Filter berdasar transaction_date (bukan period bulanan) supaya akurat
+ * sampai tanggal tertentu. Tabel `account_balances` tidak digunakan karena
+ * pernah mengalami drift; jurnal adalah satu-satunya truth source.
+ */
 async function fetchBalances(
-  startMonth?: string,
-  endMonth?: string,
-  mode: UnitMode = "pusat",
-  unitId?: string | null,
-): Promise<BalanceRow[]> {
+  startDate?: string,
+  endDate?: string,
+  _mode: UnitMode = "pusat",
+  _unitId?: string | null,
+): Promise<LineRow[]> {
   let q = supabase
-    .from("account_balances")
-    .select("account_id, period, debit_total, credit_total, unit_id")
-    .limit(20000);
-  if (startMonth) q = q.gte("period", startMonth);
-  if (endMonth) q = q.lte("period", endMonth);
-  if (mode === "pusat") q = q.is("unit_id", null);
-  else if (mode === "unit" && unitId) q = q.eq("unit_id", unitId);
-  // konsolidasi: tidak difilter unit_id (gabungkan semua)
+    .from("journal_entry_lines")
+    .select("account_id, debit, credit, journal_entries!inner(transaction_date)")
+    .limit(50000);
+  if (startDate) q = q.gte("journal_entries.transaction_date", startDate);
+  if (endDate) q = q.lte("journal_entries.transaction_date", endDate);
   const { data, error } = await q;
   if (error) throw error;
-  return (data ?? []) as BalanceRow[];
+  return (data ?? []) as unknown as LineRow[];
 }
 
-function reduceRows(rows: BalanceRow[]): BalanceMap {
+function reduceRows(rows: LineRow[]): BalanceMap {
   const map: BalanceMap = new Map();
   for (const r of rows) {
     const cur = map.get(r.account_id) ?? { debit: 0, credit: 0, balance: 0 };
-    cur.debit += num(r.debit_total);
-    cur.credit += num(r.credit_total);
+    cur.debit += num(r.debit);
+    cur.credit += num(r.credit);
     map.set(r.account_id, cur);
   }
   return map;
@@ -72,10 +73,9 @@ export function useAccountBalances(
   mode: UnitMode = "pusat",
   unitId?: string | null,
 ) {
-  const end = toMonth(asOfDate);
   return useQuery({
-    queryKey: ["balances", "asof", end ?? "all", mode, unitId ?? ""],
-    queryFn: async () => reduceRows(await fetchBalances(undefined, end, mode, unitId)),
+    queryKey: ["balances", "asof", asOfDate ?? "all", mode, unitId ?? ""],
+    queryFn: async () => reduceRows(await fetchBalances(undefined, asOfDate, mode, unitId)),
   });
 }
 
@@ -86,11 +86,9 @@ export function useAccountBalancesPeriod(
   mode: UnitMode = "pusat",
   unitId?: string | null,
 ) {
-  const s = toMonth(start);
-  const e = toMonth(end);
   return useQuery({
-    queryKey: ["balances", "period", s ?? "", e ?? "", mode, unitId ?? ""],
-    queryFn: async () => reduceRows(await fetchBalances(s, e, mode, unitId)),
+    queryKey: ["balances", "period", start ?? "", end ?? "", mode, unitId ?? ""],
+    queryFn: async () => reduceRows(await fetchBalances(start, end, mode, unitId)),
   });
 }
 
