@@ -6,11 +6,14 @@ import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
 import {
   type AccountLite,
+  type UnitMode,
   computeSignedBalances,
   formatRpOrDash,
   sumByType,
   useAccountBalances,
 } from "@/lib/account-balances";
+
+type Unit = { id: string; name: string };
 
 const SECTIONS: { title: string; type: string; total: string }[] = [
   { title: "ASET", type: "ASET", total: "TOTAL ASET" },
