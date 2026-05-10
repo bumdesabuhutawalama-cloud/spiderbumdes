@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { AlertTriangle, Calendar, CheckCircle2, ChevronRight, Download, Loader2 } from "lucide-react";
+import { AlertTriangle, Calendar, CheckCircle2, Download, Loader2 } from "lucide-react";
 import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
@@ -42,9 +42,6 @@ export function NeracaSheet({
   const [asOf, setAsOf] = useState(yearEnd(new Date().getFullYear()));
   const currentYear = Number(asOf.slice(0, 4));
   const prevAsOf = yearEnd(currentYear - 1);
-  const [expanded, setExpanded] = useState<Set<string>>(
-    () => new Set(SECTIONS.map((s) => s.type)),
-  );
   const [mode, setMode] = useState<UnitMode>(defaultMode);
   const [unitId, setUnitId] = useState<string>("");
   const [exporting, setExporting] = useState(false);
@@ -62,12 +59,6 @@ export function NeracaSheet({
       setExporting(false);
     }
   };
-  const toggle = (k: string) =>
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      next.has(k) ? next.delete(k) : next.add(k);
-      return next;
-    });
 
   const { data: units } = useQuery({
     queryKey: ["units", "active"],
@@ -258,21 +249,11 @@ export function NeracaSheet({
                     const rendered = SECTIONS.flatMap((section, si) => {
                       const rows: React.ReactNode[] = [];
                       no += 1;
-                      const isOpen = expanded.has(section.type);
                       rows.push(
-                        <tr
-                          key={`s-${si}`}
-                          className="bg-[oklch(0.92_0.05_85)] cursor-pointer hover:bg-[oklch(0.90_0.06_85)]"
-                          onClick={() => toggle(section.type)}
-                        >
+                        <tr key={`s-${si}`} className="bg-[oklch(0.92_0.05_85)]">
                           <td className="py-1 text-center font-bold text-[oklch(0.55_0.18_25)]">{no}</td>
                           <td colSpan={3} className="py-1 px-2 font-bold text-[oklch(0.55_0.18_25)]">
-                            <span className="inline-flex items-center gap-1">
-                              <ChevronRight
-                                className={cn("h-3.5 w-3.5 transition-transform", isOpen && "rotate-90")}
-                              />
-                              {section.title}
-                            </span>
+                            {section.title}
                           </td>
                         </tr>,
                       );
@@ -287,7 +268,7 @@ export function NeracaSheet({
                         const isHeader = a.entry_type === "Header";
                         const cur = computed.signedCur.get(a.id) ?? 0;
                         const prev = computed.signedPrev.get(a.id) ?? 0;
-                        if (!isOpen) return;
+                        
                         no += 1;
                         const depth = a.code.split(/[.\-]/).filter(Boolean).length;
                         const indent = Math.max(0, depth - 2) * 12;
@@ -325,7 +306,7 @@ export function NeracaSheet({
                       if (section.type === "EKUITAS") {
                         secCur += computed.labaCur;
                         secPrev += computed.labaPrev;
-                        if (isOpen) {
+                        {
                           no += 1;
                           rows.push(
                           <tr key="laba-berjalan" className="border-b border-amber-200/60">

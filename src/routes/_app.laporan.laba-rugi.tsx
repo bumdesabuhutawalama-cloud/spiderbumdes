@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { Calendar, ChevronRight, Download, Loader2 } from "lucide-react";
+import { Calendar, Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,17 +29,8 @@ function LabaRugiPage() {
   const year = new Date().getFullYear();
   const [start, setStart] = useState(`${year}-01-01`);
   const [end, setEnd] = useState(`${year}-12-31`);
-  const [expanded, setExpanded] = useState<Set<string>>(
-    () => new Set(SECTIONS.map((s) => s.type)),
-  );
   const [exporting, setExporting] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
-  const toggle = (k: string) =>
-    setExpanded((prev) => {
-      const next = new Set(prev);
-      next.has(k) ? next.delete(k) : next.add(k);
-      return next;
-    });
 
   const handleExport = async () => {
     if (!reportRef.current) return;
@@ -168,21 +159,11 @@ function LabaRugiPage() {
                     const rendered = SECTIONS.flatMap((section, si) => {
                       const rows: React.ReactNode[] = [];
                       no += 1;
-                      const isOpen = expanded.has(section.type);
                       rows.push(
-                        <tr
-                          key={`s-${si}`}
-                          className="bg-[oklch(0.92_0.05_85)] cursor-pointer hover:bg-[oklch(0.90_0.06_85)]"
-                          onClick={() => toggle(section.type)}
-                        >
+                        <tr key={`s-${si}`} className="bg-[oklch(0.92_0.05_85)]">
                           <td className="py-1 text-center font-bold text-[oklch(0.55_0.18_25)]">{no}</td>
                           <td colSpan={3} className="py-1 px-2 font-bold text-[oklch(0.55_0.18_25)]">
-                            <span className="inline-flex items-center gap-1">
-                              <ChevronRight
-                                className={cn("h-3.5 w-3.5 transition-transform", isOpen && "rotate-90")}
-                              />
-                              {section.title}
-                            </span>
+                            {section.title}
                           </td>
                         </tr>,
                       );
@@ -200,7 +181,7 @@ function LabaRugiPage() {
                           secCur += cur;
                           secPrev += prev;
                         }
-                        if (!isOpen) return;
+                        
                         no += 1;
                         const depth = a.code.split(/[.\-]/).filter(Boolean).length;
                         const indent = Math.max(0, depth - 2) * 12;
