@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { ClipboardList, TrendingUp, Wallet, Loader2, X, ArrowDownCircle, ArrowUpCircle } from "lucide-react";
+import { ClipboardList, TrendingUp, Wallet, Loader2, X, ArrowDownCircle, ArrowUpCircle, Package } from "lucide-react";
 import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
