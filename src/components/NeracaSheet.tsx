@@ -108,6 +108,11 @@ export function NeracaSheet({
     if (!accounts || !balCur || !balPrev) return null;
     const signedCur = computeSignedBalances(accounts, balCur);
     const signedPrev = computeSignedBalances(accounts, balPrev);
+    const activeIds = computeActiveAccountIds(
+      accounts,
+      [balCur, balPrev],
+      [signedCur, signedPrev],
+    );
     // Laba tahun berjalan = pendapatan - beban
     const labaCur = sumByType(accounts, signedCur, ["PENDAPATAN"]) - sumByType(accounts, signedCur, ["BEBAN"]);
     const labaPrev = sumByType(accounts, signedPrev, ["PENDAPATAN"]) - sumByType(accounts, signedPrev, ["BEBAN"]);
@@ -121,7 +126,7 @@ export function NeracaSheet({
     const diff = totAset - (totKew + totEku);
     const isBalanced = Math.abs(diff) < 0.5;
 
-    return { signedCur, signedPrev, labaCur, labaPrev, neracaAccounts, totAset, totKew, totEku, diff, isBalanced };
+    return { signedCur, signedPrev, labaCur, labaPrev, neracaAccounts, activeIds, totAset, totKew, totEku, diff, isBalanced };
   }, [accounts, balCur, balPrev]);
 
   return (
