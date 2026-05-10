@@ -111,6 +111,38 @@ export function NeracaSheet({
         subtitle={subtitle}
         actions={
           <>
+            {!lockMode && (
+              <div className="inline-flex items-center gap-1 rounded-lg border border-border/60 bg-secondary/60 p-1 text-xs">
+                {(["pusat", "unit", "konsolidasi"] as UnitMode[]).map((m) => (
+                  <button
+                    key={m}
+                    onClick={() => setMode(m)}
+                    className={cn(
+                      "rounded-md px-2.5 py-1 transition",
+                      mode === m
+                        ? "bg-[var(--neon-cyan)]/20 text-[var(--neon-cyan)]"
+                        : "text-muted-foreground hover:text-foreground",
+                    )}
+                  >
+                    {m === "pusat" ? "Pusat" : m === "unit" ? "Unit" : "Konsolidasi"}
+                  </button>
+                ))}
+              </div>
+            )}
+            {!lockMode && mode === "unit" && (
+              <select
+                value={unitId}
+                onChange={(e) => setUnitId(e.target.value)}
+                className="rounded-lg border border-border/60 bg-secondary/60 px-3 py-2 text-sm outline-none"
+              >
+                <option value="">Pilih unit…</option>
+                {(units ?? []).map((u) => (
+                  <option key={u.id} value={u.id}>
+                    {u.name}
+                  </option>
+                ))}
+              </select>
+            )}
             <div className="inline-flex items-center gap-2 rounded-lg border border-border/60 bg-secondary/60 px-3 py-2 text-sm">
               <Calendar className="h-4 w-4 text-muted-foreground" />
               <input
