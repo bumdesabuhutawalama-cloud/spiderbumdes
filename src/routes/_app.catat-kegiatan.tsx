@@ -27,6 +27,7 @@ const formatRp = (n: number) =>
 
 function CatatKegiatanPage() {
   const [openPenyertaan, setOpenPenyertaan] = useState(false);
+  const [openBelanjaAset, setOpenBelanjaAset] = useState(false);
 
   return (
     <>
@@ -42,6 +43,13 @@ function CatatKegiatanPage() {
           description="Pencatatan penambahan modal dari Desa atau Investor."
           onClick={() => setOpenPenyertaan(true)}
           accent="from-[var(--neon-cyan)] to-[var(--neon-green)]"
+        />
+        <ActivityCard
+          icon={<Package className="h-6 w-6" />}
+          title="Belanja Aset / Modal"
+          description="Pembelian aset tetap atau belanja modal unit usaha."
+          onClick={() => setOpenBelanjaAset(true)}
+          accent="from-[var(--neon-green)] to-amber-300"
         />
         <ActivityCard
           icon={<Wallet className="h-6 w-6" />}
@@ -62,6 +70,7 @@ function CatatKegiatanPage() {
       </div>
 
       {openPenyertaan && <PenyertaanModalDialog onClose={() => setOpenPenyertaan(false)} />}
+      {openBelanjaAset && <BelanjaAsetDialog onClose={() => setOpenBelanjaAset(false)} />}
     </>
   );
 }
