@@ -27,21 +27,40 @@ export function NeracaSheet({
   title,
   subtitle,
   heading,
+  defaultMode = "pusat",
+  lockMode = false,
 }: {
   title: string;
   subtitle: string;
   heading: { line1: string; line2?: string; line3: string };
+  defaultMode?: UnitMode;
+  lockMode?: boolean;
 }) {
   const [asOf, setAsOf] = useState(yearEnd(new Date().getFullYear()));
   const currentYear = Number(asOf.slice(0, 4));
   const prevAsOf = yearEnd(currentYear - 1);
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
+  const [mode, setMode] = useState<UnitMode>(defaultMode);
+  const [unitId, setUnitId] = useState<string>("");
   const toggle = (k: string) =>
     setExpanded((prev) => {
       const next = new Set(prev);
       next.has(k) ? next.delete(k) : next.add(k);
       return next;
     });
+
+  const { data: units } = useQuery({
+    queryKey: ["units", "active"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("units")
+        .select("id,name")
+        .eq("status", "Aktif")
+        .order("name");
+      if (error) throw error;
+      return (data ?? []) as Unit[];
+    },
+  });
 
   const { data: accounts, isLoading: loadingAcc, error: errAcc } = useQuery({
     queryKey: ["coa_accounts", "neraca-all"],
@@ -58,8 +77,9 @@ export function NeracaSheet({
     },
   });
 
-  const { data: balCur, isLoading: loadingCur } = useAccountBalances(asOf);
-  const { data: balPrev, isLoading: loadingPrev } = useAccountBalances(prevAsOf);
+  const effectiveUnitId = mode === "unit" ? unitId || null : null;
+  const { data: balCur, isLoading: loadingCur } = useAccountBalances(asOf, mode, effectiveUnitId);
+  const { data: balPrev, isLoading: loadingPrev } = useAccountBalances(prevAsOf, mode, effectiveUnitId);
 
   const isLoading = loadingAcc || loadingCur || loadingPrev;
   const error = errAcc;
