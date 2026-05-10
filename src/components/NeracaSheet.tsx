@@ -44,6 +44,21 @@ export function NeracaSheet({
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
   const [mode, setMode] = useState<UnitMode>(defaultMode);
   const [unitId, setUnitId] = useState<string>("");
+  const [exporting, setExporting] = useState(false);
+  const reportRef = useRef<HTMLDivElement>(null);
+
+  const handleExport = async () => {
+    if (!reportRef.current) return;
+    try {
+      setExporting(true);
+      await exportElementToPdf(reportRef.current, buildReportFilename(title, asOf));
+      toast.success("PDF berhasil diunduh");
+    } catch (e) {
+      toast.error("Gagal export PDF: " + (e as Error).message);
+    } finally {
+      setExporting(false);
+    }
+  };
   const toggle = (k: string) =>
     setExpanded((prev) => {
       const next = new Set(prev);
