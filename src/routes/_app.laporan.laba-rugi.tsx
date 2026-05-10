@@ -159,21 +159,11 @@ function LabaRugiPage() {
                     const rendered = SECTIONS.flatMap((section, si) => {
                       const rows: React.ReactNode[] = [];
                       no += 1;
-                      const isOpen = expanded.has(section.type);
                       rows.push(
-                        <tr
-                          key={`s-${si}`}
-                          className="bg-[oklch(0.92_0.05_85)] cursor-pointer hover:bg-[oklch(0.90_0.06_85)]"
-                          onClick={() => toggle(section.type)}
-                        >
+                        <tr key={`s-${si}`} className="bg-[oklch(0.92_0.05_85)]">
                           <td className="py-1 text-center font-bold text-[oklch(0.55_0.18_25)]">{no}</td>
                           <td colSpan={3} className="py-1 px-2 font-bold text-[oklch(0.55_0.18_25)]">
-                            <span className="inline-flex items-center gap-1">
-                              <ChevronRight
-                                className={cn("h-3.5 w-3.5 transition-transform", isOpen && "rotate-90")}
-                              />
-                              {section.title}
-                            </span>
+                            {section.title}
                           </td>
                         </tr>,
                       );
@@ -191,7 +181,7 @@ function LabaRugiPage() {
                           secCur += cur;
                           secPrev += prev;
                         }
-                        if (!isOpen) return;
+                        
                         no += 1;
                         const depth = a.code.split(/[.\-]/).filter(Boolean).length;
                         const indent = Math.max(0, depth - 2) * 12;
