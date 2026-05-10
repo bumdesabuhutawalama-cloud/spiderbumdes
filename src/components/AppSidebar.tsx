@@ -41,6 +41,7 @@ const uspItems: Item[] = [
 function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const [reportsOpen, setReportsOpen] = useState(path.startsWith("/laporan"));
+  const [uspOpen, setUspOpen] = useState(path.startsWith("/usp"));
 
   const isActive = (to: string) =>
     to === "/" ? path === "/" : path === to || path.startsWith(to + "/");
