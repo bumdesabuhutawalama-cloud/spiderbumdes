@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeftRight, Loader2, Building2, Send } from "lucide-react";
 import { PageHeader } from "@/components/DashboardLayout";
@@ -13,6 +13,7 @@ export const Route = createFileRoute("/_app/transfer-antar-entitas")({
 
 type Entity = { id: string; name: string; code: string | null; is_pusat: boolean; kas_account_id: string | null };
 type RkMap = { owner_entity_id: string; counter_entity_id: string; account_id: string; coa_accounts: { code: string; name: string } };
+type CashAcc = { id: string; code: string; name: string };
 
 const fmtRp = (n: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(n || 0);
@@ -42,6 +43,23 @@ function useRkMap() {
         .select("owner_entity_id, counter_entity_id, account_id, coa_accounts(code, name)");
       if (error) throw error;
       return (data ?? []) as unknown as RkMap[];
+    },
+  });
+}
+
+function useCashAccounts() {
+  return useQuery({
+    queryKey: ["cash_accounts"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("coa_accounts")
+        .select("id, code, name, entry_type, status")
+        .eq("type", "ASET")
+        .eq("status", "Aktif")
+        .or("code.like.1.1.01%,code.like.1.1.02%")
+        .order("code");
+      if (error) throw error;
+      return (data ?? []).filter((a) => a.entry_type !== "Header") as CashAcc[];
     },
   });
 }
@@ -82,6 +100,7 @@ function TransferPage() {
   const { data: entities = [] } = useEntities();
   const { data: rkMap = [] } = useRkMap();
   const { data: transfers = [] } = useTransfers();
+  const { data: cashAccs = [] } = useCashAccounts();
 
   const today = new Date().toISOString().slice(0, 10);
   const [fromId, setFromId] = useState("");
@@ -89,11 +108,30 @@ function TransferPage() {
   const [date, setDate] = useState(today);
   const [amount, setAmount] = useState("");
   const [desc, setDesc] = useState("");
+  const [fromKasId, setFromKasId] = useState("");
+  const [toKasId, setToKasId] = useState("");
+  const [fromBal, setFromBal] = useState<number | null>(null);
 
   const fromEntity = entities.find((e) => e.id === fromId);
   const toEntity = entities.find((e) => e.id === toId);
   const rkFromSide = rkMap.find((m) => m.owner_entity_id === fromId && m.counter_entity_id === toId);
   const rkToSide = rkMap.find((m) => m.owner_entity_id === toId && m.counter_entity_id === fromId);
+
+  // Default kas selection from entity's configured kas
+  useEffect(() => {
+    if (fromEntity?.kas_account_id && !fromKasId) setFromKasId(fromEntity.kas_account_id);
+  }, [fromEntity, fromKasId]);
+  useEffect(() => {
+    if (toEntity?.kas_account_id && !toKasId) setToKasId(toEntity.kas_account_id);
+  }, [toEntity, toKasId]);
+
+  // Load source kas balance preview
+  useEffect(() => {
+    let alive = true;
+    if (!fromKasId) { setFromBal(null); return; }
+    getCashBalance(fromKasId).then((b) => { if (alive) setFromBal(b); }).catch(() => { if (alive) setFromBal(null); });
+    return () => { alive = false; };
+  }, [fromKasId, transfers.length]);
 
   const submit = useMutation({
     mutationFn: async () => {
@@ -101,32 +139,28 @@ function TransferPage() {
       if (fromId === toId) throw new Error("Entitas asal & tujuan tidak boleh sama");
       const amt = Number(amount);
       if (!amt || amt <= 0) throw new Error("Nominal harus > 0");
-      if (!fromEntity.kas_account_id) throw new Error(`Akun Kas untuk ${fromEntity.name} belum dikonfigurasi`);
-      if (!toEntity.kas_account_id) throw new Error(`Akun Kas untuk ${toEntity.name} belum dikonfigurasi`);
+      if (!fromKasId) throw new Error(`Pilih akun Kas sumber (yang berkurang)`);
+      if (!toKasId) throw new Error(`Pilih akun Kas tujuan (yang bertambah)`);
+      if (fromKasId === toKasId) throw new Error("Akun kas sumber & tujuan tidak boleh sama");
       if (!rkFromSide) throw new Error(`Akun RK pada buku ${fromEntity.name} → ${toEntity.name} belum dipetakan`);
       if (!rkToSide) throw new Error(`Akun RK pada buku ${toEntity.name} → ${fromEntity.name} belum dipetakan`);
 
-      // Cash sufficiency on FROM side
-      const cash = await getCashBalance(fromEntity.kas_account_id);
-      if (cash < amt) throw new Error(`Kas ${fromEntity.name} tidak mencukupi (saldo ${fmtRp(cash)})`);
+      const cash = await getCashBalance(fromKasId);
+      if (cash < amt) {
+        const accName = cashAccs.find((a) => a.id === fromKasId)?.name ?? "Kas sumber";
+        throw new Error(`${accName} (${fromEntity.name}) tidak mencukupi. Saldo: ${fmtRp(cash)}`);
+      }
 
-      // Fetch account meta for line snapshot
       const { data: accs, error: aErr } = await supabase
         .from("coa_accounts")
         .select("id, code, name")
-        .in("id", [
-          fromEntity.kas_account_id,
-          toEntity.kas_account_id,
-          rkFromSide.account_id,
-          rkToSide.account_id,
-        ]);
+        .in("id", [fromKasId, toKasId, rkFromSide.account_id, rkToSide.account_id]);
       if (aErr) throw aErr;
       const byId = new Map((accs ?? []).map((a) => [a.id, a]));
       const groupId = crypto.randomUUID();
       const desc1 = `Transfer ke ${toEntity.name}` + (desc ? ` - ${desc}` : "");
       const desc2 = `Transfer dari ${fromEntity.name}` + (desc ? ` - ${desc}` : "");
 
-      // Create both journal entries
       const { data: jeRows, error: jeErr } = await supabase
         .from("journal_entries")
         .insert([
@@ -138,11 +172,9 @@ function TransferPage() {
       const [je1, je2] = jeRows!;
 
       const lines = [
-        // FROM side: Dr RK[to] / Cr Kas
         { journal_entry_id: je1.id, account_id: rkFromSide.account_id, account_code: byId.get(rkFromSide.account_id)!.code, account_name: byId.get(rkFromSide.account_id)!.name, debit: amt, credit: 0, line_order: 1 },
-        { journal_entry_id: je1.id, account_id: fromEntity.kas_account_id, account_code: byId.get(fromEntity.kas_account_id)!.code, account_name: byId.get(fromEntity.kas_account_id)!.name, debit: 0, credit: amt, line_order: 2 },
-        // TO side: Dr Kas / Cr RK[from]
-        { journal_entry_id: je2.id, account_id: toEntity.kas_account_id, account_code: byId.get(toEntity.kas_account_id)!.code, account_name: byId.get(toEntity.kas_account_id)!.name, debit: amt, credit: 0, line_order: 1 },
+        { journal_entry_id: je1.id, account_id: fromKasId, account_code: byId.get(fromKasId)!.code, account_name: byId.get(fromKasId)!.name, debit: 0, credit: amt, line_order: 2 },
+        { journal_entry_id: je2.id, account_id: toKasId, account_code: byId.get(toKasId)!.code, account_name: byId.get(toKasId)!.name, debit: amt, credit: 0, line_order: 1 },
         { journal_entry_id: je2.id, account_id: rkToSide.account_id, account_code: byId.get(rkToSide.account_id)!.code, account_name: byId.get(rkToSide.account_id)!.name, debit: 0, credit: amt, line_order: 2 },
       ];
       const { error: lErr } = await supabase.from("journal_entry_lines").insert(lines);
@@ -160,7 +192,6 @@ function TransferPage() {
       });
       if (tErr) throw tErr;
 
-      // Bust report cache
       await supabase.from("report_cache").delete().neq("id", "00000000-0000-0000-0000-000000000000");
     },
     onSuccess: () => {
@@ -174,15 +205,28 @@ function TransferPage() {
   });
 
   const entityName = (id: string) => entities.find((e) => e.id === id)?.name ?? "-";
+  const accLabel = (id: string) => {
+    const a = cashAccs.find((x) => x.id === id);
+    return a ? `${a.code} — ${a.name}` : "-";
+  };
 
   const preview = useMemo(() => {
     const amt = Number(amount) || 0;
     if (!fromEntity || !toEntity || !amt) return null;
     return {
-      from: { dr: rkFromSide?.coa_accounts.name ?? "(belum dipetakan)", cr: "Kas " + fromEntity.name, amt },
-      to: { dr: "Kas " + toEntity.name, cr: rkToSide?.coa_accounts.name ?? "(belum dipetakan)", amt },
+      from: {
+        dr: rkFromSide?.coa_accounts.name ?? "(RK belum dipetakan)",
+        cr: fromKasId ? accLabel(fromKasId) : "(pilih kas sumber)",
+        amt,
+      },
+      to: {
+        dr: toKasId ? accLabel(toKasId) : "(pilih kas tujuan)",
+        cr: rkToSide?.coa_accounts.name ?? "(RK belum dipetakan)",
+        amt,
+      },
     };
-  }, [fromEntity, toEntity, amount, rkFromSide, rkToSide]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fromEntity, toEntity, amount, rkFromSide, rkToSide, fromKasId, toKasId, cashAccs]);
 
   return (
     <>
@@ -200,7 +244,7 @@ function TransferPage() {
 
           <div className="grid gap-4 sm:grid-cols-2">
             <Field label="Dari Entitas">
-              <select value={fromId} onChange={(e) => setFromId(e.target.value)} className="input-glass">
+              <select value={fromId} onChange={(e) => { setFromId(e.target.value); setFromKasId(""); }} className="input-glass">
                 <option value="">— pilih —</option>
                 {entities.map((e) => (
                   <option key={e.id} value={e.id}>
@@ -210,7 +254,7 @@ function TransferPage() {
               </select>
             </Field>
             <Field label="Ke Entitas">
-              <select value={toId} onChange={(e) => setToId(e.target.value)} className="input-glass">
+              <select value={toId} onChange={(e) => { setToId(e.target.value); setToKasId(""); }} className="input-glass">
                 <option value="">— pilih —</option>
                 {entities.filter((e) => e.id !== fromId).map((e) => (
                   <option key={e.id} value={e.id}>
@@ -219,6 +263,24 @@ function TransferPage() {
                 ))}
               </select>
             </Field>
+
+            <Field label={`Kas Sumber (berkurang)${fromBal !== null ? ` · saldo ${fmtRp(fromBal)}` : ""}`}>
+              <select value={fromKasId} onChange={(e) => setFromKasId(e.target.value)} className="input-glass">
+                <option value="">— pilih kas —</option>
+                {cashAccs.map((a) => (
+                  <option key={a.id} value={a.id}>{a.code} — {a.name}</option>
+                ))}
+              </select>
+            </Field>
+            <Field label="Kas Tujuan (bertambah)">
+              <select value={toKasId} onChange={(e) => setToKasId(e.target.value)} className="input-glass">
+                <option value="">— pilih kas —</option>
+                {cashAccs.filter((a) => a.id !== fromKasId).map((a) => (
+                  <option key={a.id} value={a.id}>{a.code} — {a.name}</option>
+                ))}
+              </select>
+            </Field>
+
             <Field label="Tanggal">
               <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="input-glass" />
             </Field>
@@ -262,7 +324,7 @@ function TransferPage() {
           )}
 
           <button
-            disabled={submit.isPending || !fromId || !toId || !amount}
+            disabled={submit.isPending || !fromId || !toId || !amount || !fromKasId || !toKasId}
             onClick={() => submit.mutate()}
             className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-green)] px-4 py-2 text-sm font-medium text-[oklch(0.15_0.03_250)] glow-cyan hover:opacity-90 transition disabled:opacity-50"
           >
