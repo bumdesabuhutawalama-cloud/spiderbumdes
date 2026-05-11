@@ -137,6 +137,11 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
           onNavigate={onNavigate}
         />
         <NavLink
+          item={{ to: "/transfer-antar-entitas", label: "Transfer Antar Entitas", icon: ArrowLeftRight }}
+          active={isActive("/transfer-antar-entitas")}
+          onNavigate={onNavigate}
+        />
+        <NavLink
           item={{ to: "/pengaturan", label: "Pengaturan", icon: Settings }}
           active={isActive("/pengaturan")}
           onNavigate={onNavigate}
