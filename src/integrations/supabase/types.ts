@@ -83,6 +83,106 @@ export type Database = {
         }
         Relationships: []
       }
+      entity_rk_accounts: {
+        Row: {
+          account_id: string
+          counter_entity_id: string
+          created_at: string
+          id: string
+          owner_entity_id: string
+        }
+        Insert: {
+          account_id: string
+          counter_entity_id: string
+          created_at?: string
+          id?: string
+          owner_entity_id: string
+        }
+        Update: {
+          account_id?: string
+          counter_entity_id?: string
+          created_at?: string
+          id?: string
+          owner_entity_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entity_rk_accounts_account_id_fkey"
+            columns: ["account_id"]
+            isOneToOne: false
+            referencedRelation: "coa_accounts"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entity_rk_accounts_counter_entity_id_fkey"
+            columns: ["counter_entity_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entity_rk_accounts_owner_entity_id_fkey"
+            columns: ["owner_entity_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      entity_transfers: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          from_entity_id: string
+          id: string
+          journal_from_id: string | null
+          journal_to_id: string | null
+          to_entity_id: string
+          transfer_date: string
+          transfer_group_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          description?: string | null
+          from_entity_id: string
+          id?: string
+          journal_from_id?: string | null
+          journal_to_id?: string | null
+          to_entity_id: string
+          transfer_date: string
+          transfer_group_id?: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          from_entity_id?: string
+          id?: string
+          journal_from_id?: string | null
+          journal_to_id?: string | null
+          to_entity_id?: string
+          transfer_date?: string
+          transfer_group_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "entity_transfers_from_entity_id_fkey"
+            columns: ["from_entity_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "entity_transfers_to_entity_id_fkey"
+            columns: ["to_entity_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       journal_entries: {
         Row: {
           created_at: string
@@ -91,6 +191,7 @@ export type Database = {
           total_amount: number
           transaction_date: string
           transaction_type: string
+          transfer_group_id: string | null
           updated_at: string
         }
         Insert: {
@@ -100,6 +201,7 @@ export type Database = {
           total_amount?: number
           transaction_date: string
           transaction_type: string
+          transfer_group_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -109,6 +211,7 @@ export type Database = {
           total_amount?: number
           transaction_date?: string
           transaction_type?: string
+          transfer_group_id?: string | null
           updated_at?: string
         }
         Relationships: []
@@ -305,6 +408,8 @@ export type Database = {
           code: string | null
           created_at: string
           id: string
+          is_pusat: boolean
+          kas_account_id: string | null
           name: string
           status: string
           updated_at: string
@@ -313,6 +418,8 @@ export type Database = {
           code?: string | null
           created_at?: string
           id?: string
+          is_pusat?: boolean
+          kas_account_id?: string | null
           name: string
           status?: string
           updated_at?: string
@@ -321,6 +428,8 @@ export type Database = {
           code?: string | null
           created_at?: string
           id?: string
+          is_pusat?: boolean
+          kas_account_id?: string | null
           name?: string
           status?: string
           updated_at?: string
