@@ -17,6 +17,7 @@ import { Route as AppPengaturanRouteImport } from './routes/_app.pengaturan'
 import { Route as AppCoaRouteImport } from './routes/_app.coa'
 import { Route as AppCatatKegiatanRouteImport } from './routes/_app.catat-kegiatan'
 import { Route as AppUspPinjamanRouteImport } from './routes/_app.usp.pinjaman'
+import { Route as AppLaporanRekonsiliasiRkRouteImport } from './routes/_app.laporan.rekonsiliasi-rk'
 import { Route as AppLaporanNeracaPusatRouteImport } from './routes/_app.laporan.neraca-pusat'
 import { Route as AppLaporanNeracaKonsolidasiRouteImport } from './routes/_app.laporan.neraca-konsolidasi'
 import { Route as AppLaporanLabaRugiRouteImport } from './routes/_app.laporan.laba-rugi'
@@ -61,6 +62,12 @@ const AppUspPinjamanRoute = AppUspPinjamanRouteImport.update({
   path: '/pinjaman',
   getParentRoute: () => AppUspRoute,
 } as any)
+const AppLaporanRekonsiliasiRkRoute =
+  AppLaporanRekonsiliasiRkRouteImport.update({
+    id: '/laporan/rekonsiliasi-rk',
+    path: '/laporan/rekonsiliasi-rk',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppLaporanNeracaPusatRoute = AppLaporanNeracaPusatRouteImport.update({
   id: '/laporan/neraca-pusat',
   path: '/laporan/neraca-pusat',
@@ -94,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/laporan/laba-rugi': typeof AppLaporanLabaRugiRoute
   '/laporan/neraca-konsolidasi': typeof AppLaporanNeracaKonsolidasiRoute
   '/laporan/neraca-pusat': typeof AppLaporanNeracaPusatRoute
+  '/laporan/rekonsiliasi-rk': typeof AppLaporanRekonsiliasiRkRoute
   '/usp/pinjaman': typeof AppUspPinjamanRoute
 }
 export interface FileRoutesByTo {
@@ -107,6 +115,7 @@ export interface FileRoutesByTo {
   '/laporan/laba-rugi': typeof AppLaporanLabaRugiRoute
   '/laporan/neraca-konsolidasi': typeof AppLaporanNeracaKonsolidasiRoute
   '/laporan/neraca-pusat': typeof AppLaporanNeracaPusatRoute
+  '/laporan/rekonsiliasi-rk': typeof AppLaporanRekonsiliasiRkRoute
   '/usp/pinjaman': typeof AppUspPinjamanRoute
 }
 export interface FileRoutesById {
@@ -122,6 +131,7 @@ export interface FileRoutesById {
   '/_app/laporan/laba-rugi': typeof AppLaporanLabaRugiRoute
   '/_app/laporan/neraca-konsolidasi': typeof AppLaporanNeracaKonsolidasiRoute
   '/_app/laporan/neraca-pusat': typeof AppLaporanNeracaPusatRoute
+  '/_app/laporan/rekonsiliasi-rk': typeof AppLaporanRekonsiliasiRkRoute
   '/_app/usp/pinjaman': typeof AppUspPinjamanRoute
 }
 export interface FileRouteTypes {
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/laporan/laba-rugi'
     | '/laporan/neraca-konsolidasi'
     | '/laporan/neraca-pusat'
+    | '/laporan/rekonsiliasi-rk'
     | '/usp/pinjaman'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/laporan/laba-rugi'
     | '/laporan/neraca-konsolidasi'
     | '/laporan/neraca-pusat'
+    | '/laporan/rekonsiliasi-rk'
     | '/usp/pinjaman'
   id:
     | '__root__'
@@ -164,6 +176,7 @@ export interface FileRouteTypes {
     | '/_app/laporan/laba-rugi'
     | '/_app/laporan/neraca-konsolidasi'
     | '/_app/laporan/neraca-pusat'
+    | '/_app/laporan/rekonsiliasi-rk'
     | '/_app/usp/pinjaman'
   fileRoutesById: FileRoutesById
 }
@@ -229,6 +242,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppUspPinjamanRouteImport
       parentRoute: typeof AppUspRoute
     }
+    '/_app/laporan/rekonsiliasi-rk': {
+      id: '/_app/laporan/rekonsiliasi-rk'
+      path: '/laporan/rekonsiliasi-rk'
+      fullPath: '/laporan/rekonsiliasi-rk'
+      preLoaderRoute: typeof AppLaporanRekonsiliasiRkRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/laporan/neraca-pusat': {
       id: '/_app/laporan/neraca-pusat'
       path: '/laporan/neraca-pusat'
@@ -282,6 +302,7 @@ interface AppRouteChildren {
   AppLaporanLabaRugiRoute: typeof AppLaporanLabaRugiRoute
   AppLaporanNeracaKonsolidasiRoute: typeof AppLaporanNeracaKonsolidasiRoute
   AppLaporanNeracaPusatRoute: typeof AppLaporanNeracaPusatRoute
+  AppLaporanRekonsiliasiRkRoute: typeof AppLaporanRekonsiliasiRkRoute
 }
 
 const AppRouteChildren: AppRouteChildren = {
@@ -295,6 +316,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppLaporanLabaRugiRoute: AppLaporanLabaRugiRoute,
   AppLaporanNeracaKonsolidasiRoute: AppLaporanNeracaKonsolidasiRoute,
   AppLaporanNeracaPusatRoute: AppLaporanNeracaPusatRoute,
+  AppLaporanRekonsiliasiRkRoute: AppLaporanRekonsiliasiRkRoute,
 }
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
