@@ -15,6 +15,8 @@ import {
   FileSpreadsheet,
   HandCoins,
   ListChecks,
+  ArrowLeftRight,
+  GitCompare,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
