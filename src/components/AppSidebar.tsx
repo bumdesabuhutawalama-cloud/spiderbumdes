@@ -33,6 +33,7 @@ const reports: Item[] = [
   { to: "/laporan/neraca-konsolidasi", label: "Neraca Konsolidasi", icon: FileSpreadsheet },
   { to: "/laporan/laba-rugi", label: "Laba Rugi", icon: TrendingUp },
   { to: "/laporan/bagi-hasil", label: "Bagi Hasil", icon: PieChart },
+  { to: "/laporan/rekonsiliasi-rk", label: "Rekonsiliasi RK", icon: GitCompare },
 ];
 
 const uspItems: Item[] = [
