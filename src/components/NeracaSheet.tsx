@@ -73,7 +73,7 @@ export function NeracaSheet({
     },
   });
 
-  const { data: accounts, isLoading: loadingAcc, error: errAcc } = useQuery({
+  const { data: accountsRaw, isLoading: loadingAcc, error: errAcc } = useQuery({
     queryKey: ["coa_accounts", "neraca-all"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -87,6 +87,22 @@ export function NeracaSheet({
       return data as AccountLite[];
     },
   });
+
+  const { data: rkAccountIds } = useQuery({
+    queryKey: ["entity_rk_account_ids"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("entity_rk_accounts").select("account_id");
+      if (error) throw error;
+      return new Set((data ?? []).map((r) => r.account_id as string));
+    },
+  });
+
+  // Eliminasi akun RK saat mode konsolidasi
+  const accounts = useMemo(() => {
+    if (!accountsRaw) return accountsRaw;
+    if (mode !== "konsolidasi" || !rkAccountIds) return accountsRaw;
+    return accountsRaw.filter((a) => !rkAccountIds.has(a.id));
+  }, [accountsRaw, mode, rkAccountIds]);
 
   const effectiveUnitId = mode === "unit" ? unitId || null : null;
   const { data: balCur, isLoading: loadingCur } = useAccountBalances(asOf, mode, effectiveUnitId);

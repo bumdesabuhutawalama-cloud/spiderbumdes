@@ -15,6 +15,8 @@ import {
   FileSpreadsheet,
   HandCoins,
   ListChecks,
+  ArrowLeftRight,
+  GitCompare,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -31,6 +33,7 @@ const reports: Item[] = [
   { to: "/laporan/neraca-konsolidasi", label: "Neraca Konsolidasi", icon: FileSpreadsheet },
   { to: "/laporan/laba-rugi", label: "Laba Rugi", icon: TrendingUp },
   { to: "/laporan/bagi-hasil", label: "Bagi Hasil", icon: PieChart },
+  { to: "/laporan/rekonsiliasi-rk", label: "Rekonsiliasi RK", icon: GitCompare },
 ];
 
 const uspItems: Item[] = [
@@ -131,6 +134,11 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
         <NavLink
           item={{ to: "/catat-kegiatan", label: "Catat Kegiatan", icon: ClipboardList }}
           active={isActive("/catat-kegiatan")}
+          onNavigate={onNavigate}
+        />
+        <NavLink
+          item={{ to: "/transfer-antar-entitas", label: "Transfer Antar Entitas", icon: ArrowLeftRight }}
+          active={isActive("/transfer-antar-entitas")}
           onNavigate={onNavigate}
         />
         <NavLink
