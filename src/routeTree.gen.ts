@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
 import { Route as AppUspRouteImport } from './routes/_app.usp'
+import { Route as AppTransferAntarEntitasRouteImport } from './routes/_app.transfer-antar-entitas'
 import { Route as AppPengaturanRouteImport } from './routes/_app.pengaturan'
 import { Route as AppCoaRouteImport } from './routes/_app.coa'
 import { Route as AppCatatKegiatanRouteImport } from './routes/_app.catat-kegiatan'
@@ -33,6 +34,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
 const AppUspRoute = AppUspRouteImport.update({
   id: '/usp',
   path: '/usp',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppTransferAntarEntitasRoute = AppTransferAntarEntitasRouteImport.update({
+  id: '/transfer-antar-entitas',
+  path: '/transfer-antar-entitas',
   getParentRoute: () => AppRoute,
 } as any)
 const AppPengaturanRoute = AppPengaturanRouteImport.update({
@@ -82,6 +88,7 @@ export interface FileRoutesByFullPath {
   '/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/coa': typeof AppCoaRoute
   '/pengaturan': typeof AppPengaturanRoute
+  '/transfer-antar-entitas': typeof AppTransferAntarEntitasRoute
   '/usp': typeof AppUspRouteWithChildren
   '/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
   '/laporan/laba-rugi': typeof AppLaporanLabaRugiRoute
@@ -93,6 +100,7 @@ export interface FileRoutesByTo {
   '/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/coa': typeof AppCoaRoute
   '/pengaturan': typeof AppPengaturanRoute
+  '/transfer-antar-entitas': typeof AppTransferAntarEntitasRoute
   '/usp': typeof AppUspRouteWithChildren
   '/': typeof AppIndexRoute
   '/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
@@ -107,6 +115,7 @@ export interface FileRoutesById {
   '/_app/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/_app/coa': typeof AppCoaRoute
   '/_app/pengaturan': typeof AppPengaturanRoute
+  '/_app/transfer-antar-entitas': typeof AppTransferAntarEntitasRoute
   '/_app/usp': typeof AppUspRouteWithChildren
   '/_app/': typeof AppIndexRoute
   '/_app/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
@@ -122,6 +131,7 @@ export interface FileRouteTypes {
     | '/catat-kegiatan'
     | '/coa'
     | '/pengaturan'
+    | '/transfer-antar-entitas'
     | '/usp'
     | '/laporan/bagi-hasil'
     | '/laporan/laba-rugi'
@@ -133,6 +143,7 @@ export interface FileRouteTypes {
     | '/catat-kegiatan'
     | '/coa'
     | '/pengaturan'
+    | '/transfer-antar-entitas'
     | '/usp'
     | '/'
     | '/laporan/bagi-hasil'
@@ -146,6 +157,7 @@ export interface FileRouteTypes {
     | '/_app/catat-kegiatan'
     | '/_app/coa'
     | '/_app/pengaturan'
+    | '/_app/transfer-antar-entitas'
     | '/_app/usp'
     | '/_app/'
     | '/_app/laporan/bagi-hasil'
@@ -180,6 +192,13 @@ declare module '@tanstack/react-router' {
       path: '/usp'
       fullPath: '/usp'
       preLoaderRoute: typeof AppUspRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/transfer-antar-entitas': {
+      id: '/_app/transfer-antar-entitas'
+      path: '/transfer-antar-entitas'
+      fullPath: '/transfer-antar-entitas'
+      preLoaderRoute: typeof AppTransferAntarEntitasRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/pengaturan': {
@@ -256,6 +275,7 @@ interface AppRouteChildren {
   AppCatatKegiatanRoute: typeof AppCatatKegiatanRoute
   AppCoaRoute: typeof AppCoaRoute
   AppPengaturanRoute: typeof AppPengaturanRoute
+  AppTransferAntarEntitasRoute: typeof AppTransferAntarEntitasRoute
   AppUspRoute: typeof AppUspRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
   AppLaporanBagiHasilRoute: typeof AppLaporanBagiHasilRoute
@@ -268,6 +288,7 @@ const AppRouteChildren: AppRouteChildren = {
   AppCatatKegiatanRoute: AppCatatKegiatanRoute,
   AppCoaRoute: AppCoaRoute,
   AppPengaturanRoute: AppPengaturanRoute,
+  AppTransferAntarEntitasRoute: AppTransferAntarEntitasRoute,
   AppUspRoute: AppUspRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
   AppLaporanBagiHasilRoute: AppLaporanBagiHasilRoute,
@@ -284,3 +305,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
