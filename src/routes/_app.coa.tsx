@@ -5,6 +5,7 @@ import { Plus, Search, Loader2, Pencil, Trash2, Power } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
+import { invalidateFinancials } from "@/lib/query-invalidate";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
