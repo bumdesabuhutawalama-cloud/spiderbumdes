@@ -154,7 +154,7 @@ function ActivityCard({
   );
 }
 
-function PenyertaanModalDialog({ onClose }: { onClose: () => void }) {
+export function PenyertaanModalDialog({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient();
   const today = new Date().toISOString().slice(0, 10);
   const [tanggal, setTanggal] = useState(today);
@@ -471,7 +471,7 @@ const ASET_CATEGORIES: AsetCategory[] = [
   { key: "lainnya", label: "Aset Lainnya", prefix: "1.3.99.", hint: "Aset tetap lainnya" },
 ];
 
-function BelanjaAsetDialog({ onClose }: { onClose: () => void }) {
+export function BelanjaAsetDialog({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient();
   const today = new Date().toISOString().slice(0, 10);
   const [tanggal, setTanggal] = useState(today);
@@ -766,7 +766,7 @@ const PENDAPATAN_CATEGORIES: PendapatanCategory[] = [
   { key: "piutang", label: "Penerimaan Piutang", prefix: "1.1.03.", hint: "Pelunasan piutang usaha" },
 ];
 
-function PenerimaanKasDialog({ onClose }: { onClose: () => void }) {
+export function PenerimaanKasDialog({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient();
   const today = new Date().toISOString().slice(0, 10);
   const [tanggal, setTanggal] = useState(today);
@@ -1077,7 +1077,7 @@ const BEBAN_CATEGORIES: BebanCategory[] = [
   { key: "hutang", label: "Bayar Hutang", prefix: "2.1.", hint: "Pelunasan hutang usaha / pinjaman" },
 ];
 
-function PengeluaranOperasionalDialog({ onClose }: { onClose: () => void }) {
+export function PengeluaranOperasionalDialog({ onClose }: { onClose: () => void }) {
   const qc = useQueryClient();
   const today = new Date().toISOString().slice(0, 10);
   const [tanggal, setTanggal] = useState(today);

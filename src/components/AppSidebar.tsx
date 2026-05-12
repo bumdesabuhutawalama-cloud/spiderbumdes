@@ -14,6 +14,7 @@ import {
   FileSpreadsheet,
   HandCoins,
   GitCompare,
+  ClipboardList,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -96,6 +97,12 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
         </div>
 
         <div className="my-2 border-t border-border/40" />
+
+        <NavLink
+          item={{ to: "/pusat/kegiatan", label: "Catat Kegiatan", icon: ClipboardList }}
+          active={isActive("/pusat/kegiatan")}
+          onNavigate={onNavigate}
+        />
 
         <NavLink
           item={{ to: "/usp", label: "Unit Simpan Pinjam", icon: HandCoins }}
