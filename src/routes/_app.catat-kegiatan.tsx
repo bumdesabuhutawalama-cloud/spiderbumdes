@@ -611,12 +611,7 @@ function BelanjaAsetDialog({ onClose }: { onClose: () => void }) {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <Field label="Tanggal Transaksi">
-              <input
-                type="date"
-                value={tanggal}
-                onChange={(e) => setTanggal(e.target.value)}
-                className="input-glass"
-              />
+              <DateField value={tanggal} onChange={setTanggal} />
             </Field>
 
             <Field label="Sumber Pembayaran">
