@@ -3,6 +3,7 @@ import { useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ClipboardList, TrendingUp, Wallet, Loader2, X, ArrowDownCircle, ArrowUpCircle, Package, HandCoins, Banknote, AlertTriangle, Receipt } from "lucide-react";
 import { PageHeader } from "@/components/DashboardLayout";
+import { DateField } from "@/components/DateField";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
@@ -288,14 +289,12 @@ function PenyertaanModalDialog({ onClose }: { onClose: () => void }) {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <Field label="Tanggal Transaksi">
-              <input
-                type="date"
+              <DateField
                 value={tanggal}
-                onChange={(e) => {
-                  setTanggal(e.target.value);
-                  if (e.target.value) sumberRef.current?.focus();
+                onChange={(v) => {
+                  setTanggal(v);
+                  if (v) sumberRef.current?.focus();
                 }}
-                className="input-glass"
               />
             </Field>
 
@@ -612,12 +611,7 @@ function BelanjaAsetDialog({ onClose }: { onClose: () => void }) {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <Field label="Tanggal Transaksi">
-              <input
-                type="date"
-                value={tanggal}
-                onChange={(e) => setTanggal(e.target.value)}
-                className="input-glass"
-              />
+              <DateField value={tanggal} onChange={setTanggal} />
             </Field>
 
             <Field label="Sumber Pembayaran">
@@ -911,12 +905,7 @@ function PenerimaanKasDialog({ onClose }: { onClose: () => void }) {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <Field label="Tanggal Transaksi">
-              <input
-                type="date"
-                value={tanggal}
-                onChange={(e) => setTanggal(e.target.value)}
-                className="input-glass"
-              />
+              <DateField value={tanggal} onChange={setTanggal} />
             </Field>
 
             <Field label="Diterima di Rekening">
@@ -1230,12 +1219,7 @@ function PengeluaranOperasionalDialog({ onClose }: { onClose: () => void }) {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <Field label="Tanggal Transaksi">
-              <input
-                type="date"
-                value={tanggal}
-                onChange={(e) => setTanggal(e.target.value)}
-                className="input-glass"
-              />
+              <DateField value={tanggal} onChange={setTanggal} />
             </Field>
 
             <Field label="Dibayar dari Rekening">
