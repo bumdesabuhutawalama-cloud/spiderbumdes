@@ -61,7 +61,7 @@ function DashboardPage() {
   const monthStart = `${today.getFullYear()}-${pad(today.getMonth() + 1)}-01`;
 
   // Master COA — needed to map signed balances by type.
-  const { data: accounts } = useQuery({
+  const { data: accountsRaw } = useQuery({
     queryKey: ["coa_accounts_dashboard"],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -71,6 +71,22 @@ function DashboardPage() {
       return (data ?? []) as AccountLite[];
     },
   });
+
+  // Akun RK antar-entitas dieliminasi pada konsolidasi (samakan dengan Neraca Konsolidasi).
+  const { data: rkAccountIds } = useQuery({
+    queryKey: ["entity_rk_account_ids_dashboard"],
+    queryFn: async () => {
+      const { data, error } = await supabase.from("entity_rk_accounts").select("account_id");
+      if (error) throw error;
+      return new Set((data ?? []).map((r) => r.account_id as string));
+    },
+  });
+
+  const accounts = useMemo(() => {
+    if (!accountsRaw) return accountsRaw;
+    if (!rkAccountIds) return accountsRaw;
+    return accountsRaw.filter((a) => !rkAccountIds.has(a.id));
+  }, [accountsRaw, rkAccountIds]);
 
   // Konsolidasi: mode 'pusat' (default) memakai semua jurnal tanpa filter unit.
   const { data: balAsOf } = useAccountBalances(todayStr, "pusat");
