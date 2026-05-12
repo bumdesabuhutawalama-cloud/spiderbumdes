@@ -30,11 +30,14 @@ import { Route as AppLaporanRekonsiliasiRkRouteImport } from './routes/_app.lapo
 import { Route as AppLaporanNeracaPusatRouteImport } from './routes/_app.laporan.neraca-pusat'
 import { Route as AppLaporanNeracaKonsolidasiRouteImport } from './routes/_app.laporan.neraca-konsolidasi'
 import { Route as AppLaporanLabaRugiRouteImport } from './routes/_app.laporan.laba-rugi'
+import { Route as AppLaporanBukuBesarPusatRouteImport } from './routes/_app.laporan.buku-besar-pusat'
+import { Route as AppLaporanBukuBesarKonsolidasiRouteImport } from './routes/_app.laporan.buku-besar-konsolidasi'
 import { Route as AppLaporanBagiHasilRouteImport } from './routes/_app.laporan.bagi-hasil'
 import { Route as AppUspLaporanIndexRouteImport } from './routes/_app.usp.laporan.index'
 import { Route as AppUspLaporanRekonsiliasiRkRouteImport } from './routes/_app.usp.laporan.rekonsiliasi-rk'
 import { Route as AppUspLaporanNeracaRouteImport } from './routes/_app.usp.laporan.neraca'
 import { Route as AppUspLaporanLabaRugiRouteImport } from './routes/_app.usp.laporan.laba-rugi'
+import { Route as AppUspLaporanBukuBesarRouteImport } from './routes/_app.usp.laporan.buku-besar'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -142,6 +145,18 @@ const AppLaporanLabaRugiRoute = AppLaporanLabaRugiRouteImport.update({
   path: '/laporan/laba-rugi',
   getParentRoute: () => AppRoute,
 } as any)
+const AppLaporanBukuBesarPusatRoute =
+  AppLaporanBukuBesarPusatRouteImport.update({
+    id: '/laporan/buku-besar-pusat',
+    path: '/laporan/buku-besar-pusat',
+    getParentRoute: () => AppRoute,
+  } as any)
+const AppLaporanBukuBesarKonsolidasiRoute =
+  AppLaporanBukuBesarKonsolidasiRouteImport.update({
+    id: '/laporan/buku-besar-konsolidasi',
+    path: '/laporan/buku-besar-konsolidasi',
+    getParentRoute: () => AppRoute,
+  } as any)
 const AppLaporanBagiHasilRoute = AppLaporanBagiHasilRouteImport.update({
   id: '/laporan/bagi-hasil',
   path: '/laporan/bagi-hasil',
@@ -168,6 +183,11 @@ const AppUspLaporanLabaRugiRoute = AppUspLaporanLabaRugiRouteImport.update({
   path: '/laba-rugi',
   getParentRoute: () => AppUspLaporanRoute,
 } as any)
+const AppUspLaporanBukuBesarRoute = AppUspLaporanBukuBesarRouteImport.update({
+  id: '/buku-besar',
+  path: '/buku-besar',
+  getParentRoute: () => AppUspLaporanRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -179,6 +199,8 @@ export interface FileRoutesByFullPath {
   '/usp': typeof AppUspRouteWithChildren
   '/login/$unit': typeof LoginUnitRoute
   '/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
+  '/laporan/buku-besar-konsolidasi': typeof AppLaporanBukuBesarKonsolidasiRoute
+  '/laporan/buku-besar-pusat': typeof AppLaporanBukuBesarPusatRoute
   '/laporan/laba-rugi': typeof AppLaporanLabaRugiRoute
   '/laporan/neraca-konsolidasi': typeof AppLaporanNeracaKonsolidasiRoute
   '/laporan/neraca-pusat': typeof AppLaporanNeracaPusatRoute
@@ -191,6 +213,7 @@ export interface FileRoutesByFullPath {
   '/usp/transfer': typeof AppUspTransferRoute
   '/pengaturan/': typeof AppPengaturanIndexRoute
   '/usp/': typeof AppUspIndexRoute
+  '/usp/laporan/buku-besar': typeof AppUspLaporanBukuBesarRoute
   '/usp/laporan/laba-rugi': typeof AppUspLaporanLabaRugiRoute
   '/usp/laporan/neraca': typeof AppUspLaporanNeracaRoute
   '/usp/laporan/rekonsiliasi-rk': typeof AppUspLaporanRekonsiliasiRkRoute
@@ -204,6 +227,8 @@ export interface FileRoutesByTo {
   '/login/$unit': typeof LoginUnitRoute
   '/': typeof AppIndexRoute
   '/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
+  '/laporan/buku-besar-konsolidasi': typeof AppLaporanBukuBesarKonsolidasiRoute
+  '/laporan/buku-besar-pusat': typeof AppLaporanBukuBesarPusatRoute
   '/laporan/laba-rugi': typeof AppLaporanLabaRugiRoute
   '/laporan/neraca-konsolidasi': typeof AppLaporanNeracaKonsolidasiRoute
   '/laporan/neraca-pusat': typeof AppLaporanNeracaPusatRoute
@@ -215,6 +240,7 @@ export interface FileRoutesByTo {
   '/usp/transfer': typeof AppUspTransferRoute
   '/pengaturan': typeof AppPengaturanIndexRoute
   '/usp': typeof AppUspIndexRoute
+  '/usp/laporan/buku-besar': typeof AppUspLaporanBukuBesarRoute
   '/usp/laporan/laba-rugi': typeof AppUspLaporanLabaRugiRoute
   '/usp/laporan/neraca': typeof AppUspLaporanNeracaRoute
   '/usp/laporan/rekonsiliasi-rk': typeof AppUspLaporanRekonsiliasiRkRoute
@@ -232,6 +258,8 @@ export interface FileRoutesById {
   '/login/$unit': typeof LoginUnitRoute
   '/_app/': typeof AppIndexRoute
   '/_app/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
+  '/_app/laporan/buku-besar-konsolidasi': typeof AppLaporanBukuBesarKonsolidasiRoute
+  '/_app/laporan/buku-besar-pusat': typeof AppLaporanBukuBesarPusatRoute
   '/_app/laporan/laba-rugi': typeof AppLaporanLabaRugiRoute
   '/_app/laporan/neraca-konsolidasi': typeof AppLaporanNeracaKonsolidasiRoute
   '/_app/laporan/neraca-pusat': typeof AppLaporanNeracaPusatRoute
@@ -244,6 +272,7 @@ export interface FileRoutesById {
   '/_app/usp/transfer': typeof AppUspTransferRoute
   '/_app/pengaturan/': typeof AppPengaturanIndexRoute
   '/_app/usp/': typeof AppUspIndexRoute
+  '/_app/usp/laporan/buku-besar': typeof AppUspLaporanBukuBesarRoute
   '/_app/usp/laporan/laba-rugi': typeof AppUspLaporanLabaRugiRoute
   '/_app/usp/laporan/neraca': typeof AppUspLaporanNeracaRoute
   '/_app/usp/laporan/rekonsiliasi-rk': typeof AppUspLaporanRekonsiliasiRkRoute
@@ -261,6 +290,8 @@ export interface FileRouteTypes {
     | '/usp'
     | '/login/$unit'
     | '/laporan/bagi-hasil'
+    | '/laporan/buku-besar-konsolidasi'
+    | '/laporan/buku-besar-pusat'
     | '/laporan/laba-rugi'
     | '/laporan/neraca-konsolidasi'
     | '/laporan/neraca-pusat'
@@ -273,6 +304,7 @@ export interface FileRouteTypes {
     | '/usp/transfer'
     | '/pengaturan/'
     | '/usp/'
+    | '/usp/laporan/buku-besar'
     | '/usp/laporan/laba-rugi'
     | '/usp/laporan/neraca'
     | '/usp/laporan/rekonsiliasi-rk'
@@ -286,6 +318,8 @@ export interface FileRouteTypes {
     | '/login/$unit'
     | '/'
     | '/laporan/bagi-hasil'
+    | '/laporan/buku-besar-konsolidasi'
+    | '/laporan/buku-besar-pusat'
     | '/laporan/laba-rugi'
     | '/laporan/neraca-konsolidasi'
     | '/laporan/neraca-pusat'
@@ -297,6 +331,7 @@ export interface FileRouteTypes {
     | '/usp/transfer'
     | '/pengaturan'
     | '/usp'
+    | '/usp/laporan/buku-besar'
     | '/usp/laporan/laba-rugi'
     | '/usp/laporan/neraca'
     | '/usp/laporan/rekonsiliasi-rk'
@@ -313,6 +348,8 @@ export interface FileRouteTypes {
     | '/login/$unit'
     | '/_app/'
     | '/_app/laporan/bagi-hasil'
+    | '/_app/laporan/buku-besar-konsolidasi'
+    | '/_app/laporan/buku-besar-pusat'
     | '/_app/laporan/laba-rugi'
     | '/_app/laporan/neraca-konsolidasi'
     | '/_app/laporan/neraca-pusat'
@@ -325,6 +362,7 @@ export interface FileRouteTypes {
     | '/_app/usp/transfer'
     | '/_app/pengaturan/'
     | '/_app/usp/'
+    | '/_app/usp/laporan/buku-besar'
     | '/_app/usp/laporan/laba-rugi'
     | '/_app/usp/laporan/neraca'
     | '/_app/usp/laporan/rekonsiliasi-rk'
@@ -485,6 +523,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppLaporanLabaRugiRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/laporan/buku-besar-pusat': {
+      id: '/_app/laporan/buku-besar-pusat'
+      path: '/laporan/buku-besar-pusat'
+      fullPath: '/laporan/buku-besar-pusat'
+      preLoaderRoute: typeof AppLaporanBukuBesarPusatRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/laporan/buku-besar-konsolidasi': {
+      id: '/_app/laporan/buku-besar-konsolidasi'
+      path: '/laporan/buku-besar-konsolidasi'
+      fullPath: '/laporan/buku-besar-konsolidasi'
+      preLoaderRoute: typeof AppLaporanBukuBesarKonsolidasiRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/laporan/bagi-hasil': {
       id: '/_app/laporan/bagi-hasil'
       path: '/laporan/bagi-hasil'
@@ -520,6 +572,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppUspLaporanLabaRugiRouteImport
       parentRoute: typeof AppUspLaporanRoute
     }
+    '/_app/usp/laporan/buku-besar': {
+      id: '/_app/usp/laporan/buku-besar'
+      path: '/buku-besar'
+      fullPath: '/usp/laporan/buku-besar'
+      preLoaderRoute: typeof AppUspLaporanBukuBesarRouteImport
+      parentRoute: typeof AppUspLaporanRoute
+    }
   }
 }
 
@@ -538,6 +597,7 @@ const AppPengaturanRouteWithChildren = AppPengaturanRoute._addFileChildren(
 )
 
 interface AppUspLaporanRouteChildren {
+  AppUspLaporanBukuBesarRoute: typeof AppUspLaporanBukuBesarRoute
   AppUspLaporanLabaRugiRoute: typeof AppUspLaporanLabaRugiRoute
   AppUspLaporanNeracaRoute: typeof AppUspLaporanNeracaRoute
   AppUspLaporanRekonsiliasiRkRoute: typeof AppUspLaporanRekonsiliasiRkRoute
@@ -545,6 +605,7 @@ interface AppUspLaporanRouteChildren {
 }
 
 const AppUspLaporanRouteChildren: AppUspLaporanRouteChildren = {
+  AppUspLaporanBukuBesarRoute: AppUspLaporanBukuBesarRoute,
   AppUspLaporanLabaRugiRoute: AppUspLaporanLabaRugiRoute,
   AppUspLaporanNeracaRoute: AppUspLaporanNeracaRoute,
   AppUspLaporanRekonsiliasiRkRoute: AppUspLaporanRekonsiliasiRkRoute,
@@ -582,6 +643,8 @@ interface AppRouteChildren {
   AppUspRoute: typeof AppUspRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
   AppLaporanBagiHasilRoute: typeof AppLaporanBagiHasilRoute
+  AppLaporanBukuBesarKonsolidasiRoute: typeof AppLaporanBukuBesarKonsolidasiRoute
+  AppLaporanBukuBesarPusatRoute: typeof AppLaporanBukuBesarPusatRoute
   AppLaporanLabaRugiRoute: typeof AppLaporanLabaRugiRoute
   AppLaporanNeracaKonsolidasiRoute: typeof AppLaporanNeracaKonsolidasiRoute
   AppLaporanNeracaPusatRoute: typeof AppLaporanNeracaPusatRoute
@@ -597,6 +660,8 @@ const AppRouteChildren: AppRouteChildren = {
   AppUspRoute: AppUspRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
   AppLaporanBagiHasilRoute: AppLaporanBagiHasilRoute,
+  AppLaporanBukuBesarKonsolidasiRoute: AppLaporanBukuBesarKonsolidasiRoute,
+  AppLaporanBukuBesarPusatRoute: AppLaporanBukuBesarPusatRoute,
   AppLaporanLabaRugiRoute: AppLaporanLabaRugiRoute,
   AppLaporanNeracaKonsolidasiRoute: AppLaporanNeracaKonsolidasiRoute,
   AppLaporanNeracaPusatRoute: AppLaporanNeracaPusatRoute,
@@ -623,3 +688,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
