@@ -157,14 +157,38 @@ function UsersPage() {
     }
   };
 
-  const handleReset = async (userId: string) => {
-    const pw = window.prompt("Password baru (min 8 karakter):");
-    if (!pw || pw.length < 8) return;
+  const [resetTarget, setResetTarget] = useState<UserRow | null>(null);
+  const [resetPw, setResetPw] = useState("");
+  const [resetPw2, setResetPw2] = useState("");
+  const [resetSaving, setResetSaving] = useState(false);
+
+  const handleReset = (u: UserRow) => {
+    setResetPw("");
+    setResetPw2("");
+    setResetTarget(u);
+  };
+
+  const submitReset = async () => {
+    if (!resetTarget) return;
+    if (resetPw.length < 8) {
+      toast.error("Password minimal 8 karakter.");
+      return;
+    }
+    if (resetPw !== resetPw2) {
+      toast.error("Konfirmasi password tidak cocok.");
+      return;
+    }
+    setResetSaving(true);
     try {
-      await reset({ data: { userId, newPassword: pw } });
+      await reset({ data: { userId: resetTarget.userId, newPassword: resetPw } });
       toast.success("Password berhasil di-reset.");
+      setResetTarget(null);
+      setResetPw("");
+      setResetPw2("");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Gagal reset password");
+    } finally {
+      setResetSaving(false);
     }
   };
 
@@ -496,7 +520,7 @@ function UsersPage() {
                             </IconBtn>
                             <IconBtn
                               title="Reset password"
-                              onClick={() => handleReset(u.userId)}
+                              onClick={() => handleReset(u)}
                             >
                               <KeyRound className="h-3.5 w-3.5" />
                             </IconBtn>
@@ -560,6 +584,84 @@ function UsersPage() {
           )}
         </div>
       </div>
+
+      {resetTarget && (
+        <div
+          className="fixed inset-0 z-50 grid place-items-center bg-black/60 backdrop-blur-sm p-4"
+          onClick={() => !resetSaving && setResetTarget(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-md rounded-xl border border-border/60 bg-background p-5 shadow-xl"
+          >
+            <div className="flex items-start justify-between mb-4">
+              <div>
+                <h3 className="text-base font-semibold">Reset Password</h3>
+                <p className="text-xs text-muted-foreground mt-1">
+                  Untuk: {resetTarget.email}
+                </p>
+              </div>
+              <button
+                type="button"
+                disabled={resetSaving}
+                onClick={() => setResetTarget(null)}
+                className="grid h-7 w-7 place-items-center rounded border border-border/60 bg-secondary/50 hover:bg-secondary"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                void submitReset();
+              }}
+              className="space-y-3"
+            >
+              <Field label="Password baru (min 8 karakter)">
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  className={inputCls}
+                  value={resetPw}
+                  onChange={(e) => setResetPw(e.target.value)}
+                  minLength={8}
+                  required
+                  autoFocus
+                />
+              </Field>
+              <Field label="Konfirmasi password baru">
+                <input
+                  type="password"
+                  autoComplete="new-password"
+                  className={inputCls}
+                  value={resetPw2}
+                  onChange={(e) => setResetPw2(e.target.value)}
+                  minLength={8}
+                  required
+                />
+              </Field>
+              <div className="flex justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  disabled={resetSaving}
+                  onClick={() => setResetTarget(null)}
+                  className="rounded-lg border border-border/60 bg-secondary/50 px-3 py-2 text-sm hover:bg-secondary"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={resetSaving}
+                  className="inline-flex items-center gap-2 rounded-lg bg-[var(--neon-cyan)] px-3 py-2 text-sm font-medium text-[oklch(0.15_0.03_250)] hover:opacity-90 disabled:opacity-60"
+                >
+                  {resetSaving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                  Simpan Password
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </>
   );
 }
