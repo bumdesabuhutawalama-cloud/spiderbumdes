@@ -12,10 +12,14 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
 import { Route as AppUspRouteImport } from './routes/_app.usp'
+import { Route as AppTransferAntarEntitasRouteImport } from './routes/_app.transfer-antar-entitas'
 import { Route as AppPengaturanRouteImport } from './routes/_app.pengaturan'
 import { Route as AppCoaRouteImport } from './routes/_app.coa'
+import { Route as AppCatatKegiatanRouteImport } from './routes/_app.catat-kegiatan'
+import { Route as AppUspIndexRouteImport } from './routes/_app.usp.index'
 import { Route as AppUspTransferRouteImport } from './routes/_app.usp.transfer'
 import { Route as AppUspPinjamanRouteImport } from './routes/_app.usp.pinjaman'
+import { Route as AppUspLaporanRouteImport } from './routes/_app.usp.laporan'
 import { Route as AppUspKegiatanRouteImport } from './routes/_app.usp.kegiatan'
 import { Route as AppLaporanRekonsiliasiRkRouteImport } from './routes/_app.laporan.rekonsiliasi-rk'
 import { Route as AppLaporanNeracaPusatRouteImport } from './routes/_app.laporan.neraca-pusat'
@@ -37,6 +41,11 @@ const AppUspRoute = AppUspRouteImport.update({
   path: '/usp',
   getParentRoute: () => AppRoute,
 } as any)
+const AppTransferAntarEntitasRoute = AppTransferAntarEntitasRouteImport.update({
+  id: '/transfer-antar-entitas',
+  path: '/transfer-antar-entitas',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppPengaturanRoute = AppPengaturanRouteImport.update({
   id: '/pengaturan',
   path: '/pengaturan',
@@ -47,6 +56,16 @@ const AppCoaRoute = AppCoaRouteImport.update({
   path: '/coa',
   getParentRoute: () => AppRoute,
 } as any)
+const AppCatatKegiatanRoute = AppCatatKegiatanRouteImport.update({
+  id: '/catat-kegiatan',
+  path: '/catat-kegiatan',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppUspIndexRoute = AppUspIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppUspRoute,
+} as any)
 const AppUspTransferRoute = AppUspTransferRouteImport.update({
   id: '/transfer',
   path: '/transfer',
@@ -55,6 +74,11 @@ const AppUspTransferRoute = AppUspTransferRouteImport.update({
 const AppUspPinjamanRoute = AppUspPinjamanRouteImport.update({
   id: '/pinjaman',
   path: '/pinjaman',
+  getParentRoute: () => AppUspRoute,
+} as any)
+const AppUspLaporanRoute = AppUspLaporanRouteImport.update({
+  id: '/laporan',
+  path: '/laporan',
   getParentRoute: () => AppUspRoute,
 } as any)
 const AppUspKegiatanRoute = AppUspKegiatanRouteImport.update({
@@ -92,8 +116,10 @@ const AppLaporanBagiHasilRoute = AppLaporanBagiHasilRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
+  '/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/coa': typeof AppCoaRoute
   '/pengaturan': typeof AppPengaturanRoute
+  '/transfer-antar-entitas': typeof AppTransferAntarEntitasRoute
   '/usp': typeof AppUspRouteWithChildren
   '/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
   '/laporan/laba-rugi': typeof AppLaporanLabaRugiRoute
@@ -101,13 +127,16 @@ export interface FileRoutesByFullPath {
   '/laporan/neraca-pusat': typeof AppLaporanNeracaPusatRoute
   '/laporan/rekonsiliasi-rk': typeof AppLaporanRekonsiliasiRkRoute
   '/usp/kegiatan': typeof AppUspKegiatanRoute
+  '/usp/laporan': typeof AppUspLaporanRoute
   '/usp/pinjaman': typeof AppUspPinjamanRoute
   '/usp/transfer': typeof AppUspTransferRoute
+  '/usp/': typeof AppUspIndexRoute
 }
 export interface FileRoutesByTo {
+  '/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/coa': typeof AppCoaRoute
   '/pengaturan': typeof AppPengaturanRoute
-  '/usp': typeof AppUspRouteWithChildren
+  '/transfer-antar-entitas': typeof AppTransferAntarEntitasRoute
   '/': typeof AppIndexRoute
   '/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
   '/laporan/laba-rugi': typeof AppLaporanLabaRugiRoute
@@ -115,14 +144,18 @@ export interface FileRoutesByTo {
   '/laporan/neraca-pusat': typeof AppLaporanNeracaPusatRoute
   '/laporan/rekonsiliasi-rk': typeof AppLaporanRekonsiliasiRkRoute
   '/usp/kegiatan': typeof AppUspKegiatanRoute
+  '/usp/laporan': typeof AppUspLaporanRoute
   '/usp/pinjaman': typeof AppUspPinjamanRoute
   '/usp/transfer': typeof AppUspTransferRoute
+  '/usp': typeof AppUspIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
+  '/_app/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/_app/coa': typeof AppCoaRoute
   '/_app/pengaturan': typeof AppPengaturanRoute
+  '/_app/transfer-antar-entitas': typeof AppTransferAntarEntitasRoute
   '/_app/usp': typeof AppUspRouteWithChildren
   '/_app/': typeof AppIndexRoute
   '/_app/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
@@ -131,15 +164,19 @@ export interface FileRoutesById {
   '/_app/laporan/neraca-pusat': typeof AppLaporanNeracaPusatRoute
   '/_app/laporan/rekonsiliasi-rk': typeof AppLaporanRekonsiliasiRkRoute
   '/_app/usp/kegiatan': typeof AppUspKegiatanRoute
+  '/_app/usp/laporan': typeof AppUspLaporanRoute
   '/_app/usp/pinjaman': typeof AppUspPinjamanRoute
   '/_app/usp/transfer': typeof AppUspTransferRoute
+  '/_app/usp/': typeof AppUspIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/catat-kegiatan'
     | '/coa'
     | '/pengaturan'
+    | '/transfer-antar-entitas'
     | '/usp'
     | '/laporan/bagi-hasil'
     | '/laporan/laba-rugi'
@@ -147,13 +184,16 @@ export interface FileRouteTypes {
     | '/laporan/neraca-pusat'
     | '/laporan/rekonsiliasi-rk'
     | '/usp/kegiatan'
+    | '/usp/laporan'
     | '/usp/pinjaman'
     | '/usp/transfer'
+    | '/usp/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/catat-kegiatan'
     | '/coa'
     | '/pengaturan'
-    | '/usp'
+    | '/transfer-antar-entitas'
     | '/'
     | '/laporan/bagi-hasil'
     | '/laporan/laba-rugi'
@@ -161,13 +201,17 @@ export interface FileRouteTypes {
     | '/laporan/neraca-pusat'
     | '/laporan/rekonsiliasi-rk'
     | '/usp/kegiatan'
+    | '/usp/laporan'
     | '/usp/pinjaman'
     | '/usp/transfer'
+    | '/usp'
   id:
     | '__root__'
     | '/_app'
+    | '/_app/catat-kegiatan'
     | '/_app/coa'
     | '/_app/pengaturan'
+    | '/_app/transfer-antar-entitas'
     | '/_app/usp'
     | '/_app/'
     | '/_app/laporan/bagi-hasil'
@@ -176,8 +220,10 @@ export interface FileRouteTypes {
     | '/_app/laporan/neraca-pusat'
     | '/_app/laporan/rekonsiliasi-rk'
     | '/_app/usp/kegiatan'
+    | '/_app/usp/laporan'
     | '/_app/usp/pinjaman'
     | '/_app/usp/transfer'
+    | '/_app/usp/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -207,6 +253,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppUspRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/transfer-antar-entitas': {
+      id: '/_app/transfer-antar-entitas'
+      path: '/transfer-antar-entitas'
+      fullPath: '/transfer-antar-entitas'
+      preLoaderRoute: typeof AppTransferAntarEntitasRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/pengaturan': {
       id: '/_app/pengaturan'
       path: '/pengaturan'
@@ -221,6 +274,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCoaRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/catat-kegiatan': {
+      id: '/_app/catat-kegiatan'
+      path: '/catat-kegiatan'
+      fullPath: '/catat-kegiatan'
+      preLoaderRoute: typeof AppCatatKegiatanRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/usp/': {
+      id: '/_app/usp/'
+      path: '/'
+      fullPath: '/usp/'
+      preLoaderRoute: typeof AppUspIndexRouteImport
+      parentRoute: typeof AppUspRoute
+    }
     '/_app/usp/transfer': {
       id: '/_app/usp/transfer'
       path: '/transfer'
@@ -233,6 +300,13 @@ declare module '@tanstack/react-router' {
       path: '/pinjaman'
       fullPath: '/usp/pinjaman'
       preLoaderRoute: typeof AppUspPinjamanRouteImport
+      parentRoute: typeof AppUspRoute
+    }
+    '/_app/usp/laporan': {
+      id: '/_app/usp/laporan'
+      path: '/laporan'
+      fullPath: '/usp/laporan'
+      preLoaderRoute: typeof AppUspLaporanRouteImport
       parentRoute: typeof AppUspRoute
     }
     '/_app/usp/kegiatan': {
@@ -282,22 +356,28 @@ declare module '@tanstack/react-router' {
 
 interface AppUspRouteChildren {
   AppUspKegiatanRoute: typeof AppUspKegiatanRoute
+  AppUspLaporanRoute: typeof AppUspLaporanRoute
   AppUspPinjamanRoute: typeof AppUspPinjamanRoute
   AppUspTransferRoute: typeof AppUspTransferRoute
+  AppUspIndexRoute: typeof AppUspIndexRoute
 }
 
 const AppUspRouteChildren: AppUspRouteChildren = {
   AppUspKegiatanRoute: AppUspKegiatanRoute,
+  AppUspLaporanRoute: AppUspLaporanRoute,
   AppUspPinjamanRoute: AppUspPinjamanRoute,
   AppUspTransferRoute: AppUspTransferRoute,
+  AppUspIndexRoute: AppUspIndexRoute,
 }
 
 const AppUspRouteWithChildren =
   AppUspRoute._addFileChildren(AppUspRouteChildren)
 
 interface AppRouteChildren {
+  AppCatatKegiatanRoute: typeof AppCatatKegiatanRoute
   AppCoaRoute: typeof AppCoaRoute
   AppPengaturanRoute: typeof AppPengaturanRoute
+  AppTransferAntarEntitasRoute: typeof AppTransferAntarEntitasRoute
   AppUspRoute: typeof AppUspRouteWithChildren
   AppIndexRoute: typeof AppIndexRoute
   AppLaporanBagiHasilRoute: typeof AppLaporanBagiHasilRoute
@@ -308,8 +388,10 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppCatatKegiatanRoute: AppCatatKegiatanRoute,
   AppCoaRoute: AppCoaRoute,
   AppPengaturanRoute: AppPengaturanRoute,
+  AppTransferAntarEntitasRoute: AppTransferAntarEntitasRoute,
   AppUspRoute: AppUspRouteWithChildren,
   AppIndexRoute: AppIndexRoute,
   AppLaporanBagiHasilRoute: AppLaporanBagiHasilRoute,
@@ -327,3 +409,13 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
