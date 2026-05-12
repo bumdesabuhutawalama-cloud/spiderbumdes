@@ -277,8 +277,7 @@ export function BukuBesarSheet({
                 </thead>
                 <tbody>
                   <tr className="border-b border-border/40 bg-secondary/30 italic text-muted-foreground">
-                    <td className="px-2 py-1.5" colSpan={mode === "konsolidasi" ? 4 : 3}>Saldo Awal per {start}</td>
-                    <td className="px-2 py-1.5" />
+                    <td className="px-2 py-1.5" colSpan={mode === "konsolidasi" ? 5 : 4}>Saldo Awal per {start}</td>
                     <td className="px-2 py-1.5" />
                     <td className="px-2 py-1.5" />
                     <td className="px-2 py-1.5 text-right font-mono">{formatRp(data.opening)}</td>
