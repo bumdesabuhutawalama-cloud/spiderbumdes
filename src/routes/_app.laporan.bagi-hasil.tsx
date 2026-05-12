@@ -277,19 +277,40 @@ function BagiHasilPage() {
         .single();
       if (ke) throw ke;
 
+      // Untuk Cadangan Modal (2.4.02.00) — alokasi kembali ke Kas Alokasi Bagi Hasil
+      // dan reklasifikasi Saldo Laba menjadi Saldo Laba Dicadangkan untuk Penambahan Modal.
+      const isCadanganModal = payCode === "2.4.02.00";
+      let kasAlokasi: { id: string; code: string; name: string } | null = null;
+      let saldoLabaCad: { id: string; code: string; name: string } | null = null;
+      if (isCadanganModal) {
+        const { data: extras, error: ee } = await supabase
+          .from("coa_accounts")
+          .select("id, code, name")
+          .in("code", ["1.1.01.10", "3.3.01.06"]);
+        if (ee) throw ee;
+        kasAlokasi = (extras ?? []).find((a) => a.code === "1.1.01.10") ?? null;
+        saldoLabaCad = (extras ?? []).find((a) => a.code === "3.3.01.06") ?? null;
+        if (!kasAlokasi || !saldoLabaCad)
+          throw new Error("Akun 1.1.01.10 / 3.3.01.06 belum tersedia di COA.");
+      }
+
       const { data: je, error: jee } = await supabase
         .from("journal_entries")
         .insert({
           transaction_date: payDate,
           transaction_type: "PROFIT_DISTRIBUTION_PAYMENT",
-          description: payDesc || `Pembayaran ${hut.name}`,
+          description:
+            payDesc ||
+            (isCadanganModal
+              ? `Pembayaran ${hut.name} — alokasi ke Kas Alokasi Bagi Hasil`
+              : `Pembayaran ${hut.name}`),
           total_amount: amt,
         })
         .select("id")
         .single();
       if (jee) throw jee;
 
-      const { error: le } = await supabase.from("journal_entry_lines").insert([
+      const lines = [
         {
           journal_entry_id: je.id,
           account_id: hut.id,
@@ -308,7 +329,30 @@ function BagiHasilPage() {
           credit: amt,
           line_order: 1,
         },
-      ]);
+      ];
+      if (isCadanganModal && kasAlokasi && saldoLabaCad) {
+        lines.push(
+          {
+            journal_entry_id: je.id,
+            account_id: kasAlokasi.id,
+            account_code: kasAlokasi.code,
+            account_name: kasAlokasi.name,
+            debit: amt,
+            credit: 0,
+            line_order: 2,
+          },
+          {
+            journal_entry_id: je.id,
+            account_id: saldoLabaCad.id,
+            account_code: saldoLabaCad.code,
+            account_name: saldoLabaCad.name,
+            debit: 0,
+            credit: amt,
+            line_order: 3,
+          },
+        );
+      }
+      const { error: le } = await supabase.from("journal_entry_lines").insert(lines);
       if (le) throw le;
     },
     onSuccess: () => {
@@ -475,6 +519,13 @@ function BagiHasilPage() {
             />
           </div>
         </div>
+        {payCode === "2.4.02.00" && (
+          <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-xs text-foreground/80">
+            <strong>Penambahan Modal:</strong> dana akan dipindahkan dari kas operasional
+            ke <em>Kas Alokasi Bagi Hasil (1.1.01.10)</em> dan dicatat ke
+            <em> Saldo Laba Dicadangkan untuk Penambahan Modal (3.3.01.06)</em> secara otomatis.
+          </div>
+        )}
         <button
           disabled={bayar.isPending}
           onClick={() => bayar.mutate()}
