@@ -19,8 +19,11 @@ const items: Item[] = [
   { to: "/usp/laporan", label: "Laporan USP", icon: FileBarChart },
 ];
 
+import { useAuth } from "@/hooks/use-auth";
+
 export function UspNav() {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const { isPusat } = useAuth();
   const current = items.find((i) =>
     i.exact ? path === i.to : path === i.to || path.startsWith(i.to + "/"),
   );
@@ -29,9 +32,13 @@ export function UspNav() {
     <div className="mb-5 space-y-3">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-xs text-muted-foreground">
-        <Link to="/" className="inline-flex items-center gap-1 hover:text-foreground transition">
-          <ArrowLeft className="h-3.5 w-3.5" /> Unit Pusat
-        </Link>
+        {isPusat ? (
+          <Link to="/" className="inline-flex items-center gap-1 hover:text-foreground transition">
+            <ArrowLeft className="h-3.5 w-3.5" /> Unit Pusat
+          </Link>
+        ) : (
+          <span className="inline-flex items-center gap-1 text-foreground/60">Modul</span>
+        )}
         <ChevronRight className="h-3.5 w-3.5 opacity-50" />
         <span className="text-foreground/80">Unit Simpan Pinjam</span>
         {current && current.to !== "/usp" && (
