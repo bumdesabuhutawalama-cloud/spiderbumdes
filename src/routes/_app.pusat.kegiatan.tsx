@@ -58,7 +58,7 @@ function CatatKegiatanPusatPage() {
           accent="from-amber-400 to-rose-400"
         />
         <Link
-          to="/transfer-antar-entitas"
+          to="/usp/transfer"
           className="glass-card group relative rounded-2xl p-5 text-left transition hover:scale-[1.02] hover:shadow-[0_0_30px_rgba(34,211,238,0.15)]"
         >
           <div className="mb-3 inline-grid h-12 w-12 place-items-center rounded-xl bg-gradient-to-br from-sky-400 to-violet-400 text-[oklch(0.15_0.03_250)]">
