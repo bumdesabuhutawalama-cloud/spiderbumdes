@@ -1,16 +1,66 @@
-import { useState } from "react";
-import { createFileRoute, Outlet, useRouterState } from "@tanstack/react-router";
-import { ChevronDown, Search, Bell, Menu, Building2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import {
+  createFileRoute,
+  Outlet,
+  useRouterState,
+  useNavigate,
+  Navigate,
+} from "@tanstack/react-router";
+import { ChevronDown, Search, Bell, Menu, Building2, LogOut, Loader2 } from "lucide-react";
 import { CinematicBackground } from "@/components/CinematicBackground";
 import { AppSidebar, MobileSidebar } from "@/components/AppSidebar";
+import { useAuth } from "@/hooks/use-auth";
 
 export const Route = createFileRoute("/_app")({
   component: AppLayout,
 });
 
+const PUSAT_ONLY_PREFIXES = ["/coa", "/laporan", "/pengaturan", "/pusat"];
+
 function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const { initialized, isAuthenticated, isPusat, isUnit, role } = useAuth();
+  const navigate = useNavigate();
+
+  // Redirect non-authenticated to /login
+  useEffect(() => {
+    if (initialized && !isAuthenticated) {
+      navigate({ to: "/login" });
+    }
+  }, [initialized, isAuthenticated, navigate]);
+
+  if (!initialized) {
+    return (
+      <div className="min-h-screen grid place-items-center text-muted-foreground">
+        <Loader2 className="h-6 w-6 animate-spin" />
+      </div>
+    );
+  }
+  if (!isAuthenticated) return null;
+
+  // Authorization guards
+  if (isUnit) {
+    // admin_unit: redirect root & pusat-only paths to /usp
+    const isPusatRoute =
+      pathname === "/" || PUSAT_ONLY_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
+    if (isPusatRoute) {
+      return <Navigate to="/usp" />;
+    }
+    // Block /usp/* if user's unit is not USP
+    if (pathname.startsWith("/usp") && role?.unitCode && role.unitCode !== "USP") {
+      return (
+        <div className="min-h-screen grid place-items-center p-6 text-center">
+          <div>
+            <p className="text-lg font-semibold">Akses ditolak</p>
+            <p className="text-sm text-muted-foreground mt-1">
+              Akun ini tidak memiliki akses ke modul USP.
+            </p>
+          </div>
+        </div>
+      );
+    }
+  }
 
   return (
     <div className="relative min-h-screen text-foreground">
@@ -36,6 +86,13 @@ function AppLayout() {
 }
 
 function Header({ onOpenMenu }: { onOpenMenu: () => void }) {
+  const { role, user, signOut, isPusat } = useAuth();
+  const [open, setOpen] = useState(false);
+  const initials = (user?.email ?? "U")
+    .split("@")[0]
+    .slice(0, 2)
+    .toUpperCase();
+
   return (
     <header className="sticky top-0 z-20 flex h-14 md:h-16 items-center gap-2 sm:gap-4 border-b border-border/60 bg-background/40 px-3 sm:px-5 md:px-8 backdrop-blur-xl">
       <button
@@ -55,7 +112,7 @@ function Header({ onOpenMenu }: { onOpenMenu: () => void }) {
 
       <div className="hidden md:flex items-center gap-2 text-xs uppercase tracking-[0.2em] text-muted-foreground">
         <span className="h-1.5 w-1.5 rounded-full bg-[var(--neon-green)] shadow-[0_0_10px_var(--neon-green)] animate-pulse-glow" />
-        Live · Sistem Konsolidasi BUMDes
+        Live · {isPusat ? "Konsolidasi BUMDes" : `Modul ${role?.unitName ?? "Unit"}`}
       </div>
 
       <div className="ml-auto hidden lg:flex items-center gap-2 rounded-lg border border-border/60 bg-secondary/50 px-3 py-1.5 text-sm text-muted-foreground w-72">
@@ -71,16 +128,36 @@ function Header({ onOpenMenu }: { onOpenMenu: () => void }) {
         <span className="absolute -top-0.5 -right-0.5 h-2 w-2 rounded-full bg-[var(--neon-cyan)] shadow-[0_0_8px_var(--neon-cyan)]" />
       </button>
 
-      <button className="flex items-center gap-2 rounded-lg border border-border/60 bg-secondary/50 px-2 py-1.5 sm:pr-3 hover:border-[var(--neon-cyan)]/50 transition">
-        <div className="grid h-7 w-7 place-items-center rounded-md bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-green)] text-[oklch(0.15_0.03_250)] text-xs font-bold">
-          AD
-        </div>
-        <div className="hidden sm:block text-left leading-tight">
-          <p className="text-xs font-medium">Admin Direktur</p>
-          <p className="text-[10px] text-muted-foreground">BUMDes Pusat</p>
-        </div>
-        <ChevronDown className="hidden sm:block h-4 w-4 text-muted-foreground" />
-      </button>
+      <div className="relative">
+        <button
+          onClick={() => setOpen((v) => !v)}
+          className="flex items-center gap-2 rounded-lg border border-border/60 bg-secondary/50 px-2 py-1.5 sm:pr-3 hover:border-[var(--neon-cyan)]/50 transition"
+        >
+          <div className="grid h-7 w-7 place-items-center rounded-md bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-green)] text-[oklch(0.15_0.03_250)] text-xs font-bold">
+            {initials}
+          </div>
+          <div className="hidden sm:block text-left leading-tight">
+            <p className="text-xs font-medium">{user?.email ?? "—"}</p>
+            <p className="text-[10px] text-muted-foreground">
+              {isPusat ? "Admin Pusat" : `Admin ${role?.unitCode ?? "Unit"}`}
+            </p>
+          </div>
+          <ChevronDown className="hidden sm:block h-4 w-4 text-muted-foreground" />
+        </button>
+        {open && (
+          <div className="absolute right-0 mt-2 w-48 rounded-lg border border-border/60 bg-background/95 backdrop-blur-xl shadow-xl py-1 z-50">
+            <button
+              onClick={() => {
+                setOpen(false);
+                void signOut();
+              }}
+              className="flex w-full items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:bg-destructive/15 hover:text-destructive"
+            >
+              <LogOut className="h-4 w-4" /> Logout
+            </button>
+          </div>
+        )}
+      </div>
     </header>
   );
 }
