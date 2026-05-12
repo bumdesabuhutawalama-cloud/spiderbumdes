@@ -107,7 +107,14 @@ export function NeracaSheet({
     return accountsRaw.filter((a) => !rkAccountIds.has(a.id));
   }, [accountsRaw, mode, rkAccountIds]);
 
-  const effectiveUnitId = mode === "unit" ? unitId || null : null;
+  const fixedUnit = fixedUnitCode
+    ? (units ?? []).find((u) => u.id === fixedUnitCode || (u as { code?: string }).code === fixedUnitCode)
+    : null;
+  const effectiveUnitId = fixedUnitCode
+    ? fixedUnit?.id ?? null
+    : mode === "unit"
+      ? unitId || null
+      : null;
   const { data: balCur, isLoading: loadingCur } = useAccountBalances(asOf, mode, effectiveUnitId);
   const { data: balPrev, isLoading: loadingPrev } = useAccountBalances(prevAsOf, mode, effectiveUnitId);
 
