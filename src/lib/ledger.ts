@@ -144,7 +144,6 @@ async function fetchLedger(
     .select("id,journal_entry_id,account_id,debit,credit,journal_entries!inner(id,transaction_date,description,transaction_type)")
     .eq("account_id", accountId)
     .lte("journal_entries.transaction_date", endDate)
-    .order("transaction_date", { foreignTable: "journal_entries", ascending: true })
     .limit(20000);
   if (linesErr) throw linesErr;
 
