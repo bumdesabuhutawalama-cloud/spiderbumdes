@@ -327,7 +327,6 @@ function BagiHasilPage() {
       <PageHeader
         title="Bagi Hasil"
         subtitle="Hitung, tetapkan, dan bayar distribusi laba berbasis jurnal."
-        icon={<PieChart className="h-5 w-5" />}
       />
 
       <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
