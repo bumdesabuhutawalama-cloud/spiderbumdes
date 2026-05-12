@@ -223,9 +223,14 @@ export function NeracaSheet({
             </div>
 
             {isLoading && (
-              <div className="py-12 text-center text-[oklch(0.4_0.05_50)]">
-                <Loader2 className="inline h-4 w-4 animate-spin mr-2" />
-                Memuat data laporan...
+              <div className="space-y-2 py-6">
+                {Array.from({ length: 8 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="h-5 w-full animate-pulse rounded bg-[oklch(0.9_0.04_85)]"
+                    style={{ width: `${60 + ((i * 7) % 35)}%` }}
+                  />
+                ))}
               </div>
             )}
             {error && (
