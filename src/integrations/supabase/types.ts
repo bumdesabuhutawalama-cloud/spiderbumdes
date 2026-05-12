@@ -379,24 +379,30 @@ export type Database = {
           full_name: string | null
           id: string
           is_active: boolean
+          jabatan: string | null
           updated_at: string
           user_id: string
+          username: string | null
         }
         Insert: {
           created_at?: string
           full_name?: string | null
           id?: string
           is_active?: boolean
+          jabatan?: string | null
           updated_at?: string
           user_id: string
+          username?: string | null
         }
         Update: {
           created_at?: string
           full_name?: string | null
           id?: string
           is_active?: boolean
+          jabatan?: string | null
           updated_at?: string
           user_id?: string
+          username?: string | null
         }
         Relationships: []
       }

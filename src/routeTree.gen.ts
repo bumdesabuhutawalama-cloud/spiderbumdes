@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
 import { Route as AppIndexRouteImport } from './routes/_app.index'
+import { Route as LoginUnitRouteImport } from './routes/login.$unit'
 import { Route as AppUspRouteImport } from './routes/_app.usp'
 import { Route as AppTransferAntarEntitasRouteImport } from './routes/_app.transfer-antar-entitas'
 import { Route as AppPengaturanRouteImport } from './routes/_app.pengaturan'
@@ -47,6 +48,11 @@ const AppIndexRoute = AppIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppRoute,
+} as any)
+const LoginUnitRoute = LoginUnitRouteImport.update({
+  id: '/$unit',
+  path: '/$unit',
+  getParentRoute: () => LoginRoute,
 } as any)
 const AppUspRoute = AppUspRouteImport.update({
   id: '/usp',
@@ -159,12 +165,13 @@ const AppUspLaporanLabaRugiRoute = AppUspLaporanLabaRugiRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
-  '/login': typeof LoginRoute
+  '/login': typeof LoginRouteWithChildren
   '/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/coa': typeof AppCoaRoute
   '/pengaturan': typeof AppPengaturanRouteWithChildren
   '/transfer-antar-entitas': typeof AppTransferAntarEntitasRoute
   '/usp': typeof AppUspRouteWithChildren
+  '/login/$unit': typeof LoginUnitRoute
   '/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
   '/laporan/laba-rugi': typeof AppLaporanLabaRugiRoute
   '/laporan/neraca-konsolidasi': typeof AppLaporanNeracaKonsolidasiRoute
@@ -183,11 +190,12 @@ export interface FileRoutesByFullPath {
   '/usp/laporan/': typeof AppUspLaporanIndexRoute
 }
 export interface FileRoutesByTo {
-  '/login': typeof LoginRoute
+  '/login': typeof LoginRouteWithChildren
   '/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/coa': typeof AppCoaRoute
   '/pengaturan': typeof AppPengaturanRouteWithChildren
   '/transfer-antar-entitas': typeof AppTransferAntarEntitasRoute
+  '/login/$unit': typeof LoginUnitRoute
   '/': typeof AppIndexRoute
   '/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
   '/laporan/laba-rugi': typeof AppLaporanLabaRugiRoute
@@ -208,12 +216,13 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
-  '/login': typeof LoginRoute
+  '/login': typeof LoginRouteWithChildren
   '/_app/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/_app/coa': typeof AppCoaRoute
   '/_app/pengaturan': typeof AppPengaturanRouteWithChildren
   '/_app/transfer-antar-entitas': typeof AppTransferAntarEntitasRoute
   '/_app/usp': typeof AppUspRouteWithChildren
+  '/login/$unit': typeof LoginUnitRoute
   '/_app/': typeof AppIndexRoute
   '/_app/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
   '/_app/laporan/laba-rugi': typeof AppLaporanLabaRugiRoute
@@ -242,6 +251,7 @@ export interface FileRouteTypes {
     | '/pengaturan'
     | '/transfer-antar-entitas'
     | '/usp'
+    | '/login/$unit'
     | '/laporan/bagi-hasil'
     | '/laporan/laba-rugi'
     | '/laporan/neraca-konsolidasi'
@@ -265,6 +275,7 @@ export interface FileRouteTypes {
     | '/coa'
     | '/pengaturan'
     | '/transfer-antar-entitas'
+    | '/login/$unit'
     | '/'
     | '/laporan/bagi-hasil'
     | '/laporan/laba-rugi'
@@ -290,6 +301,7 @@ export interface FileRouteTypes {
     | '/_app/pengaturan'
     | '/_app/transfer-antar-entitas'
     | '/_app/usp'
+    | '/login/$unit'
     | '/_app/'
     | '/_app/laporan/bagi-hasil'
     | '/_app/laporan/laba-rugi'
@@ -311,7 +323,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
-  LoginRoute: typeof LoginRoute
+  LoginRoute: typeof LoginRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -336,6 +348,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof AppIndexRouteImport
       parentRoute: typeof AppRoute
+    }
+    '/login/$unit': {
+      id: '/login/$unit'
+      path: '/$unit'
+      fullPath: '/login/$unit'
+      preLoaderRoute: typeof LoginUnitRouteImport
+      parentRoute: typeof LoginRoute
     }
     '/_app/usp': {
       id: '/_app/usp'
@@ -568,9 +587,19 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface LoginRouteChildren {
+  LoginUnitRoute: typeof LoginUnitRoute
+}
+
+const LoginRouteChildren: LoginRouteChildren = {
+  LoginUnitRoute: LoginUnitRoute,
+}
+
+const LoginRouteWithChildren = LoginRoute._addFileChildren(LoginRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
-  LoginRoute: LoginRoute,
+  LoginRoute: LoginRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
