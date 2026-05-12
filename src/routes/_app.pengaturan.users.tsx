@@ -157,14 +157,38 @@ function UsersPage() {
     }
   };
 
-  const handleReset = async (userId: string) => {
-    const pw = window.prompt("Password baru (min 8 karakter):");
-    if (!pw || pw.length < 8) return;
+  const [resetTarget, setResetTarget] = useState<UserRow | null>(null);
+  const [resetPw, setResetPw] = useState("");
+  const [resetPw2, setResetPw2] = useState("");
+  const [resetSaving, setResetSaving] = useState(false);
+
+  const handleReset = (u: UserRow) => {
+    setResetPw("");
+    setResetPw2("");
+    setResetTarget(u);
+  };
+
+  const submitReset = async () => {
+    if (!resetTarget) return;
+    if (resetPw.length < 8) {
+      toast.error("Password minimal 8 karakter.");
+      return;
+    }
+    if (resetPw !== resetPw2) {
+      toast.error("Konfirmasi password tidak cocok.");
+      return;
+    }
+    setResetSaving(true);
     try {
-      await reset({ data: { userId, newPassword: pw } });
+      await reset({ data: { userId: resetTarget.userId, newPassword: resetPw } });
       toast.success("Password berhasil di-reset.");
+      setResetTarget(null);
+      setResetPw("");
+      setResetPw2("");
     } catch (err) {
       toast.error(err instanceof Error ? err.message : "Gagal reset password");
+    } finally {
+      setResetSaving(false);
     }
   };
 
