@@ -13,7 +13,7 @@ import {
   BebanOperasionalUspDialog,
 } from "@/components/usp-dialogs";
 
-export const Route = createFileRoute("/_app/catat-kegiatan")({
+export const Route = createFileRoute("/_app/usp/kegiatan")({
   head: () => ({ meta: [{ title: "Catat Kegiatan · BUMDes" }] }),
   component: CatatKegiatanPage,
 });
