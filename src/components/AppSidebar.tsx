@@ -1,11 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
   BookOpenText,
   FileBarChart,
   Settings,
-  ClipboardList,
   LogOut,
   ChevronDown,
   Building2,
@@ -14,8 +13,6 @@ import {
   PieChart,
   FileSpreadsheet,
   HandCoins,
-  ListChecks,
-  ArrowLeftRight,
   GitCompare,
   X,
 } from "lucide-react";
@@ -24,7 +21,7 @@ import { cn } from "@/lib/utils";
 type Item = { to: string; label: string; icon: React.ComponentType<{ className?: string }> };
 
 const main: Item[] = [
-  { to: "/", label: "Dashboard", icon: LayoutDashboard },
+  { to: "/", label: "Dashboard Pusat", icon: LayoutDashboard },
   { to: "/coa", label: "Bagan Akun / COA", icon: BookOpenText },
 ];
 
