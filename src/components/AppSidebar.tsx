@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
@@ -31,11 +31,6 @@ const reports: Item[] = [
   { to: "/laporan/laba-rugi", label: "Laba Rugi", icon: TrendingUp },
   { to: "/laporan/bagi-hasil", label: "Bagi Hasil", icon: PieChart },
   { to: "/laporan/rekonsiliasi-rk", label: "Rekonsiliasi RK", icon: GitCompare },
-];
-
-const uspItems: Item[] = [
-  { to: "/usp", label: "Dashboard USP", icon: LayoutDashboard },
-  { to: "/usp/pinjaman", label: "Data Pinjaman", icon: ListChecks },
 ];
 
 function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
