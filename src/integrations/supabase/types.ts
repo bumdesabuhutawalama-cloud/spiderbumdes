@@ -373,6 +373,69 @@ export type Database = {
           },
         ]
       }
+      profit_distribution_config: {
+        Row: {
+          coa_account_code: string
+          code: string
+          created_at: string
+          id: string
+          is_active: boolean
+          name: string
+          percentage: number
+          updated_at: string
+        }
+        Insert: {
+          coa_account_code: string
+          code: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name: string
+          percentage: number
+          updated_at?: string
+        }
+        Update: {
+          coa_account_code?: string
+          code?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          name?: string
+          percentage?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      profit_distribution_runs: {
+        Row: {
+          created_at: string
+          executed: boolean
+          id: string
+          journal_entry_id: string | null
+          net_profit: number
+          period_end: string
+          period_start: string
+        }
+        Insert: {
+          created_at?: string
+          executed?: boolean
+          id?: string
+          journal_entry_id?: string | null
+          net_profit: number
+          period_end: string
+          period_start: string
+        }
+        Update: {
+          created_at?: string
+          executed?: boolean
+          id?: string
+          journal_entry_id?: string | null
+          net_profit?: number
+          period_end?: string
+          period_start?: string
+        }
+        Relationships: []
+      }
       report_cache: {
         Row: {
           generated_at: string
