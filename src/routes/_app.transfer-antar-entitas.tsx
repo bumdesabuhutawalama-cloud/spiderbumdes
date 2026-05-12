@@ -5,6 +5,7 @@ import { ArrowLeftRight, Loader2, Building2, Send } from "lucide-react";
 import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { DateField } from "@/components/DateField";
 
 export const Route = createFileRoute("/_app/transfer-antar-entitas")({
   head: () => ({ meta: [{ title: "Transfer Antar Entitas · BUMDes" }] }),
@@ -281,8 +282,8 @@ function TransferPage() {
               </select>
             </Field>
 
-            <Field label="Tanggal">
-              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="input-glass" />
+            <Field label="Tanggal Transaksi">
+              <DateField value={date} onChange={setDate} />
             </Field>
             <Field label="Nominal (Rp)">
               <input
