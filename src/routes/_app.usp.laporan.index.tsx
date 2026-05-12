@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Scale, GitCompare, FileBarChart } from "lucide-react";
+import { Scale, GitCompare, FileBarChart, BookOpen } from "lucide-react";
 import { PageHeader } from "@/components/DashboardLayout";
 
 export const Route = createFileRoute("/_app/usp/laporan/")({
@@ -32,6 +32,12 @@ function LaporanUspIndex() {
           title="Rekonsiliasi RK"
           desc="Cek kesesuaian Rekening Koran USP dengan Pusat."
           icon={<GitCompare className="h-5 w-5" />}
+        />
+        <Card
+          to="/usp/laporan/buku-besar"
+          title="Buku Besar USP"
+          desc="Mutasi akun lengkap khusus entity USP dengan saldo berjalan."
+          icon={<BookOpen className="h-5 w-5" />}
         />
       </div>
     </>

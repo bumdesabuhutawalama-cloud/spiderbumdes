@@ -16,6 +16,7 @@ import {
   GitCompare,
   ClipboardList,
   Users,
+  BookOpen,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -34,6 +35,8 @@ const reports: Item[] = [
   { to: "/laporan/laba-rugi", label: "Laba Rugi", icon: TrendingUp },
   { to: "/laporan/bagi-hasil", label: "Bagi Hasil", icon: PieChart },
   { to: "/laporan/rekonsiliasi-rk", label: "Rekonsiliasi RK", icon: GitCompare },
+  { to: "/laporan/buku-besar-pusat", label: "Buku Besar Pusat", icon: BookOpen },
+  { to: "/laporan/buku-besar-konsolidasi", label: "Buku Besar Konsolidasi", icon: BookOpen },
 ];
 
 function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
