@@ -1,6 +1,7 @@
 import { QueryClient } from "@tanstack/react-query";
 import { createRouter } from "@tanstack/react-router";
 import { routeTree } from "./routeTree.gen";
+import { RouteFallback } from "./components/RouteFallback";
 
 export const getRouter = () => {
   const queryClient = new QueryClient({
@@ -21,7 +22,10 @@ export const getRouter = () => {
     scrollRestoration: true,
     defaultPreload: "intent",
     defaultPreloadStaleTime: 0,
-    defaultPendingMs: 200,
+    // Tampilkan pending instan agar halaman lama tidak "tertinggal" saat navigasi.
+    defaultPendingMs: 0,
+    defaultPendingMinMs: 0,
+    defaultPendingComponent: RouteFallback,
   });
 
   return router;
