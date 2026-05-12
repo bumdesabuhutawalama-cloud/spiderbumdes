@@ -246,7 +246,7 @@ function BagiHasilPage() {
     },
     onSuccess: () => {
       toast.success("Bagi hasil berhasil ditetapkan.");
-      qc.invalidateQueries();
+      void invalidateFinancials(qc);
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -360,7 +360,7 @@ function BagiHasilPage() {
       toast.success("Pembayaran bagi hasil dicatat.");
       setPayAmt("");
       setPayDesc("");
-      qc.invalidateQueries();
+      void invalidateFinancials(qc);
     },
     onError: (e: Error) => toast.error(e.message),
   });
