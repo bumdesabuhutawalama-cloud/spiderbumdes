@@ -519,6 +519,13 @@ function BagiHasilPage() {
             />
           </div>
         </div>
+        {payCode === "2.4.02.00" && (
+          <div className="rounded-md border border-primary/30 bg-primary/5 p-3 text-xs text-foreground/80">
+            <strong>Penambahan Modal:</strong> dana akan dipindahkan dari kas operasional
+            ke <em>Kas Alokasi Bagi Hasil (1.1.01.10)</em> dan dicatat ke
+            <em> Saldo Laba Dicadangkan untuk Penambahan Modal (3.3.01.06)</em> secara otomatis.
+          </div>
+        )}
         <button
           disabled={bayar.isPending}
           onClick={() => bayar.mutate()}
