@@ -15,9 +15,11 @@ import {
   HandCoins,
   GitCompare,
   ClipboardList,
+  Users,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
 
 type Item = { to: string; label: string; icon: React.ComponentType<{ className?: string }> };
 
@@ -36,6 +38,7 @@ const reports: Item[] = [
 
 function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
+  const { isPusat, isUnit, role, signOut } = useAuth();
   const [reportsOpen, setReportsOpen] = useState(path.startsWith("/laporan"));
 
   const isActive = (to: string) =>
@@ -51,74 +54,117 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
         <div>
           <p className="text-sm font-semibold tracking-wide">BUMDes</p>
           <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
-            Unit Pusat
+            {isPusat ? "Unit Pusat" : role?.unitName ?? "Unit"}
           </p>
         </div>
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
-        {main.map((item) => (
-          <NavLink key={item.to} item={item} active={isActive(item.to)} onNavigate={onNavigate} />
-        ))}
+        {isPusat && (
+          <>
+            {main.map((item) => (
+              <NavLink key={item.to} item={item} active={isActive(item.to)} onNavigate={onNavigate} />
+            ))}
 
-        <button
-          onClick={() => setReportsOpen((v) => !v)}
-          className={cn(
-            "group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all",
-            "hover:bg-secondary/60 hover:text-foreground",
-            path.startsWith("/laporan")
-              ? "bg-secondary/70 text-foreground"
-              : "text-muted-foreground",
-          )}
-        >
-          <FileBarChart className="h-4 w-4 transition-colors group-hover:text-[var(--neon-cyan)]" />
-          <span className="flex-1 text-left">Laporan Pusat</span>
-          <ChevronDown
-            className={cn(
-              "h-4 w-4 transition-transform duration-300",
-              reportsOpen && "rotate-180",
-            )}
-          />
-        </button>
+            <button
+              onClick={() => setReportsOpen((v) => !v)}
+              className={cn(
+                "group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all",
+                "hover:bg-secondary/60 hover:text-foreground",
+                path.startsWith("/laporan")
+                  ? "bg-secondary/70 text-foreground"
+                  : "text-muted-foreground",
+              )}
+            >
+              <FileBarChart className="h-4 w-4 transition-colors group-hover:text-[var(--neon-cyan)]" />
+              <span className="flex-1 text-left">Laporan Pusat</span>
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 transition-transform duration-300",
+                  reportsOpen && "rotate-180",
+                )}
+              />
+            </button>
 
-        <div
-          className={cn(
-            "grid overflow-hidden transition-all duration-300 ease-out",
-            reportsOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
-          )}
-        >
-          <div className="min-h-0">
-            <div className="ml-3 mt-1 space-y-0.5 border-l border-border/60 pl-3">
-              {reports.map((r) => (
-                <NavLink key={r.to} item={r} active={isActive(r.to)} dense onNavigate={onNavigate} />
-              ))}
+            <div
+              className={cn(
+                "grid overflow-hidden transition-all duration-300 ease-out",
+                reportsOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
+              )}
+            >
+              <div className="min-h-0">
+                <div className="ml-3 mt-1 space-y-0.5 border-l border-border/60 pl-3">
+                  {reports.map((r) => (
+                    <NavLink key={r.to} item={r} active={isActive(r.to)} dense onNavigate={onNavigate} />
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <div className="my-2 border-t border-border/40" />
+            <div className="my-2 border-t border-border/40" />
 
-        <NavLink
-          item={{ to: "/pusat/kegiatan", label: "Catat Kegiatan", icon: ClipboardList }}
-          active={isActive("/pusat/kegiatan")}
-          onNavigate={onNavigate}
-        />
+            <NavLink
+              item={{ to: "/pusat/kegiatan", label: "Catat Kegiatan", icon: ClipboardList }}
+              active={isActive("/pusat/kegiatan")}
+              onNavigate={onNavigate}
+            />
 
-        <NavLink
-          item={{ to: "/usp", label: "Unit Simpan Pinjam", icon: HandCoins }}
-          active={isActive("/usp")}
-          onNavigate={onNavigate}
-        />
+            <NavLink
+              item={{ to: "/usp", label: "Unit Simpan Pinjam", icon: HandCoins }}
+              active={isActive("/usp")}
+              onNavigate={onNavigate}
+            />
 
-        <NavLink
-          item={{ to: "/pengaturan", label: "Pengaturan", icon: Settings }}
-          active={isActive("/pengaturan")}
-          onNavigate={onNavigate}
-        />
+            <NavLink
+              item={{ to: "/pengaturan/users", label: "Manajemen User", icon: Users }}
+              active={isActive("/pengaturan/users")}
+              onNavigate={onNavigate}
+            />
+
+            <NavLink
+              item={{ to: "/pengaturan", label: "Pengaturan", icon: Settings }}
+              active={isActive("/pengaturan")}
+              onNavigate={onNavigate}
+            />
+          </>
+        )}
+
+        {isUnit && (
+          <>
+            <NavLink
+              item={{ to: "/usp", label: "Dashboard USP", icon: LayoutDashboard }}
+              active={path === "/usp"}
+              onNavigate={onNavigate}
+            />
+            <NavLink
+              item={{ to: "/usp/pinjaman", label: "Data Pinjaman", icon: HandCoins }}
+              active={isActive("/usp/pinjaman")}
+              onNavigate={onNavigate}
+            />
+            <NavLink
+              item={{ to: "/usp/kegiatan", label: "Catat Kegiatan", icon: ClipboardList }}
+              active={isActive("/usp/kegiatan")}
+              onNavigate={onNavigate}
+            />
+            <NavLink
+              item={{ to: "/usp/transfer", label: "Transfer", icon: GitCompare }}
+              active={isActive("/usp/transfer")}
+              onNavigate={onNavigate}
+            />
+            <NavLink
+              item={{ to: "/usp/laporan", label: "Laporan USP", icon: FileBarChart }}
+              active={isActive("/usp/laporan")}
+              onNavigate={onNavigate}
+            />
+          </>
+        )}
       </nav>
 
       <div className="border-t border-border/60 p-3">
-        <button className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-all hover:bg-destructive/15 hover:text-destructive">
+        <button
+          onClick={() => void signOut()}
+          className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-all hover:bg-destructive/15 hover:text-destructive"
+        >
           <LogOut className="h-4 w-4" />
           Logout
         </button>
