@@ -5,6 +5,7 @@ import { ClipboardList, TrendingUp, Wallet, Loader2, X, ArrowDownCircle, ArrowUp
 import { PageHeader } from "@/components/DashboardLayout";
 import { DateField } from "@/components/DateField";
 import { supabase } from "@/integrations/supabase/client";
+import { invalidateFinancials } from "@/lib/query-invalidate";
 import { toast } from "sonner";
 import {
   PencairanPinjamanDialog,
@@ -247,8 +248,7 @@ export function PenyertaanModalDialog({ onClose }: { onClose: () => void }) {
     },
     onSuccess: () => {
       toast.success("Transaksi penyertaan modal berhasil dicatat");
-      qc.invalidateQueries({ queryKey: ["journal_entries"] });
-      qc.invalidateQueries({ queryKey: ["balances"] });
+      void invalidateFinancials(qc);
       onClose();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -569,8 +569,7 @@ export function BelanjaAsetDialog({ onClose }: { onClose: () => void }) {
     },
     onSuccess: () => {
       toast.success("Belanja aset/modal berhasil dicatat");
-      qc.invalidateQueries({ queryKey: ["journal_entries"] });
-      qc.invalidateQueries({ queryKey: ["balances"] });
+      void invalidateFinancials(qc);
       onClose();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -863,8 +862,7 @@ export function PenerimaanKasDialog({ onClose }: { onClose: () => void }) {
     },
     onSuccess: () => {
       toast.success("Penerimaan kas berhasil dicatat");
-      qc.invalidateQueries({ queryKey: ["journal_entries"] });
-      qc.invalidateQueries({ queryKey: ["balances"] });
+      void invalidateFinancials(qc);
       onClose();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -1177,8 +1175,7 @@ export function PengeluaranOperasionalDialog({ onClose }: { onClose: () => void 
     },
     onSuccess: () => {
       toast.success("Pengeluaran operasional berhasil dicatat");
-      qc.invalidateQueries({ queryKey: ["journal_entries"] });
-      qc.invalidateQueries({ queryKey: ["balances"] });
+      void invalidateFinancials(qc);
       onClose();
     },
     onError: (e: Error) => toast.error(e.message),

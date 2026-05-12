@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Loader2, X, ArrowDownCircle, ArrowUpCircle, HandCoins, Banknote, AlertTriangle, Receipt } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
+import { invalidateFinancials } from "@/lib/query-invalidate";
 import { toast } from "sonner";
 
 type Account = {
@@ -334,10 +335,7 @@ export function PencairanPinjamanDialog({ onClose }: { onClose: () => void }) {
     },
     onSuccess: () => {
       toast.success("Pencairan pinjaman berhasil dicatat");
-      qc.invalidateQueries({ queryKey: ["balances"] });
-      qc.invalidateQueries({ queryKey: ["loans"] });
-      qc.invalidateQueries({ queryKey: ["loan_installments"] });
-      qc.invalidateQueries({ queryKey: ["journal_entries"] });
+      void invalidateFinancials(qc);
       onClose();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -585,10 +583,7 @@ export function TerimaAngsuranDialog({ onClose }: { onClose: () => void }) {
     },
     onSuccess: () => {
       toast.success("Penerimaan angsuran berhasil dicatat");
-      qc.invalidateQueries({ queryKey: ["balances"] });
-      qc.invalidateQueries({ queryKey: ["loans"] });
-      qc.invalidateQueries({ queryKey: ["loan_installments"] });
-      qc.invalidateQueries({ queryKey: ["journal_entries"] });
+      void invalidateFinancials(qc);
       onClose();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -708,8 +703,7 @@ export function TerimaDendaDialog({ onClose }: { onClose: () => void }) {
     },
     onSuccess: () => {
       toast.success("Penerimaan denda berhasil dicatat");
-      qc.invalidateQueries({ queryKey: ["balances"] });
-      qc.invalidateQueries({ queryKey: ["journal_entries"] });
+      void invalidateFinancials(qc);
       onClose();
     },
     onError: (e: Error) => toast.error(e.message),
@@ -806,8 +800,7 @@ export function BebanOperasionalUspDialog({ onClose }: { onClose: () => void }) 
     },
     onSuccess: () => {
       toast.success("Beban operasional USP berhasil dicatat");
-      qc.invalidateQueries({ queryKey: ["balances"] });
-      qc.invalidateQueries({ queryKey: ["journal_entries"] });
+      void invalidateFinancials(qc);
       onClose();
     },
     onError: (e: Error) => toast.error(e.message),

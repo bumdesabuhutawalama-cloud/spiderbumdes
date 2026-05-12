@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { ArrowLeftRight, Loader2, Building2, Send } from "lucide-react";
 import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
+import { invalidateFinancials } from "@/lib/query-invalidate";
 import { toast } from "sonner";
 import { DateField } from "@/components/DateField";
 
@@ -199,8 +200,7 @@ function TransferPage() {
       toast.success("Transfer berhasil dicatat (jurnal pasangan otomatis)");
       setAmount("");
       setDesc("");
-      qc.invalidateQueries({ queryKey: ["entity_transfers"] });
-      qc.invalidateQueries({ queryKey: ["balances"] });
+      void invalidateFinancials(qc);
     },
     onError: (e) => toast.error((e as Error).message),
   });

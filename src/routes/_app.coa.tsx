@@ -5,6 +5,7 @@ import { Plus, Search, Loader2, Pencil, Trash2, Power } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
+import { invalidateFinancials } from "@/lib/query-invalidate";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
@@ -52,9 +53,8 @@ const COA_KEY = ["coa_accounts"] as const;
 async function invalidateCoaDependents(qc: ReturnType<typeof useQueryClient>) {
   await Promise.all([
     qc.invalidateQueries({ queryKey: COA_KEY }),
-    qc.invalidateQueries({ queryKey: ["balances"] }),
-    qc.invalidateQueries({ queryKey: ["reports"] }),
     qc.invalidateQueries({ queryKey: ["account_tree"] }),
+    invalidateFinancials(qc),
   ]);
   // Hapus seluruh report_cache karena perubahan struktur akun mempengaruhi
   // semua periode/laporan. Best-effort, abaikan error jika tidak ada baris.

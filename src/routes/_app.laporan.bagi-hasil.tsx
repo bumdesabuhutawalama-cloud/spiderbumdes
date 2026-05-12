@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { Calculator, FileCheck2, Wallet, Loader2, PieChart } from "lucide-react";
 import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
+import { invalidateFinancials } from "@/lib/query-invalidate";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/_app/laporan/bagi-hasil")({
@@ -245,7 +246,7 @@ function BagiHasilPage() {
     },
     onSuccess: () => {
       toast.success("Bagi hasil berhasil ditetapkan.");
-      qc.invalidateQueries();
+      void invalidateFinancials(qc);
     },
     onError: (e: Error) => toast.error(e.message),
   });
@@ -359,7 +360,7 @@ function BagiHasilPage() {
       toast.success("Pembayaran bagi hasil dicatat.");
       setPayAmt("");
       setPayDesc("");
-      qc.invalidateQueries();
+      void invalidateFinancials(qc);
     },
     onError: (e: Error) => toast.error(e.message),
   });
