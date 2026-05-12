@@ -282,8 +282,8 @@ function TransferPage() {
               </select>
             </Field>
 
-            <Field label="Tanggal">
-              <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="input-glass" />
+            <Field label="Tanggal Transaksi">
+              <DateField value={date} onChange={setDate} />
             </Field>
             <Field label="Nominal (Rp)">
               <input
