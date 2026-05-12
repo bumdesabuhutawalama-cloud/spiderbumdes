@@ -93,50 +93,116 @@ function LoginPage() {
             </p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-xs uppercase tracking-wide text-muted-foreground">Email</label>
-              <div className="relative">
-                <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          {bootstrapNeeded ? (
+            <form onSubmit={handleBootstrap} className="space-y-4">
+              <div className="rounded-lg border border-[var(--neon-cyan)]/40 bg-[var(--neon-cyan)]/5 px-3 py-2 text-xs text-[var(--neon-cyan)]">
+                Belum ada Admin Pusat. Buat akun pertama untuk mengelola sistem.
+              </div>
+              <Field label="Nama Lengkap" icon={<UserPlus className="h-4 w-4" />}>
+                <input
+                  required
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Nama Anda"
+                  className={inputCls}
+                />
+              </Field>
+              <Field label="Email" icon={<Mail className="h-4 w-4" />}>
                 <input
                   type="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="admin@bumdes.local"
-                  className="w-full rounded-lg border border-border/60 bg-secondary/40 pl-9 pr-3 py-2.5 text-sm outline-none focus:border-[var(--neon-cyan)]/60"
+                  className={inputCls}
                 />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-xs uppercase tracking-wide text-muted-foreground">Password</label>
-              <div className="relative">
-                <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              </Field>
+              <Field label="Password (min 8 karakter)" icon={<Lock className="h-4 w-4" />}>
+                <input
+                  type="password"
+                  required
+                  minLength={8}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className={inputCls}
+                />
+              </Field>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-green)] py-2.5 text-sm font-semibold text-[oklch(0.15_0.03_250)] disabled:opacity-60"
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
+                Buat Admin Pusat
+              </button>
+            </form>
+          ) : (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <Field label="Email" icon={<Mail className="h-4 w-4" />}>
+                <input
+                  type="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@bumdes.local"
+                  className={inputCls}
+                />
+              </Field>
+              <Field label="Password" icon={<Lock className="h-4 w-4" />}>
                 <input
                   type="password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="••••••••"
-                  className="w-full rounded-lg border border-border/60 bg-secondary/40 pl-9 pr-3 py-2.5 text-sm outline-none focus:border-[var(--neon-cyan)]/60"
+                  className={inputCls}
                 />
-              </div>
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-green)] py-2.5 text-sm font-semibold text-[oklch(0.15_0.03_250)] transition hover:opacity-90 disabled:opacity-60"
-            >
-              {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-              Masuk
-            </button>
-          </form>
+              </Field>
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-green)] py-2.5 text-sm font-semibold text-[oklch(0.15_0.03_250)] transition hover:opacity-90 disabled:opacity-60"
+              >
+                {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+                Masuk
+              </button>
+            </form>
+          )}
 
           <p className="text-center text-[11px] text-muted-foreground">
             Akun dibuat oleh Admin Pusat. Hubungi admin jika belum punya akses.
           </p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+const inputCls =
+  "w-full rounded-lg border border-border/60 bg-secondary/40 pl-9 pr-3 py-2.5 text-sm outline-none focus:border-[var(--neon-cyan)]/60";
+
+function Field({
+  label,
+  icon,
+  children,
+}: {
+  label: string;
+  icon: React.ReactNode;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label className="text-xs uppercase tracking-wide text-muted-foreground">{label}</label>
+      <div className="relative">
+        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+          {icon}
+        </span>
+        {children}
+      </div>
+    </div>
+  );
+}
         </div>
       </div>
     </div>
