@@ -53,9 +53,8 @@ const COA_KEY = ["coa_accounts"] as const;
 async function invalidateCoaDependents(qc: ReturnType<typeof useQueryClient>) {
   await Promise.all([
     qc.invalidateQueries({ queryKey: COA_KEY }),
-    qc.invalidateQueries({ queryKey: ["balances"] }),
-    qc.invalidateQueries({ queryKey: ["reports"] }),
     qc.invalidateQueries({ queryKey: ["account_tree"] }),
+    invalidateFinancials(qc),
   ]);
   // Hapus seluruh report_cache karena perubahan struktur akun mempengaruhi
   // semua periode/laporan. Best-effort, abaikan error jika tidak ada baris.
