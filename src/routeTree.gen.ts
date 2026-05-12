@@ -19,6 +19,7 @@ import { Route as AppPengaturanRouteImport } from './routes/_app.pengaturan'
 import { Route as AppCoaRouteImport } from './routes/_app.coa'
 import { Route as AppCatatKegiatanRouteImport } from './routes/_app.catat-kegiatan'
 import { Route as AppUspIndexRouteImport } from './routes/_app.usp.index'
+import { Route as AppPengaturanIndexRouteImport } from './routes/_app.pengaturan.index'
 import { Route as AppUspTransferRouteImport } from './routes/_app.usp.transfer'
 import { Route as AppUspPinjamanRouteImport } from './routes/_app.usp.pinjaman'
 import { Route as AppUspLaporanRouteImport } from './routes/_app.usp.laporan'
@@ -83,6 +84,11 @@ const AppUspIndexRoute = AppUspIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AppUspRoute,
+} as any)
+const AppPengaturanIndexRoute = AppPengaturanIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppPengaturanRoute,
 } as any)
 const AppUspTransferRoute = AppUspTransferRouteImport.update({
   id: '/transfer',
@@ -183,6 +189,7 @@ export interface FileRoutesByFullPath {
   '/usp/laporan': typeof AppUspLaporanRouteWithChildren
   '/usp/pinjaman': typeof AppUspPinjamanRoute
   '/usp/transfer': typeof AppUspTransferRoute
+  '/pengaturan/': typeof AppPengaturanIndexRoute
   '/usp/': typeof AppUspIndexRoute
   '/usp/laporan/laba-rugi': typeof AppUspLaporanLabaRugiRoute
   '/usp/laporan/neraca': typeof AppUspLaporanNeracaRoute
@@ -193,7 +200,6 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRouteWithChildren
   '/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/coa': typeof AppCoaRoute
-  '/pengaturan': typeof AppPengaturanRouteWithChildren
   '/transfer-antar-entitas': typeof AppTransferAntarEntitasRoute
   '/login/$unit': typeof LoginUnitRoute
   '/': typeof AppIndexRoute
@@ -207,6 +213,7 @@ export interface FileRoutesByTo {
   '/usp/kegiatan': typeof AppUspKegiatanRoute
   '/usp/pinjaman': typeof AppUspPinjamanRoute
   '/usp/transfer': typeof AppUspTransferRoute
+  '/pengaturan': typeof AppPengaturanIndexRoute
   '/usp': typeof AppUspIndexRoute
   '/usp/laporan/laba-rugi': typeof AppUspLaporanLabaRugiRoute
   '/usp/laporan/neraca': typeof AppUspLaporanNeracaRoute
@@ -235,6 +242,7 @@ export interface FileRoutesById {
   '/_app/usp/laporan': typeof AppUspLaporanRouteWithChildren
   '/_app/usp/pinjaman': typeof AppUspPinjamanRoute
   '/_app/usp/transfer': typeof AppUspTransferRoute
+  '/_app/pengaturan/': typeof AppPengaturanIndexRoute
   '/_app/usp/': typeof AppUspIndexRoute
   '/_app/usp/laporan/laba-rugi': typeof AppUspLaporanLabaRugiRoute
   '/_app/usp/laporan/neraca': typeof AppUspLaporanNeracaRoute
@@ -263,6 +271,7 @@ export interface FileRouteTypes {
     | '/usp/laporan'
     | '/usp/pinjaman'
     | '/usp/transfer'
+    | '/pengaturan/'
     | '/usp/'
     | '/usp/laporan/laba-rugi'
     | '/usp/laporan/neraca'
@@ -273,7 +282,6 @@ export interface FileRouteTypes {
     | '/login'
     | '/catat-kegiatan'
     | '/coa'
-    | '/pengaturan'
     | '/transfer-antar-entitas'
     | '/login/$unit'
     | '/'
@@ -287,6 +295,7 @@ export interface FileRouteTypes {
     | '/usp/kegiatan'
     | '/usp/pinjaman'
     | '/usp/transfer'
+    | '/pengaturan'
     | '/usp'
     | '/usp/laporan/laba-rugi'
     | '/usp/laporan/neraca'
@@ -314,6 +323,7 @@ export interface FileRouteTypes {
     | '/_app/usp/laporan'
     | '/_app/usp/pinjaman'
     | '/_app/usp/transfer'
+    | '/_app/pengaturan/'
     | '/_app/usp/'
     | '/_app/usp/laporan/laba-rugi'
     | '/_app/usp/laporan/neraca'
@@ -397,6 +407,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/usp/'
       preLoaderRoute: typeof AppUspIndexRouteImport
       parentRoute: typeof AppUspRoute
+    }
+    '/_app/pengaturan/': {
+      id: '/_app/pengaturan/'
+      path: '/'
+      fullPath: '/pengaturan/'
+      preLoaderRoute: typeof AppPengaturanIndexRouteImport
+      parentRoute: typeof AppPengaturanRoute
     }
     '/_app/usp/transfer': {
       id: '/_app/usp/transfer'
@@ -508,10 +525,12 @@ declare module '@tanstack/react-router' {
 
 interface AppPengaturanRouteChildren {
   AppPengaturanUsersRoute: typeof AppPengaturanUsersRoute
+  AppPengaturanIndexRoute: typeof AppPengaturanIndexRoute
 }
 
 const AppPengaturanRouteChildren: AppPengaturanRouteChildren = {
   AppPengaturanUsersRoute: AppPengaturanUsersRoute,
+  AppPengaturanIndexRoute: AppPengaturanIndexRoute,
 }
 
 const AppPengaturanRouteWithChildren = AppPengaturanRoute._addFileChildren(
