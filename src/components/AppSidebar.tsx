@@ -14,6 +14,7 @@ import {
   FileSpreadsheet,
   HandCoins,
   GitCompare,
+  ClipboardList,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
