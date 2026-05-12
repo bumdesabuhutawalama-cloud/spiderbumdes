@@ -1,28 +1,46 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Users, UserPlus, KeyRound, Trash2, Power, Loader2 } from "lucide-react";
+import {
+  Users,
+  UserPlus,
+  KeyRound,
+  Trash2,
+  Power,
+  Loader2,
+  Search,
+  Link2,
+  Pencil,
+  X,
+} from "lucide-react";
 import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import {
   listUsers,
   createUser,
+  updateUser,
   resetUserPassword,
   setUserActive,
   deleteUser,
 } from "@/lib/users.functions";
 
 export const Route = createFileRoute("/_app/pengaturan/users")({
-  head: () => ({ meta: [{ title: "Manajemen User · BUMDes" }] }),
+  head: () => ({ meta: [{ title: "Manajemen User Unit · BUMDes" }] }),
   component: UsersPage,
 });
+
+type UserRow = Awaited<ReturnType<typeof listUsers>>[number];
+type UnitRow = { id: string; name: string; code: string | null; is_pusat: boolean };
+
+const PAGE_SIZE = 10;
 
 function UsersPage() {
   const qc = useQueryClient();
   const list = useServerFn(listUsers);
   const create = useServerFn(createUser);
+  const update = useServerFn(updateUser);
   const reset = useServerFn(resetUserPassword);
   const toggle = useServerFn(setUserActive);
   const remove = useServerFn(deleteUser);
@@ -32,43 +50,110 @@ function UsersPage() {
     queryFn: () => list(),
   });
 
-  const { data: units } = useQuery({
+  const { data: units } = useQuery<UnitRow[]>({
     queryKey: ["units_list"],
     queryFn: async () => {
-      const { data } = await supabase.from("units").select("id, name, code, is_pusat").order("name");
-      return data ?? [];
+      const { data } = await supabase
+        .from("units")
+        .select("id, name, code, is_pusat")
+        .order("name");
+      return (data ?? []) as UnitRow[];
     },
   });
 
-  const [form, setForm] = useState({
+  // ===== filters =====
+  const [q, setQ] = useState("");
+  const [roleFilter, setRoleFilter] = useState<"all" | "admin_pusat" | "admin_unit">("all");
+  const [unitFilter, setUnitFilter] = useState<string>("all");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "inactive">("all");
+  const [page, setPage] = useState(1);
+
+  const filtered = useMemo(() => {
+    const term = q.trim().toLowerCase();
+    return (users ?? []).filter((u) => {
+      if (roleFilter !== "all" && u.role !== roleFilter) return false;
+      if (unitFilter !== "all" && (u.unitId ?? "") !== unitFilter) return false;
+      if (statusFilter === "active" && !u.isActive) return false;
+      if (statusFilter === "inactive" && u.isActive) return false;
+      if (!term) return true;
+      return [u.email, u.fullName, u.username, u.jabatan, u.unitName, u.unitCode]
+        .filter(Boolean)
+        .some((s) => String(s).toLowerCase().includes(term));
+    });
+  }, [users, q, roleFilter, unitFilter, statusFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
+  const safePage = Math.min(page, totalPages);
+  const pageRows = filtered.slice((safePage - 1) * PAGE_SIZE, safePage * PAGE_SIZE);
+
+  // ===== form state =====
+  const blankForm = {
+    fullName: "",
+    jabatan: "",
+    username: "",
     email: "",
     password: "",
-    fullName: "",
     role: "admin_unit" as "admin_pusat" | "admin_unit",
     unitId: "",
-  });
-  const [creating, setCreating] = useState(false);
+  };
+  const [form, setForm] = useState(blankForm);
+  const [saving, setSaving] = useState(false);
+  const [editing, setEditing] = useState<UserRow | null>(null);
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const openEdit = (u: UserRow) => {
+    setEditing(u);
+    setForm({
+      fullName: u.fullName ?? "",
+      jabatan: u.jabatan ?? "",
+      username: u.username ?? "",
+      email: u.email,
+      password: "",
+      role: (u.role ?? "admin_unit") as "admin_pusat" | "admin_unit",
+      unitId: u.unitId ?? "",
+    });
+  };
+  const closeEdit = () => {
+    setEditing(null);
+    setForm(blankForm);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setCreating(true);
+    setSaving(true);
     try {
-      await create({
-        data: {
-          email: form.email,
-          password: form.password,
-          fullName: form.fullName,
-          role: form.role,
-          unitId: form.role === "admin_pusat" ? null : form.unitId || null,
-        },
-      });
-      toast.success("User berhasil dibuat.");
-      setForm({ email: "", password: "", fullName: "", role: "admin_unit", unitId: "" });
+      if (editing) {
+        await update({
+          data: {
+            userId: editing.userId,
+            fullName: form.fullName,
+            jabatan: form.jabatan || null,
+            username: form.username || null,
+            role: form.role,
+            unitId: form.role === "admin_pusat" ? null : form.unitId || null,
+          },
+        });
+        toast.success("User diperbarui.");
+        closeEdit();
+      } else {
+        await create({
+          data: {
+            email: form.email,
+            password: form.password,
+            fullName: form.fullName,
+            jabatan: form.jabatan || null,
+            username: form.username || null,
+            role: form.role,
+            unitId: form.role === "admin_pusat" ? null : form.unitId || null,
+          },
+        });
+        toast.success("User berhasil dibuat.");
+        setForm(blankForm);
+      }
       qc.invalidateQueries({ queryKey: ["admin_users"] });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Gagal membuat user");
+      toast.error(err instanceof Error ? err.message : "Gagal menyimpan");
     } finally {
-      setCreating(false);
+      setSaving(false);
     }
   };
 
@@ -104,19 +189,58 @@ function UsersPage() {
     }
   };
 
+  const buildLoginLink = (unitCode: string | null) => {
+    if (!unitCode) return null;
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    return `${origin}/login/${unitCode.toLowerCase()}`;
+  };
+
+  const handleCopyLink = async (unitCode: string | null) => {
+    const link = buildLoginLink(unitCode);
+    if (!link) {
+      toast.error("User ini tidak terhubung ke unit usaha.");
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(link);
+      toast.success("Link login unit disalin.");
+    } catch {
+      toast.error("Gagal menyalin link.");
+    }
+  };
+
   return (
     <>
       <PageHeader
-        title="Manajemen User"
-        subtitle="Buat dan kelola akses user untuk Unit Pusat dan Unit Usaha."
+        title="Manajemen User Unit"
+        subtitle="Kelola akses login admin pusat dan admin unit usaha. Setiap unit memiliki link login khusus."
       />
 
       <div className="grid lg:grid-cols-[420px,1fr] gap-5">
-        {/* Form create */}
-        <form onSubmit={handleCreate} className="glass-card rounded-2xl p-5 space-y-3 h-fit">
-          <h3 className="text-sm font-semibold flex items-center gap-2">
-            <UserPlus className="h-4 w-4 text-[var(--neon-cyan)]" /> Buat User Baru
-          </h3>
+        {/* Form create / edit */}
+        <form onSubmit={handleSubmit} className="glass-card rounded-2xl p-5 space-y-3 h-fit">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-semibold flex items-center gap-2">
+              {editing ? (
+                <>
+                  <Pencil className="h-4 w-4 text-[var(--neon-cyan)]" /> Edit User
+                </>
+              ) : (
+                <>
+                  <UserPlus className="h-4 w-4 text-[var(--neon-cyan)]" /> Tambah User
+                </>
+              )}
+            </h3>
+            {editing && (
+              <button
+                type="button"
+                onClick={closeEdit}
+                className="text-xs text-muted-foreground hover:text-foreground inline-flex items-center gap-1"
+              >
+                <X className="h-3.5 w-3.5" /> Batal
+              </button>
+            )}
+          </div>
 
           <Field label="Nama Lengkap">
             <input
@@ -127,27 +251,48 @@ function UsersPage() {
             />
           </Field>
 
-          <Field label="Email">
+          <Field label="Jabatan">
             <input
-              type="email"
-              required
-              value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              placeholder="usp01@bumdes.local"
+              value={form.jabatan}
+              onChange={(e) => setForm({ ...form, jabatan: e.target.value })}
+              placeholder="cth. Kepala Unit, Bendahara"
               className={inputCls}
             />
           </Field>
 
-          <Field label="Password (min 8 karakter)">
+          <Field label="Username (opsional)">
             <input
-              type="text"
-              required
-              minLength={8}
-              value={form.password}
-              onChange={(e) => setForm({ ...form, password: e.target.value })}
+              value={form.username}
+              onChange={(e) => setForm({ ...form, username: e.target.value })}
+              placeholder="huruf, angka, . _ -"
               className={inputCls}
             />
           </Field>
+
+          <Field label="Email">
+            <input
+              type="email"
+              required
+              disabled={!!editing}
+              value={form.email}
+              onChange={(e) => setForm({ ...form, email: e.target.value })}
+              placeholder="usp01@bumdes.local"
+              className={`${inputCls} ${editing ? "opacity-60 cursor-not-allowed" : ""}`}
+            />
+          </Field>
+
+          {!editing && (
+            <Field label="Password (min 8 karakter)">
+              <input
+                type="text"
+                required
+                minLength={8}
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+                className={inputCls}
+              />
+            </Field>
+          )}
 
           <Field label="Role">
             <select
@@ -163,7 +308,7 @@ function UsersPage() {
           </Field>
 
           {form.role === "admin_unit" && (
-            <Field label="Unit">
+            <Field label="Unit Usaha">
               <select
                 required
                 value={form.unitId}
@@ -175,7 +320,8 @@ function UsersPage() {
                   ?.filter((u) => !u.is_pusat)
                   .map((u) => (
                     <option key={u.id} value={u.id}>
-                      {u.name} ({u.code})
+                      {u.name}
+                      {u.code ? ` (${u.code})` : ""}
                     </option>
                   ))}
               </select>
@@ -184,84 +330,232 @@ function UsersPage() {
 
           <button
             type="submit"
-            disabled={creating}
+            disabled={saving}
             className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-green)] py-2.5 text-sm font-semibold text-[oklch(0.15_0.03_250)] disabled:opacity-60"
           >
-            {creating ? <Loader2 className="h-4 w-4 animate-spin" /> : <UserPlus className="h-4 w-4" />}
-            Buat User
+            {saving ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : editing ? (
+              <Pencil className="h-4 w-4" />
+            ) : (
+              <UserPlus className="h-4 w-4" />
+            )}
+            {editing ? "Simpan Perubahan" : "Tambah User"}
           </button>
         </form>
 
         {/* List */}
         <div className="glass-card rounded-2xl p-5">
-          <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
-            <Users className="h-4 w-4 text-[var(--neon-cyan)]" /> Daftar User
-          </h3>
+          <div className="flex flex-wrap items-center gap-2 mb-4">
+            <h3 className="text-sm font-semibold flex items-center gap-2 mr-auto">
+              <Users className="h-4 w-4 text-[var(--neon-cyan)]" />
+              Daftar User{" "}
+              <span className="text-xs text-muted-foreground">
+                ({filtered.length})
+              </span>
+            </h3>
+
+            <div className="relative">
+              <Search className="h-3.5 w-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={q}
+                onChange={(e) => {
+                  setQ(e.target.value);
+                  setPage(1);
+                }}
+                placeholder="Cari nama, email, unit…"
+                className="rounded-lg border border-border/60 bg-secondary/40 pl-7 pr-3 py-1.5 text-xs w-56 outline-none focus:border-[var(--neon-cyan)]/60"
+              />
+            </div>
+
+            <select
+              value={roleFilter}
+              onChange={(e) => {
+                setRoleFilter(e.target.value as typeof roleFilter);
+                setPage(1);
+              }}
+              className="rounded-lg border border-border/60 bg-secondary/40 px-2 py-1.5 text-xs"
+            >
+              <option value="all">Semua Role</option>
+              <option value="admin_pusat">Admin Pusat</option>
+              <option value="admin_unit">Admin Unit</option>
+            </select>
+
+            <select
+              value={unitFilter}
+              onChange={(e) => {
+                setUnitFilter(e.target.value);
+                setPage(1);
+              }}
+              className="rounded-lg border border-border/60 bg-secondary/40 px-2 py-1.5 text-xs"
+            >
+              <option value="all">Semua Unit</option>
+              {units?.map((u) => (
+                <option key={u.id} value={u.id}>
+                  {u.name}
+                </option>
+              ))}
+            </select>
+
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value as typeof statusFilter);
+                setPage(1);
+              }}
+              className="rounded-lg border border-border/60 bg-secondary/40 px-2 py-1.5 text-xs"
+            >
+              <option value="all">Semua Status</option>
+              <option value="active">Aktif</option>
+              <option value="inactive">Suspend</option>
+            </select>
+          </div>
+
           {isLoading ? (
             <p className="text-sm text-muted-foreground">Memuat…</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead className="text-[11px] uppercase text-muted-foreground">
-                  <tr>
-                    <th className="text-left py-2">Email</th>
-                    <th className="text-left">Nama</th>
-                    <th className="text-left">Role</th>
-                    <th className="text-left">Unit</th>
-                    <th className="text-left">Status</th>
-                    <th className="text-right">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {(users ?? []).map((u) => (
-                    <tr key={u.userId} className="border-t border-white/5">
-                      <td className="py-2">{u.email}</td>
-                      <td>{u.fullName ?? "—"}</td>
-                      <td>
-                        <span className="rounded px-1.5 py-0.5 text-[11px] bg-secondary/60">
-                          {u.role ?? "—"}
-                        </span>
-                      </td>
-                      <td>{u.unitName ?? "—"}</td>
-                      <td>
-                        <span
-                          className={`rounded px-1.5 py-0.5 text-[11px] ${
-                            u.isActive
-                              ? "bg-emerald-500/15 text-emerald-300"
-                              : "bg-red-500/15 text-red-300"
-                          }`}
-                        >
-                          {u.isActive ? "Aktif" : "Nonaktif"}
-                        </span>
-                      </td>
-                      <td className="text-right">
-                        <div className="inline-flex gap-1">
-                          <IconBtn
-                            title="Reset password"
-                            onClick={() => handleReset(u.userId)}
-                          >
-                            <KeyRound className="h-3.5 w-3.5" />
-                          </IconBtn>
-                          <IconBtn
-                            title={u.isActive ? "Nonaktifkan" : "Aktifkan"}
-                            onClick={() => handleToggle(u.userId, u.isActive)}
-                          >
-                            <Power className="h-3.5 w-3.5" />
-                          </IconBtn>
-                          <IconBtn
-                            title="Hapus"
-                            onClick={() => handleDelete(u.userId, u.email)}
-                            danger
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </IconBtn>
-                        </div>
-                      </td>
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="text-[11px] uppercase text-muted-foreground">
+                    <tr>
+                      <th className="text-left py-2">User</th>
+                      <th className="text-left">Jabatan</th>
+                      <th className="text-left">Role</th>
+                      <th className="text-left">Unit</th>
+                      <th className="text-left">Status</th>
+                      <th className="text-right">Aksi</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody>
+                    {pageRows.map((u) => (
+                      <tr key={u.userId} className="border-t border-white/5 align-top">
+                        <td className="py-2.5">
+                          <div className="font-medium leading-tight">
+                            {u.fullName ?? "—"}
+                          </div>
+                          <div className="text-[11px] text-muted-foreground">
+                            {u.email}
+                          </div>
+                          {u.username && (
+                            <div className="text-[11px] text-muted-foreground">
+                              @{u.username}
+                            </div>
+                          )}
+                        </td>
+                        <td className="text-xs">{u.jabatan ?? "—"}</td>
+                        <td>
+                          <span
+                            className={`rounded px-1.5 py-0.5 text-[11px] ${
+                              u.role === "admin_pusat"
+                                ? "bg-[var(--neon-cyan)]/15 text-[var(--neon-cyan)]"
+                                : "bg-secondary/60"
+                            }`}
+                          >
+                            {u.role ?? "—"}
+                          </span>
+                        </td>
+                        <td className="text-xs">
+                          {u.unitName ? (
+                            <>
+                              {u.unitName}
+                              {u.unitCode && (
+                                <span className="ml-1 text-muted-foreground">
+                                  ({u.unitCode})
+                                </span>
+                              )}
+                            </>
+                          ) : (
+                            "—"
+                          )}
+                        </td>
+                        <td>
+                          <span
+                            className={`rounded px-1.5 py-0.5 text-[11px] ${
+                              u.isActive
+                                ? "bg-emerald-500/15 text-emerald-300"
+                                : "bg-red-500/15 text-red-300"
+                            }`}
+                          >
+                            {u.isActive ? "Aktif" : "Suspend"}
+                          </span>
+                        </td>
+                        <td className="text-right">
+                          <div className="inline-flex gap-1 flex-wrap justify-end">
+                            {u.role === "admin_unit" && u.unitCode && (
+                              <IconBtn
+                                title="Copy link login unit"
+                                onClick={() => handleCopyLink(u.unitCode)}
+                              >
+                                <Link2 className="h-3.5 w-3.5" />
+                              </IconBtn>
+                            )}
+                            <IconBtn title="Edit user" onClick={() => openEdit(u)}>
+                              <Pencil className="h-3.5 w-3.5" />
+                            </IconBtn>
+                            <IconBtn
+                              title="Reset password"
+                              onClick={() => handleReset(u.userId)}
+                            >
+                              <KeyRound className="h-3.5 w-3.5" />
+                            </IconBtn>
+                            <IconBtn
+                              title={u.isActive ? "Suspend" : "Aktifkan"}
+                              onClick={() => handleToggle(u.userId, u.isActive)}
+                            >
+                              <Power className="h-3.5 w-3.5" />
+                            </IconBtn>
+                            <IconBtn
+                              title="Hapus"
+                              onClick={() => handleDelete(u.userId, u.email)}
+                              danger
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </IconBtn>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {pageRows.length === 0 && (
+                      <tr>
+                        <td
+                          colSpan={6}
+                          className="py-8 text-center text-xs text-muted-foreground"
+                        >
+                          Tidak ada user yang cocok dengan filter.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-4 text-xs text-muted-foreground">
+                  <span>
+                    Halaman {safePage} dari {totalPages}
+                  </span>
+                  <div className="inline-flex gap-1">
+                    <button
+                      type="button"
+                      disabled={safePage <= 1}
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      className="rounded border border-border/60 bg-secondary/50 px-2 py-1 disabled:opacity-40"
+                    >
+                      Sebelumnya
+                    </button>
+                    <button
+                      type="button"
+                      disabled={safePage >= totalPages}
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      className="rounded border border-border/60 bg-secondary/50 px-2 py-1 disabled:opacity-40"
+                    >
+                      Berikutnya
+                    </button>
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </div>

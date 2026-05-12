@@ -67,7 +67,9 @@ export const listUsers = createServerFn({ method: "GET" })
     await assertPusat(context.userId);
 
     const [{ data: profiles }, { data: roles }, { data: units }, authList] = await Promise.all([
-      supabaseAdmin.from("profiles").select("user_id, full_name, is_active, created_at"),
+      supabaseAdmin
+        .from("profiles")
+        .select("user_id, full_name, is_active, created_at, jabatan, username"),
       supabaseAdmin.from("user_roles").select("user_id, role, unit_id"),
       supabaseAdmin.from("units").select("id, name, code"),
       supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 200 }),
@@ -80,11 +82,15 @@ export const listUsers = createServerFn({ method: "GET" })
     return (authList.data?.users ?? []).map((u) => {
       const r = roleMap.get(u.id);
       const unit = r?.unit_id ? unitMap.get(r.unit_id) : null;
-      const p = profMap.get(u.id);
+      const p = profMap.get(u.id) as
+        | { full_name: string | null; is_active: boolean; jabatan: string | null; username: string | null }
+        | undefined;
       return {
         userId: u.id,
         email: u.email ?? "",
         fullName: p?.full_name ?? null,
+        jabatan: p?.jabatan ?? null,
+        username: p?.username ?? null,
         isActive: p?.is_active ?? true,
         role: r?.role ?? null,
         unitId: r?.unit_id ?? null,
@@ -104,6 +110,8 @@ export const createUser = createServerFn({ method: "POST" })
         email: z.string().email(),
         password: z.string().min(8).max(72),
         fullName: z.string().min(1).max(100),
+        jabatan: z.string().max(100).nullable().optional(),
+        username: z.string().min(3).max(50).regex(/^[a-zA-Z0-9_.-]+$/).nullable().optional(),
         role: z.enum(["admin_pusat", "admin_unit"]),
         unitId: z.string().uuid().nullable(),
       })
@@ -125,6 +133,16 @@ export const createUser = createServerFn({ method: "POST" })
     const uid = created.user?.id;
     if (!uid) throw new Error("Gagal membuat user.");
 
+    // Update profile with extra fields (profile auto-created by trigger)
+    await supabaseAdmin
+      .from("profiles")
+      .update({
+        full_name: data.fullName,
+        jabatan: data.jabatan ?? null,
+        username: data.username ?? null,
+      })
+      .eq("user_id", uid);
+
     const { error: roleErr } = await supabaseAdmin.from("user_roles").insert({
       user_id: uid,
       role: data.role,
@@ -132,6 +150,62 @@ export const createUser = createServerFn({ method: "POST" })
     });
     if (roleErr) throw new Error(roleErr.message);
     return { ok: true, userId: uid };
+  });
+
+// ============ Update user (profile + role/unit) ============
+export const updateUser = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((d) =>
+    z
+      .object({
+        userId: z.string().uuid(),
+        fullName: z.string().min(1).max(100),
+        jabatan: z.string().max(100).nullable().optional(),
+        username: z.string().min(3).max(50).regex(/^[a-zA-Z0-9_.-]+$/).nullable().optional(),
+        role: z.enum(["admin_pusat", "admin_unit"]),
+        unitId: z.string().uuid().nullable(),
+      })
+      .parse(d),
+  )
+  .handler(async ({ context, data }) => {
+    await assertPusat(context.userId);
+    if (data.role === "admin_unit" && !data.unitId) {
+      throw new Error("Unit wajib dipilih untuk role admin_unit.");
+    }
+
+    const { error: pErr } = await supabaseAdmin
+      .from("profiles")
+      .update({
+        full_name: data.fullName,
+        jabatan: data.jabatan ?? null,
+        username: data.username ?? null,
+      })
+      .eq("user_id", data.userId);
+    if (pErr) throw new Error(pErr.message);
+
+    // upsert role
+    const { data: existing } = await supabaseAdmin
+      .from("user_roles")
+      .select("id")
+      .eq("user_id", data.userId)
+      .maybeSingle();
+
+    const newRole = {
+      user_id: data.userId,
+      role: data.role,
+      unit_id: data.role === "admin_pusat" ? null : data.unitId,
+    };
+    if (existing) {
+      const { error } = await supabaseAdmin
+        .from("user_roles")
+        .update(newRole)
+        .eq("id", existing.id);
+      if (error) throw new Error(error.message);
+    } else {
+      const { error } = await supabaseAdmin.from("user_roles").insert(newRole);
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
   });
 
 // ============ Reset password ============
@@ -162,7 +236,6 @@ export const setUserActive = createServerFn({ method: "POST" })
       .update({ is_active: data.isActive })
       .eq("user_id", data.userId);
     if (error) throw new Error(error.message);
-    // Also disable auth user via ban
     await supabaseAdmin.auth.admin.updateUserById(data.userId, {
       ban_duration: data.isActive ? "none" : "876000h",
     });
