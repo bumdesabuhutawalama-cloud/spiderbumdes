@@ -52,7 +52,7 @@ export function UspNav() {
           return (
             <Link
               key={it.to}
-              to={it.to}
+              to={it.to as "/usp"}
               className={`inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm transition ${
                 active
                   ? "border-[var(--neon-cyan)]/60 bg-[var(--neon-cyan)]/10 text-foreground"
