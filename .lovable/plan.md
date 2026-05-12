@@ -1,66 +1,119 @@
-## Module USP — Unit Simpan Pinjam
 
-Implementasi modul USP penuh dengan Activity-Based Accounting, terintegrasi dengan COA & jurnal otomatis.
+# Refactor: Modularisasi Unit Pusat & Unit Simpan Pinjam
 
-### 1. Database (1 migration)
+Tujuannya adalah memisahkan secara visual dan struktural antara **Unit Pusat** dan **Unit Simpan Pinjam (USP)**. Semua jurnal, RK, laporan, dan schema database tetap utuh — hanya routing, sidebar, dan layout yang berubah.
 
-**Akun COA baru** (insert ke `coa_accounts`):
-- `1.1.03.04` Piutang Pinjaman USP (ASET / DEBIT / Detail) — bila perlu pisahkan dari `1.1.03.03`
-- `6.1.10.01` Beban Operasional USP (BEBAN / DEBIT / Detail)
-- Akun lain sudah tersedia: Kas USP (`1.1.01.06`), Bank USP (`1.1.01.07`), Pendapatan Bunga USP (`4.1.08.02`), Pendapatan Denda USP (`4.1.08.03`)
+## 1. Struktur Sidebar Baru
 
-**Unit USP** (insert ke `units`): `Unit Simpan Pinjam`, code `USP`.
+Sidebar utama disederhanakan menjadi 5 item milik Unit Pusat:
 
-**Tabel baru:**
+- Dashboard Pusat (`/`)
+- Bagan Akun / COA (`/coa`)
+- Laporan Pusat (group: Neraca Pusat, Neraca Konsolidasi, Laba Rugi, Bagi Hasil, Rekonsiliasi RK)
+- Unit Simpan Pinjam (`/usp`) — masuk modul terpisah
+- Pengaturan (`/pengaturan`)
+
+Menu yang dipindahkan ke dalam modul USP:
+- Catat Kegiatan (saat ini transaksi USP utama)
+- Transfer Antar Entitas
+- Data Pinjaman
+- Dashboard USP
+- Rekonsiliasi RK USP (link kontekstual)
+
+Catatan: saat ini "Catat Kegiatan" dan "Transfer Antar Entitas" berada di sidebar utama. Akan dipindah ke sub-navigasi USP. Jika user juga ingin tetap dapat diakses dari Pusat, beri tahu — default rencana ini memindahkannya ke USP.
+
+## 2. Struktur Routing Baru
+
 ```
-loans (id, unit_id, borrower_name, principal_amount, interest_rate,
-       tenure_months, start_date, monthly_installment,
-       outstanding_principal, status, created_at, updated_at)
-
-loan_installments (id, loan_id, installment_no, due_date,
-                   principal_due, interest_due, total_due,
-                   is_paid, paid_date, created_at)
+src/routes/
+  __root.tsx
+  _app.tsx                       (layout Unit Pusat — sidebar utama)
+  _app.index.tsx                 (Dashboard Pusat)
+  _app.coa.tsx
+  _app.pengaturan.tsx
+  _app.laporan.*.tsx             (laporan pusat, tetap)
+  _usp.tsx                       (NEW — layout modul USP, sidebar/nav internal)
+  _usp.index.tsx                 (NEW — landing/dashboard USP, redirect ke /usp/dashboard)
+  _usp.dashboard.tsx             (rename dari _app.usp.tsx)
+  _usp.pinjaman.tsx              (rename dari _app.usp.pinjaman.tsx)
+  _usp.kegiatan.tsx              (rename dari _app.catat-kegiatan.tsx, scope ke unit USP)
+  _usp.transfer.tsx              (rename dari _app.transfer-antar-entitas.tsx)
+  _usp.laporan.tsx               (NEW — index laporan unit USP, link ke neraca unit, dsb)
 ```
-RLS: read publik, write authenticated (mengikuti pola tabel lain).
 
-### 2. Activity Cards (di `/catat-kegiatan`)
+Route-level code splitting otomatis berlaku via TanStack Router (komponen masing-masing route adalah chunk terpisah). Tidak perlu `React.lazy` manual.
 
-Tambah 4 kartu USP — tiap card buka dialog, submit menjalankan **satu** transaksi yang membuat `journal_entries` + `journal_entry_lines` (dan loan/installment record bila perlu) lewat `Promise.all` / RPC.
+Redirect backward-compatible:
+- `/catat-kegiatan` → `/usp/kegiatan`
+- `/transfer-antar-entitas` → `/usp/transfer`
+- `/usp/pinjaman` tetap valid (sama path)
 
-| Card | Jurnal otomatis |
-|---|---|
-| Pencairan Pinjaman | D Piutang Pinjaman / K Kas USP atau Bank USP. Sekaligus buat `loans` + jadwal `loan_installments` (anuitas/flat sederhana). |
-| Terima Angsuran | Pilih loan aktif → input nominal & tanggal. Sistem alokasi pokok+bunga dari installment terdekat. D Kas USP / K Piutang Pinjaman (pokok) + K Pendapatan Bunga USP. Update `outstanding_principal`, tandai installment paid, set status=closed bila lunas. |
-| Terima Denda | D Kas USP / K Pendapatan Denda USP. |
-| Beban Operasional USP | D Beban Operasional USP / K Kas USP. |
+## 3. Layout USP Terpisah
 
-### 3. Halaman Baru
+`src/routes/_usp.tsx` adalah pathless layout route dengan:
+- Header + breadcrumb: **Unit Pusat / Unit Simpan Pinjam / {sub}**
+- Sidebar/tab internal USP: Dashboard, Pinjaman, Catat Kegiatan, Transfer, Laporan
+- Tombol "Kembali ke Unit Pusat" → `/`
+- Reuse `CinematicBackground` agar visual konsisten
 
-- **`/usp` — Dashboard USP**
-  - Ringkasan: Outstanding Pinjaman, Saldo Kas USP, Pendapatan Bunga (bulan ini), Pendapatan Denda (bulan ini), Laba Bersih USP.
-  - Statistik: jumlah pinjaman aktif, jumlah peminjam, angsuran jatuh tempo bulan ini, overdue.
-  - 10 aktivitas USP terbaru.
-- **`/usp/pinjaman` — Data Pinjaman**
-  - Tabel: Peminjam, Pokok, Outstanding, Angsuran/bln, Status, Jatuh Tempo Berikutnya.
-  - Klik baris → detail: jadwal angsuran + riwayat pembayaran.
+Komponen baru:
+- `src/modules/usp/UspLayout.tsx`
+- `src/modules/usp/UspSidebar.tsx`
+- `src/modules/pusat/PusatSidebar.tsx` (refactor dari `AppSidebar.tsx`)
 
-### 4. Sidebar
+Struktur folder modular:
+```
+src/modules/
+  pusat/
+    components/    (PusatSidebar, dsb)
+  usp/
+    components/    (UspLayout, UspSidebar, UspBreadcrumb)
+    pages/         (re-export halaman jika perlu agar route file tipis)
+```
 
-Tambah grup **Unit Simpan Pinjam** dengan child: Dashboard USP, Data Pinjaman, dan link ke Catat Kegiatan + Laporan (filter unit).
+Halaman existing (laporan, COA, dst) tetap di `src/routes/` — tidak dipindah agar tidak menyentuh business logic.
 
-### 5. Catatan Teknis
+## 4. Performa
 
-- Tetap pakai pola activity-based existing (tidak edit core jurnal).
-- Saldo & laporan tetap baca dari `journal_entry_lines` lewat `account-balances.ts` (sudah filter tanggal). Filter unit_id belum dipakai di engine balance saat ini → Dashboard USP memfilter berdasar set akun (Kas USP, Piutang Pinjaman, Pendapatan Bunga/Denda USP, Beban Operasional USP) untuk angka unit.
-- Schedule angsuran: metode flat (bunga × pokok / 12) untuk kesederhanaan.
-- Tidak ada manual debit/kredit di UI.
+- Route-based code splitting otomatis (TanStack auto split).
+- React Query cache global yang sudah ada (`staleTime 5m`) tetap dipakai → tidak ada refetch saat pindah modul.
+- Memoisasi tabel besar (Pinjaman) dengan `useMemo` untuk row data.
+- Hindari unmount provider — `__root.tsx` tetap host `QueryClientProvider`.
+- Breadcrumb & sidebar USP pakai `Link` TanStack (preload `intent`).
 
-### Files
+## 5. Keamanan / Akses
 
-- Migration baru (akun COA + tables `loans`, `loan_installments`)
-- Insert unit USP via supabase--insert
-- `src/routes/_app.catat-kegiatan.tsx` — tambah 4 card + 4 dialog USP
-- `src/routes/_app.usp.tsx` — layout
-- `src/routes/_app.usp.index.tsx` — Dashboard USP
-- `src/routes/_app.usp.pinjaman.tsx` — Data Pinjaman + detail panel
-- `src/components/AppSidebar.tsx` — menu USP
+Saat ini app belum punya auth/roles aktif. Rencana minimum yang aman tanpa rewrite:
+- Tambah hook `useUspAccess()` placeholder yang return `true` (siap diganti saat auth diaktifkan).
+- `_usp.tsx` `beforeLoad` cek `useUspAccess`; jika false → `redirect({ to: "/" })`.
+- Sidebar utama menyembunyikan link USP jika tidak punya akses.
+- Catatan: untuk validasi API yang sebenarnya butuh roles tabel + RLS — tidak dilakukan di refactor ini (di luar scope, akan dibahas terpisah jika user mau enable auth).
+
+## 6. Backward Compatibility
+
+- Tidak ada migration DB.
+- Tidak ada perubahan pada `account-balances.ts`, `bagi-hasil`, RK, jurnal, atau Supabase schema.
+- Route lama diberi redirect agar bookmark user tetap berfungsi.
+- Semua data & laporan sebelum/ sesudah refactor identik.
+
+## 7. Risiko & Klarifikasi
+
+Sebelum eksekusi, satu hal perlu user konfirmasi:
+1. **Catat Kegiatan & Transfer Antar Entitas** — saat ini berada di sidebar utama dan bisa dipakai untuk transaksi pusat juga. Rencana ini memindahnya ke modul USP. Jika user butuh keduanya tetap dapat diakses dari Unit Pusat juga, kita bisa duplikasi link (route tunggal, link di kedua sidebar). Default: **dipindah penuh ke USP** sesuai instruksi.
+
+## 8. Tahapan Implementasi
+
+1. Buat folder `src/modules/pusat` dan `src/modules/usp`.
+2. Refactor `AppSidebar.tsx` → `PusatSidebar.tsx`, hapus item USP yang dipindah, sisakan struktur baru.
+3. Buat `_usp.tsx` (layout) + `UspSidebar`, `UspLayout`, breadcrumb.
+4. Rename route files:
+   - `_app.usp.tsx` → `_usp.dashboard.tsx`
+   - `_app.usp.pinjaman.tsx` → `_usp.pinjaman.tsx`
+   - `_app.catat-kegiatan.tsx` → `_usp.kegiatan.tsx`
+   - `_app.transfer-antar-entitas.tsx` → `_usp.transfer.tsx`
+5. Tambah route redirect di file lama (atau rename + buat stub route redirect).
+6. Tambah `_usp.index.tsx` (redirect ke `/usp/dashboard`) & `_usp.laporan.tsx` (link kontekstual).
+7. Update semua `<Link to="...">` internal yang menunjuk path lama.
+8. Verifikasi build & navigasi di preview.
+
+Selesai — tidak ada perubahan business logic, schema, atau jurnal.

@@ -5,7 +5,7 @@ import { ListChecks, X, ChevronRight } from "lucide-react";
 import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { formatRp } from "@/lib/account-balances";
-import { UspSubNav } from "./_app.usp";
+
 
 export const Route = createFileRoute("/_app/usp/pinjaman")({
   head: () => ({ meta: [{ title: "Data Pinjaman USP · BUMDes" }] }),
@@ -72,7 +72,7 @@ function PinjamanPage() {
   return (
     <>
       <PageHeader title="Data Pinjaman" subtitle="Daftar pinjaman aktif & lunas, jadwal angsuran, riwayat pembayaran." />
-      <UspSubNav active="pinjaman" />
+      
 
       <div className="glass-card rounded-2xl p-4 sm:p-5">
         <div className="flex items-center gap-2 mb-3 text-sm font-semibold">
