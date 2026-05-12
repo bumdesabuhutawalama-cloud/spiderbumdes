@@ -3,6 +3,7 @@ import { useMemo, useRef, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { ClipboardList, TrendingUp, Wallet, Loader2, X, ArrowDownCircle, ArrowUpCircle, Package, HandCoins, Banknote, AlertTriangle, Receipt } from "lucide-react";
 import { PageHeader } from "@/components/DashboardLayout";
+import { DateField } from "@/components/DateField";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import {
