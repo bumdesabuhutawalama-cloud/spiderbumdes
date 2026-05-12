@@ -125,16 +125,6 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
-      <div className="border-t border-border/60 p-3">
-        <button className="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm text-muted-foreground transition-all hover:bg-destructive/15 hover:text-destructive">
-          <LogOut className="h-4 w-4" />
-          Logout
-        </button>
-      </div>
-    </>
-  );
-}
-
 export function AppSidebar() {
   return (
     <aside className="hidden md:flex sticky top-0 h-screen w-64 shrink-0 flex-col glass-card rounded-none border-y-0 border-l-0">
