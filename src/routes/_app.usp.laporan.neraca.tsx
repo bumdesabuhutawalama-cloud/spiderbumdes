@@ -7,6 +7,7 @@ export const Route = createFileRoute("/_app/usp/laporan/neraca")({
     <NeracaSheet
       title="Neraca Unit Simpan Pinjam"
       subtitle="Posisi keuangan khusus aktivitas USP · saldo dihitung otomatis dari jurnal."
+      fixedUnitCode="USP"
       heading={{
         line1: "Laporan Posisi Keuangan Unit Usaha BUM Desa",
         line2: "UNIT SIMPAN PINJAM",

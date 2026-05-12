@@ -16,7 +16,7 @@ import {
   useAccountBalances,
 } from "@/lib/account-balances";
 
-type Unit = { id: string; name: string };
+type Unit = { id: string; name: string; code: string | null };
 
 const SECTIONS: { title: string; type: string; total: string }[] = [
   { title: "ASET", type: "ASET", total: "TOTAL ASET" },
@@ -32,17 +32,20 @@ export function NeracaSheet({
   heading,
   defaultMode = "pusat",
   lockMode = false,
+  fixedUnitCode,
 }: {
   title: string;
   subtitle: string;
   heading: { line1: string; line2?: string; line3: string };
   defaultMode?: UnitMode;
   lockMode?: boolean;
+  fixedUnitCode?: string;
 }) {
   const [asOf, setAsOf] = useState(yearEnd(new Date().getFullYear()));
   const currentYear = Number(asOf.slice(0, 4));
   const prevAsOf = yearEnd(currentYear - 1);
-  const [mode, setMode] = useState<UnitMode>(defaultMode);
+  const effectiveLockMode = lockMode || !!fixedUnitCode;
+  const [mode, setMode] = useState<UnitMode>(fixedUnitCode ? "unit" : defaultMode);
   const [unitId, setUnitId] = useState<string>("");
   const [exporting, setExporting] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
@@ -65,7 +68,7 @@ export function NeracaSheet({
     queryFn: async () => {
       const { data, error } = await supabase
         .from("units")
-        .select("id,name")
+        .select("id,name,code")
         .eq("status", "Aktif")
         .order("name");
       if (error) throw error;
@@ -104,7 +107,14 @@ export function NeracaSheet({
     return accountsRaw.filter((a) => !rkAccountIds.has(a.id));
   }, [accountsRaw, mode, rkAccountIds]);
 
-  const effectiveUnitId = mode === "unit" ? unitId || null : null;
+  const fixedUnit = fixedUnitCode
+    ? (units ?? []).find((u) => u.id === fixedUnitCode || (u as { code?: string }).code === fixedUnitCode)
+    : null;
+  const effectiveUnitId = fixedUnitCode
+    ? fixedUnit?.id ?? null
+    : mode === "unit"
+      ? unitId || null
+      : null;
   const { data: balCur, isLoading: loadingCur } = useAccountBalances(asOf, mode, effectiveUnitId);
   const { data: balPrev, isLoading: loadingPrev } = useAccountBalances(prevAsOf, mode, effectiveUnitId);
 
@@ -143,7 +153,7 @@ export function NeracaSheet({
         subtitle={subtitle}
         actions={
           <>
-            {!lockMode && (
+            {!effectiveLockMode && (
               <div className="inline-flex items-center gap-1 rounded-lg border border-border/60 bg-secondary/60 p-1 text-xs">
                 {(["pusat", "unit", "konsolidasi"] as UnitMode[]).map((m) => (
                   <button
@@ -161,7 +171,7 @@ export function NeracaSheet({
                 ))}
               </div>
             )}
-            {!lockMode && mode === "unit" && (
+            {!effectiveLockMode && mode === "unit" && (
               <select
                 value={unitId}
                 onChange={(e) => setUnitId(e.target.value)}
