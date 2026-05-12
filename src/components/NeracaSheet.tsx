@@ -68,7 +68,7 @@ export function NeracaSheet({
     queryFn: async () => {
       const { data, error } = await supabase
         .from("units")
-        .select("id,name")
+        .select("id,name,code")
         .eq("status", "Aktif")
         .order("name");
       if (error) throw error;
