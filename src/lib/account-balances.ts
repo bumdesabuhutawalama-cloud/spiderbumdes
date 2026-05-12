@@ -39,21 +39,59 @@ export type UnitMode = "pusat" | "unit" | "konsolidasi";
  * sampai tanggal tertentu. Tabel `account_balances` tidak digunakan karena
  * pernah mengalami drift; jurnal adalah satu-satunya truth source.
  */
+async function fetchUnitJournalIds(unitId: string): Promise<string[]> {
+  // Akun "milik" unit: kas_account_id pada units + akun RK yang owner-nya unit ini.
+  const [{ data: unit }, { data: rk }] = await Promise.all([
+    supabase.from("units").select("kas_account_id").eq("id", unitId).maybeSingle(),
+    supabase.from("entity_rk_accounts").select("account_id").eq("owner_entity_id", unitId),
+  ]);
+  const ownedIds = new Set<string>();
+  if (unit?.kas_account_id) ownedIds.add(unit.kas_account_id as string);
+  for (const r of rk ?? []) ownedIds.add((r as { account_id: string }).account_id);
+  if (ownedIds.size === 0) return [];
+  // Jurnal yang menyentuh salah satu akun milik unit → seluruh sisi jurnal itu
+  // ikut dihitung sebagai aktivitas unit (menjaga keseimbangan double-entry).
+  const { data: lines } = await supabase
+    .from("journal_entry_lines")
+    .select("journal_entry_id")
+    .in("account_id", Array.from(ownedIds))
+    .limit(50000);
+  return Array.from(new Set((lines ?? []).map((l) => (l as { journal_entry_id: string }).journal_entry_id)));
+}
+
 async function fetchBalances(
   startDate?: string,
   endDate?: string,
-  _mode: UnitMode = "pusat",
-  _unitId?: string | null,
+  mode: UnitMode = "pusat",
+  unitId?: string | null,
 ): Promise<LineRow[]> {
-  let q = supabase
-    .from("journal_entry_lines")
-    .select("account_id, debit, credit, journal_entries!inner(transaction_date)")
-    .limit(50000);
-  if (startDate) q = q.gte("journal_entries.transaction_date", startDate);
-  if (endDate) q = q.lte("journal_entries.transaction_date", endDate);
-  const { data, error } = await q;
-  if (error) throw error;
-  return (data ?? []) as unknown as LineRow[];
+  let entryIds: string[] | null = null;
+  if (mode === "unit" && unitId) {
+    entryIds = await fetchUnitJournalIds(unitId);
+    if (entryIds.length === 0) return [];
+  }
+
+  // Supabase membatasi ~1000 item per filter `in`. Pecah menjadi batch.
+  const all: LineRow[] = [];
+  const batches: (string[] | null)[] = entryIds
+    ? Array.from({ length: Math.ceil(entryIds.length / 800) }, (_, i) =>
+        entryIds!.slice(i * 800, (i + 1) * 800),
+      )
+    : [null];
+
+  for (const batch of batches) {
+    let q = supabase
+      .from("journal_entry_lines")
+      .select("account_id, debit, credit, journal_entries!inner(transaction_date)")
+      .limit(50000);
+    if (startDate) q = q.gte("journal_entries.transaction_date", startDate);
+    if (endDate) q = q.lte("journal_entries.transaction_date", endDate);
+    if (batch) q = q.in("journal_entry_id", batch);
+    const { data, error } = await q;
+    if (error) throw error;
+    all.push(...((data ?? []) as unknown as LineRow[]));
+  }
+  return all;
 }
 
 function reduceRows(rows: LineRow[]): BalanceMap {
