@@ -32,17 +32,20 @@ export function NeracaSheet({
   heading,
   defaultMode = "pusat",
   lockMode = false,
+  fixedUnitCode,
 }: {
   title: string;
   subtitle: string;
   heading: { line1: string; line2?: string; line3: string };
   defaultMode?: UnitMode;
   lockMode?: boolean;
+  fixedUnitCode?: string;
 }) {
   const [asOf, setAsOf] = useState(yearEnd(new Date().getFullYear()));
   const currentYear = Number(asOf.slice(0, 4));
   const prevAsOf = yearEnd(currentYear - 1);
-  const [mode, setMode] = useState<UnitMode>(defaultMode);
+  const effectiveLockMode = lockMode || !!fixedUnitCode;
+  const [mode, setMode] = useState<UnitMode>(fixedUnitCode ? "unit" : defaultMode);
   const [unitId, setUnitId] = useState<string>("");
   const [exporting, setExporting] = useState(false);
   const reportRef = useRef<HTMLDivElement>(null);
