@@ -288,14 +288,12 @@ function PenyertaanModalDialog({ onClose }: { onClose: () => void }) {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
             <Field label="Tanggal Transaksi">
-              <input
-                type="date"
+              <DateField
                 value={tanggal}
-                onChange={(e) => {
-                  setTanggal(e.target.value);
-                  if (e.target.value) sumberRef.current?.focus();
+                onChange={(v) => {
+                  setTanggal(v);
+                  if (v) sumberRef.current?.focus();
                 }}
-                className="input-glass"
               />
             </Field>
 
