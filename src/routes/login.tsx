@@ -1,10 +1,12 @@
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Building2, Lock, Mail, Loader2 } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { Building2, Lock, Mail, Loader2, UserPlus } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { CinematicBackground } from "@/components/CinematicBackground";
 import { loadUserRole, useAuthStore } from "@/hooks/use-auth";
+import { bootstrapAdminPusat, checkBootstrapNeeded } from "@/lib/users.functions";
 
 export const Route = createFileRoute("/login")({
   head: () => ({ meta: [{ title: "Login · BUMDes" }] }),
@@ -15,8 +17,32 @@ function LoginPage() {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [bootstrapNeeded, setBootstrapNeeded] = useState<boolean | null>(null);
   const { setUser, setRole } = useAuthStore();
+  const checkFn = useServerFn(checkBootstrapNeeded);
+  const bootstrapFn = useServerFn(bootstrapAdminPusat);
+
+  useEffect(() => {
+    void checkFn().then((r) => setBootstrapNeeded(r.needed));
+  }, [checkFn]);
+
+  const handleBootstrap = async (e: FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await bootstrapFn({ data: { email, password, fullName } });
+      toast.success("Admin Pusat berhasil dibuat. Silakan login.");
+      setBootstrapNeeded(false);
+      setFullName("");
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Bootstrap gagal");
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
