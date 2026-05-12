@@ -153,7 +153,7 @@ export function NeracaSheet({
         subtitle={subtitle}
         actions={
           <>
-            {!lockMode && (
+            {!effectiveLockMode && (
               <div className="inline-flex items-center gap-1 rounded-lg border border-border/60 bg-secondary/60 p-1 text-xs">
                 {(["pusat", "unit", "konsolidasi"] as UnitMode[]).map((m) => (
                   <button
@@ -171,7 +171,7 @@ export function NeracaSheet({
                 ))}
               </div>
             )}
-            {!lockMode && mode === "unit" && (
+            {!effectiveLockMode && mode === "unit" && (
               <select
                 value={unitId}
                 onChange={(e) => setUnitId(e.target.value)}
