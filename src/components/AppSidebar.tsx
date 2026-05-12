@@ -15,9 +15,11 @@ import {
   HandCoins,
   GitCompare,
   ClipboardList,
+  Users,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/use-auth";
 
 type Item = { to: string; label: string; icon: React.ComponentType<{ className?: string }> };
 
