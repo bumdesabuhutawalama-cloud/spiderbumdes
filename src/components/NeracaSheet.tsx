@@ -16,7 +16,7 @@ import {
   useAccountBalances,
 } from "@/lib/account-balances";
 
-type Unit = { id: string; name: string };
+type Unit = { id: string; name: string; code: string | null };
 
 const SECTIONS: { title: string; type: string; total: string }[] = [
   { title: "ASET", type: "ASET", total: "TOTAL ASET" },
