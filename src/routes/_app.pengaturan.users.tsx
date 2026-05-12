@@ -284,9 +284,10 @@ function UsersPage() {
           {!editing && (
             <Field label="Password (min 8 karakter)">
               <input
-                type="text"
+                type="password"
                 required
                 minLength={8}
+                autoComplete="new-password"
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
                 className={inputCls}
