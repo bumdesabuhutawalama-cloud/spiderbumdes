@@ -1,141 +1,85 @@
-## Tujuan
+# Realtime Sync Setelah Transaksi
 
-Menambahkan layer **authentication & authorization berbasis entity (PUSAT / UNIT)** di atas arsitektur existing tanpa rewrite. Database, routing, engine jurnal, dan laporan tetap utuh — hanya menambah lapisan akses + filter data per entity.
+## Masalah
+Saat audit, hampir semua mutasi transaksi (Penyertaan Modal, Belanja Aset, Penerimaan Kas, Pengeluaran, Pinjaman/Angsuran, Transfer Antar Entitas, Bagi Hasil) memang sudah memanggil `invalidateQueries({ queryKey: ["balances"] })` dan `["journal_entries"]`. Tetapi banyak query laporan lain memakai **queryKey berbeda** sehingga tidak ikut refetch:
 
----
+- `["ledger-…"]` → Buku Besar Pusat / Unit / Konsolidasi
+- `["coa_accounts_dashboard"]`, `["entity_rk_account_ids_dashboard"]`, `["units_top_perf"]`, `["unit_revenues_month", …]`, `["revenue_trend_12m", …]` → Dashboard
+- `["net-profit", …]`, `["bh-liab-balance", …]` → Bagi Hasil
+- `["rk_lines", …]` → Rekonsiliasi RK
+- `["entity_transfers"]`, `["loans", …]`, `["loan_installments", …]`
 
-## 1. Database (additive saja)
+Akibatnya Dashboard, Buku Besar, Rekonsiliasi RK, Bagi Hasil, dan beberapa kartu Neraca/L/R tidak update sampai user refresh manual.
 
-Migration baru, tidak mengubah tabel existing:
+## Solusi
+Buat satu helper terpusat dan panggil dari setiap mutasi transaksi. Tidak ada perubahan logika akuntansi — hanya cache layer React Query.
 
-```text
-profiles
-  user_id (uuid, FK auth.users, unique)
-  full_name (text)
-  is_active (boolean, default true)
+### 1. `src/lib/query-invalidate.ts` (baru)
+```ts
+import type { QueryClient } from "@tanstack/react-query";
 
-app_role (enum)        -> 'admin_pusat' | 'admin_unit'
+// Semua queryKey yang membaca jurnal / saldo / laporan keuangan
+const FINANCIAL_KEYS = [
+  "balances", "journal_entries", "journal_entry_lines",
+  "ledger", "ledger-entities", "coa-for-ledger",
+  "reports", "report_cache",
+  "entity_transfers", "entity_rk_accounts", "entity_rk_account_ids",
+  "entity_rk_account_ids_dashboard",
+  "loans", "loan_installments",
+  "net-profit", "bh-liab-balance",
+  "rk_lines",
+  "coa_accounts_dashboard",
+  "units_top_perf", "unit_revenues_month", "revenue_trend_12m",
+  "usp_loan_stats", "usp_recent_activity",
+  "pdc", "pdr",
+];
 
-user_roles
-  user_id (uuid)
-  role (app_role)
-  unit_id (uuid, nullable)   -- NULL untuk admin_pusat, isi untuk admin_unit
-  unique(user_id, role, unit_id)
-
--- Helper functions (SECURITY DEFINER, search_path=public)
-has_role(_user_id, _role)         -> boolean
-is_pusat(_user_id)                -> boolean
-get_user_unit_id(_user_id)        -> uuid
+export async function invalidateFinancials(qc: QueryClient) {
+  await qc.invalidateQueries({
+    predicate: (q) => {
+      const k = q.queryKey?.[0];
+      if (typeof k !== "string") return false;
+      // match exact + prefix (mis. "ledger-pusat-...", "balances-asof-...")
+      return FINANCIAL_KEYS.some((f) => k === f || k.startsWith(f + "-") || k.startsWith(f));
+    },
+    refetchType: "active", // hanya refetch query yang sedang dipakai → hindari double fetch
+  });
+}
 ```
 
-Trigger `on_auth_user_created` → auto-insert ke `profiles`.
+`refetchType: "active"` memastikan hanya halaman yang sedang dibuka melakukan network call; tab lain ditandai stale dan akan refetch saat dibuka.
 
-RLS: hanya `profiles` & `user_roles` yang dipasangi RLS baru. Tabel akuntansi existing TIDAK disentuh (filter dilakukan di query layer untuk menghindari risiko regresi laporan).
+### 2. Audit & ganti panggilan invalidate
 
----
+Ganti blok berulang seperti:
+```ts
+qc.invalidateQueries({ queryKey: ["balances"] });
+qc.invalidateQueries({ queryKey: ["journal_entries"] });
+```
+menjadi:
+```ts
+await invalidateFinancials(qc);
+```
 
-## 2. Auth Flow
+File yang disentuh (hanya bagian `onSuccess` mutasi):
+- `src/routes/_app.usp.kegiatan.tsx` (4 dialog: Penyertaan, Belanja Aset, Penerimaan, Pengeluaran)
+- `src/components/usp-dialogs.tsx` (4 dialog pinjaman + angsuran)
+- `src/routes/_app.usp.transfer.tsx` (Transfer Antar Entitas)
+- `src/routes/_app.laporan.bagi-hasil.tsx` (mutasi `tetapkan` & `bayar` — sekarang `invalidateQueries()` tanpa key, ganti ke helper agar lebih terarah)
+- `src/routes/_app.coa.tsx` (sudah ada predicate sendiri untuk COA — tambahkan panggilan helper agar laporan ikut invalidate setelah edit COA)
 
-- Aktifkan email/password (sudah ada Supabase Auth).
-- Halaman baru: `/login` (publik) dengan email + password.
-- Setelah login:
-  - role `admin_pusat` → redirect `/` (Dashboard Pusat existing)
-  - role `admin_unit` → redirect `/usp` (atau dashboard unit sesuai `unit_id`)
-- Auto-confirm email = ON (admin pusat yang buat user, tidak perlu verifikasi email).
-- Tidak pakai Google OAuth (sistem internal BUMDes).
+### 3. Konsistensi key Buku Besar
+`src/lib/ledger.ts` saat ini pakai key array kompleks. Tambahkan prefix `"ledger"` di awal agar terjaring helper:
+```ts
+queryKey: ["ledger", mode, unitId, startDate, endDate, accountId]
+```
+(Hanya rename key, hook tetap sama.)
 
-Hook baru: `useAuth()` (Zustand) menyimpan `user`, `role`, `unitId`, `entity`.
+### 4. Tidak ada perubahan logika akuntansi
+- Tidak menyentuh trigger DB, tidak mengubah struktur jurnal, tidak menyentuh perhitungan saldo di `account-balances.ts` / `NeracaSheet` / `BukuBesarSheet`.
+- Tidak mengaktifkan Supabase Realtime (postgres_changes) — invalidate setelah mutasi sudah cukup dan hemat koneksi. Bisa ditambahkan nanti bila perlu sinkron antar-user.
 
----
-
-## 3. Route Protection
-
-Refactor `_app.tsx` jadi guard:
-- Cek session → redirect `/login` jika tidak login.
-- Load role + unit_id dari `user_roles`.
-- Simpan di context router.
-
-Guard tambahan:
-- `_app.pusat.*` & route pusat (`/`, `/coa`, `/laporan/*`, `/pengaturan`, `/pusat/*`) → require `is_pusat`.
-- `_app.usp.*` → require `admin_unit` dengan `unit_id` = USP, ATAU `admin_pusat` (pusat boleh lihat semua).
-
-Implementasi via `beforeLoad` di layout route + cek di komponen.
-
----
-
-## 4. Sidebar & Menu
-
-`AppSidebar.tsx`:
-- Tampilkan menu sesuai role.
-- Admin unit: hanya lihat menu unit-nya, tidak lihat COA/Laporan Pusat/Pengaturan/Manajemen User.
-- Admin pusat: lihat semua + menu baru "Manajemen User".
-
----
-
-## 5. Manajemen User (Pusat only)
-
-Route baru: `/pengaturan/users`
-- List user (join profiles + user_roles + units).
-- Create user (via server function pakai `supabaseAdmin.auth.admin.createUser` + insert role).
-- Reset password (admin generate link / set password baru).
-- Toggle aktif (`profiles.is_active`).
-- Edit role/unit assignment.
-
-Server functions di `src/lib/users.functions.ts` dengan middleware cek `is_pusat`.
-
----
-
-## 6. Data Filtering per Entity
-
-Strategi: **filter di layer query**, bukan RLS, untuk menjaga laporan existing.
-
-- Hook `useEntityScope()` → return `{ entity, unitId, isPusat }`.
-- Update `account-balances.ts` & laporan USP agar otomatis pakai `unitId` user jika `admin_unit`.
-- Halaman USP yang sudah ada `forcedUnitId` (Neraca USP) — tinggal feed dari context.
-- Pinjaman, Kegiatan USP, Transfer: filter `unit_id` saat insert/select sesuai user.
-
-Pusat tetap bisa pilih unit manual (existing behavior).
-
----
-
-## 7. Files yang Dibuat/Diubah
-
-**Baru:**
-- `supabase/migrations/<ts>_auth_entity_layer.sql`
-- `src/routes/login.tsx`
-- `src/routes/_app.pengaturan.users.tsx`
-- `src/lib/users.functions.ts`
-- `src/lib/users.server.ts`
-- `src/hooks/use-auth.ts` (Zustand store)
-- `src/hooks/use-entity-scope.ts`
-
-**Diubah (minor):**
-- `src/routes/_app.tsx` → tambah auth guard + load role
-- `src/routes/__root.tsx` → init auth listener
-- `src/routes/_app.usp.tsx` → guard entity
-- `src/components/AppSidebar.tsx` → conditional menu
-- `src/components/UspNav.tsx` → hide "Kembali ke Pusat" untuk admin_unit
-
-**Tidak disentuh:**
-- `account-balances.ts` (kecuali sedikit di pemanggilannya)
-- semua engine jurnal
-- semua laporan existing
-- migration lama
-
----
-
-## 8. Yang TIDAK Dilakukan
-
-- ❌ Tidak rewrite auth.
-- ❌ Tidak ubah skema tabel akuntansi.
-- ❌ Tidak ubah engine jurnal/laporan.
-- ❌ Tidak buat super-admin platform / multi-tenant DB.
-- ❌ Tidak pasang RLS baru di tabel akuntansi (risiko regresi).
-
----
-
-## 9. Pertanyaan Sebelum Eksekusi
-
-1. **User pertama (admin pusat)**: Saya akan seed 1 akun admin pusat default (`admin@bumdes.local` / password yang user set). Setuju?
-2. **Entity unit**: USP sekarang sudah ada di tabel `units` (kolom `is_pusat=false`). Saya pakai itu sebagai `unit_id`. Konfirmasi?
-3. **Akses login**: Admin unit BUMDes biasanya tidak punya email pribadi — pakai username-style email (mis. `usp01@bumdes.local`)?
+## Hasil
+- Setelah klik "Simpan" pada form transaksi apapun: Neraca, Laba Rugi, Buku Besar, Dashboard saldo, kartu unit, Rekonsiliasi RK, dan Bagi Hasil otomatis refetch tanpa reload browser.
+- Tidak ada double-fetch berlebihan karena memakai `refetchType: "active"`.
+- Satu sumber kebenaran untuk daftar key finansial → mudah dirawat saat menambah laporan baru.
