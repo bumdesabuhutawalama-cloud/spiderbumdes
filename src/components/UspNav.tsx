@@ -9,13 +9,15 @@ import {
   ArrowLeft,
 } from "lucide-react";
 
-const items = [
+type Item = { to: string; label: string; icon: typeof LayoutDashboard; exact?: boolean };
+
+const items: Item[] = [
   { to: "/usp", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/usp/pinjaman", label: "Data Pinjaman", icon: ListChecks },
   { to: "/usp/kegiatan", label: "Catat Kegiatan", icon: ClipboardList },
   { to: "/usp/transfer", label: "Transfer Antar Entitas", icon: ArrowLeftRight },
   { to: "/usp/laporan", label: "Laporan USP", icon: FileBarChart },
-] as const;
+];
 
 export function UspNav() {
   const path = useRouterState({ select: (s) => s.location.pathname });
