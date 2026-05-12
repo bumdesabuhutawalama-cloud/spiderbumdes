@@ -520,7 +520,7 @@ function UsersPage() {
                             </IconBtn>
                             <IconBtn
                               title="Reset password"
-                              onClick={() => handleReset(u.userId)}
+                              onClick={() => handleReset(u)}
                             >
                               <KeyRound className="h-3.5 w-3.5" />
                             </IconBtn>
