@@ -1,9 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, X, ArrowDownCircle, ArrowUpCircle, HandCoins, Banknote, AlertTriangle, Receipt } from "lucide-react";
+import { Loader2, ArrowDownCircle, ArrowUpCircle, HandCoins, Banknote, AlertTriangle, Receipt } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateFinancials } from "@/lib/query-invalidate";
 import { toast } from "sonner";
+import { ActivityFormShell } from "@/components/ActivityFormShell";
 
 type Account = {
   id: string;
