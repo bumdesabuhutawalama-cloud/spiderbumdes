@@ -39,6 +39,14 @@ import { Route as AppUspLaporanRekonsiliasiRkRouteImport } from './routes/_app.u
 import { Route as AppUspLaporanNeracaRouteImport } from './routes/_app.usp.laporan.neraca'
 import { Route as AppUspLaporanLabaRugiRouteImport } from './routes/_app.usp.laporan.laba-rugi'
 import { Route as AppUspLaporanBukuBesarRouteImport } from './routes/_app.usp.laporan.buku-besar'
+import { Route as AppUspKegiatanPenyertaanModalRouteImport } from './routes/_app.usp.kegiatan.penyertaan-modal'
+import { Route as AppUspKegiatanPengeluaranRouteImport } from './routes/_app.usp.kegiatan.pengeluaran'
+import { Route as AppUspKegiatanPenerimaanKasRouteImport } from './routes/_app.usp.kegiatan.penerimaan-kas'
+import { Route as AppUspKegiatanPencairanRouteImport } from './routes/_app.usp.kegiatan.pencairan'
+import { Route as AppUspKegiatanDendaRouteImport } from './routes/_app.usp.kegiatan.denda'
+import { Route as AppUspKegiatanBelanjaAsetRouteImport } from './routes/_app.usp.kegiatan.belanja-aset'
+import { Route as AppUspKegiatanBebanRouteImport } from './routes/_app.usp.kegiatan.beban'
+import { Route as AppUspKegiatanAngsuranRouteImport } from './routes/_app.usp.kegiatan.angsuran'
 
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
@@ -194,6 +202,50 @@ const AppUspLaporanBukuBesarRoute = AppUspLaporanBukuBesarRouteImport.update({
   path: '/buku-besar',
   getParentRoute: () => AppUspLaporanRoute,
 } as any)
+const AppUspKegiatanPenyertaanModalRoute =
+  AppUspKegiatanPenyertaanModalRouteImport.update({
+    id: '/penyertaan-modal',
+    path: '/penyertaan-modal',
+    getParentRoute: () => AppUspKegiatanRoute,
+  } as any)
+const AppUspKegiatanPengeluaranRoute =
+  AppUspKegiatanPengeluaranRouteImport.update({
+    id: '/pengeluaran',
+    path: '/pengeluaran',
+    getParentRoute: () => AppUspKegiatanRoute,
+  } as any)
+const AppUspKegiatanPenerimaanKasRoute =
+  AppUspKegiatanPenerimaanKasRouteImport.update({
+    id: '/penerimaan-kas',
+    path: '/penerimaan-kas',
+    getParentRoute: () => AppUspKegiatanRoute,
+  } as any)
+const AppUspKegiatanPencairanRoute = AppUspKegiatanPencairanRouteImport.update({
+  id: '/pencairan',
+  path: '/pencairan',
+  getParentRoute: () => AppUspKegiatanRoute,
+} as any)
+const AppUspKegiatanDendaRoute = AppUspKegiatanDendaRouteImport.update({
+  id: '/denda',
+  path: '/denda',
+  getParentRoute: () => AppUspKegiatanRoute,
+} as any)
+const AppUspKegiatanBelanjaAsetRoute =
+  AppUspKegiatanBelanjaAsetRouteImport.update({
+    id: '/belanja-aset',
+    path: '/belanja-aset',
+    getParentRoute: () => AppUspKegiatanRoute,
+  } as any)
+const AppUspKegiatanBebanRoute = AppUspKegiatanBebanRouteImport.update({
+  id: '/beban',
+  path: '/beban',
+  getParentRoute: () => AppUspKegiatanRoute,
+} as any)
+const AppUspKegiatanAngsuranRoute = AppUspKegiatanAngsuranRouteImport.update({
+  id: '/angsuran',
+  path: '/angsuran',
+  getParentRoute: () => AppUspKegiatanRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AppIndexRoute
@@ -219,6 +271,14 @@ export interface FileRoutesByFullPath {
   '/usp/transfer': typeof AppUspTransferRoute
   '/pengaturan/': typeof AppPengaturanIndexRoute
   '/usp/': typeof AppUspIndexRoute
+  '/usp/kegiatan/angsuran': typeof AppUspKegiatanAngsuranRoute
+  '/usp/kegiatan/beban': typeof AppUspKegiatanBebanRoute
+  '/usp/kegiatan/belanja-aset': typeof AppUspKegiatanBelanjaAsetRoute
+  '/usp/kegiatan/denda': typeof AppUspKegiatanDendaRoute
+  '/usp/kegiatan/pencairan': typeof AppUspKegiatanPencairanRoute
+  '/usp/kegiatan/penerimaan-kas': typeof AppUspKegiatanPenerimaanKasRoute
+  '/usp/kegiatan/pengeluaran': typeof AppUspKegiatanPengeluaranRoute
+  '/usp/kegiatan/penyertaan-modal': typeof AppUspKegiatanPenyertaanModalRoute
   '/usp/laporan/buku-besar': typeof AppUspLaporanBukuBesarRoute
   '/usp/laporan/laba-rugi': typeof AppUspLaporanLabaRugiRoute
   '/usp/laporan/neraca': typeof AppUspLaporanNeracaRoute
@@ -246,6 +306,14 @@ export interface FileRoutesByTo {
   '/usp/transfer': typeof AppUspTransferRoute
   '/pengaturan': typeof AppPengaturanIndexRoute
   '/usp': typeof AppUspIndexRoute
+  '/usp/kegiatan/angsuran': typeof AppUspKegiatanAngsuranRoute
+  '/usp/kegiatan/beban': typeof AppUspKegiatanBebanRoute
+  '/usp/kegiatan/belanja-aset': typeof AppUspKegiatanBelanjaAsetRoute
+  '/usp/kegiatan/denda': typeof AppUspKegiatanDendaRoute
+  '/usp/kegiatan/pencairan': typeof AppUspKegiatanPencairanRoute
+  '/usp/kegiatan/penerimaan-kas': typeof AppUspKegiatanPenerimaanKasRoute
+  '/usp/kegiatan/pengeluaran': typeof AppUspKegiatanPengeluaranRoute
+  '/usp/kegiatan/penyertaan-modal': typeof AppUspKegiatanPenyertaanModalRoute
   '/usp/laporan/buku-besar': typeof AppUspLaporanBukuBesarRoute
   '/usp/laporan/laba-rugi': typeof AppUspLaporanLabaRugiRoute
   '/usp/laporan/neraca': typeof AppUspLaporanNeracaRoute
@@ -279,6 +347,14 @@ export interface FileRoutesById {
   '/_app/usp/transfer': typeof AppUspTransferRoute
   '/_app/pengaturan/': typeof AppPengaturanIndexRoute
   '/_app/usp/': typeof AppUspIndexRoute
+  '/_app/usp/kegiatan/angsuran': typeof AppUspKegiatanAngsuranRoute
+  '/_app/usp/kegiatan/beban': typeof AppUspKegiatanBebanRoute
+  '/_app/usp/kegiatan/belanja-aset': typeof AppUspKegiatanBelanjaAsetRoute
+  '/_app/usp/kegiatan/denda': typeof AppUspKegiatanDendaRoute
+  '/_app/usp/kegiatan/pencairan': typeof AppUspKegiatanPencairanRoute
+  '/_app/usp/kegiatan/penerimaan-kas': typeof AppUspKegiatanPenerimaanKasRoute
+  '/_app/usp/kegiatan/pengeluaran': typeof AppUspKegiatanPengeluaranRoute
+  '/_app/usp/kegiatan/penyertaan-modal': typeof AppUspKegiatanPenyertaanModalRoute
   '/_app/usp/laporan/buku-besar': typeof AppUspLaporanBukuBesarRoute
   '/_app/usp/laporan/laba-rugi': typeof AppUspLaporanLabaRugiRoute
   '/_app/usp/laporan/neraca': typeof AppUspLaporanNeracaRoute
@@ -312,6 +388,14 @@ export interface FileRouteTypes {
     | '/usp/transfer'
     | '/pengaturan/'
     | '/usp/'
+    | '/usp/kegiatan/angsuran'
+    | '/usp/kegiatan/beban'
+    | '/usp/kegiatan/belanja-aset'
+    | '/usp/kegiatan/denda'
+    | '/usp/kegiatan/pencairan'
+    | '/usp/kegiatan/penerimaan-kas'
+    | '/usp/kegiatan/pengeluaran'
+    | '/usp/kegiatan/penyertaan-modal'
     | '/usp/laporan/buku-besar'
     | '/usp/laporan/laba-rugi'
     | '/usp/laporan/neraca'
@@ -339,6 +423,14 @@ export interface FileRouteTypes {
     | '/usp/transfer'
     | '/pengaturan'
     | '/usp'
+    | '/usp/kegiatan/angsuran'
+    | '/usp/kegiatan/beban'
+    | '/usp/kegiatan/belanja-aset'
+    | '/usp/kegiatan/denda'
+    | '/usp/kegiatan/pencairan'
+    | '/usp/kegiatan/penerimaan-kas'
+    | '/usp/kegiatan/pengeluaran'
+    | '/usp/kegiatan/penyertaan-modal'
     | '/usp/laporan/buku-besar'
     | '/usp/laporan/laba-rugi'
     | '/usp/laporan/neraca'
@@ -371,6 +463,14 @@ export interface FileRouteTypes {
     | '/_app/usp/transfer'
     | '/_app/pengaturan/'
     | '/_app/usp/'
+    | '/_app/usp/kegiatan/angsuran'
+    | '/_app/usp/kegiatan/beban'
+    | '/_app/usp/kegiatan/belanja-aset'
+    | '/_app/usp/kegiatan/denda'
+    | '/_app/usp/kegiatan/pencairan'
+    | '/_app/usp/kegiatan/penerimaan-kas'
+    | '/_app/usp/kegiatan/pengeluaran'
+    | '/_app/usp/kegiatan/penyertaan-modal'
     | '/_app/usp/laporan/buku-besar'
     | '/_app/usp/laporan/laba-rugi'
     | '/_app/usp/laporan/neraca'
@@ -596,6 +696,62 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppUspLaporanBukuBesarRouteImport
       parentRoute: typeof AppUspLaporanRoute
     }
+    '/_app/usp/kegiatan/penyertaan-modal': {
+      id: '/_app/usp/kegiatan/penyertaan-modal'
+      path: '/penyertaan-modal'
+      fullPath: '/usp/kegiatan/penyertaan-modal'
+      preLoaderRoute: typeof AppUspKegiatanPenyertaanModalRouteImport
+      parentRoute: typeof AppUspKegiatanRoute
+    }
+    '/_app/usp/kegiatan/pengeluaran': {
+      id: '/_app/usp/kegiatan/pengeluaran'
+      path: '/pengeluaran'
+      fullPath: '/usp/kegiatan/pengeluaran'
+      preLoaderRoute: typeof AppUspKegiatanPengeluaranRouteImport
+      parentRoute: typeof AppUspKegiatanRoute
+    }
+    '/_app/usp/kegiatan/penerimaan-kas': {
+      id: '/_app/usp/kegiatan/penerimaan-kas'
+      path: '/penerimaan-kas'
+      fullPath: '/usp/kegiatan/penerimaan-kas'
+      preLoaderRoute: typeof AppUspKegiatanPenerimaanKasRouteImport
+      parentRoute: typeof AppUspKegiatanRoute
+    }
+    '/_app/usp/kegiatan/pencairan': {
+      id: '/_app/usp/kegiatan/pencairan'
+      path: '/pencairan'
+      fullPath: '/usp/kegiatan/pencairan'
+      preLoaderRoute: typeof AppUspKegiatanPencairanRouteImport
+      parentRoute: typeof AppUspKegiatanRoute
+    }
+    '/_app/usp/kegiatan/denda': {
+      id: '/_app/usp/kegiatan/denda'
+      path: '/denda'
+      fullPath: '/usp/kegiatan/denda'
+      preLoaderRoute: typeof AppUspKegiatanDendaRouteImport
+      parentRoute: typeof AppUspKegiatanRoute
+    }
+    '/_app/usp/kegiatan/belanja-aset': {
+      id: '/_app/usp/kegiatan/belanja-aset'
+      path: '/belanja-aset'
+      fullPath: '/usp/kegiatan/belanja-aset'
+      preLoaderRoute: typeof AppUspKegiatanBelanjaAsetRouteImport
+      parentRoute: typeof AppUspKegiatanRoute
+    }
+    '/_app/usp/kegiatan/beban': {
+      id: '/_app/usp/kegiatan/beban'
+      path: '/beban'
+      fullPath: '/usp/kegiatan/beban'
+      preLoaderRoute: typeof AppUspKegiatanBebanRouteImport
+      parentRoute: typeof AppUspKegiatanRoute
+    }
+    '/_app/usp/kegiatan/angsuran': {
+      id: '/_app/usp/kegiatan/angsuran'
+      path: '/angsuran'
+      fullPath: '/usp/kegiatan/angsuran'
+      preLoaderRoute: typeof AppUspKegiatanAngsuranRouteImport
+      parentRoute: typeof AppUspKegiatanRoute
+    }
   }
 }
 
@@ -614,10 +770,26 @@ const AppPengaturanRouteWithChildren = AppPengaturanRoute._addFileChildren(
 )
 
 interface AppUspKegiatanRouteChildren {
+  AppUspKegiatanAngsuranRoute: typeof AppUspKegiatanAngsuranRoute
+  AppUspKegiatanBebanRoute: typeof AppUspKegiatanBebanRoute
+  AppUspKegiatanBelanjaAsetRoute: typeof AppUspKegiatanBelanjaAsetRoute
+  AppUspKegiatanDendaRoute: typeof AppUspKegiatanDendaRoute
+  AppUspKegiatanPencairanRoute: typeof AppUspKegiatanPencairanRoute
+  AppUspKegiatanPenerimaanKasRoute: typeof AppUspKegiatanPenerimaanKasRoute
+  AppUspKegiatanPengeluaranRoute: typeof AppUspKegiatanPengeluaranRoute
+  AppUspKegiatanPenyertaanModalRoute: typeof AppUspKegiatanPenyertaanModalRoute
   AppUspKegiatanIndexRoute: typeof AppUspKegiatanIndexRoute
 }
 
 const AppUspKegiatanRouteChildren: AppUspKegiatanRouteChildren = {
+  AppUspKegiatanAngsuranRoute: AppUspKegiatanAngsuranRoute,
+  AppUspKegiatanBebanRoute: AppUspKegiatanBebanRoute,
+  AppUspKegiatanBelanjaAsetRoute: AppUspKegiatanBelanjaAsetRoute,
+  AppUspKegiatanDendaRoute: AppUspKegiatanDendaRoute,
+  AppUspKegiatanPencairanRoute: AppUspKegiatanPencairanRoute,
+  AppUspKegiatanPenerimaanKasRoute: AppUspKegiatanPenerimaanKasRoute,
+  AppUspKegiatanPengeluaranRoute: AppUspKegiatanPengeluaranRoute,
+  AppUspKegiatanPenyertaanModalRoute: AppUspKegiatanPenyertaanModalRoute,
   AppUspKegiatanIndexRoute: AppUspKegiatanIndexRoute,
 }
 
