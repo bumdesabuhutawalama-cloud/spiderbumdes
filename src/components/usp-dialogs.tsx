@@ -56,42 +56,21 @@ function Shell({
   title,
   icon,
   onClose,
+  accent,
   children,
 }: {
   title: string;
   icon: React.ReactNode;
   onClose: () => void;
+  accent?: string;
   children: React.ReactNode;
 }) {
+  // onClose dipertahankan untuk back-compat (dipakai tombol Batal di dalam form).
+  void onClose;
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/70 backdrop-blur-sm p-0 sm:p-4 animate-in fade-in duration-200"
-      onClick={onClose}
-    >
-      <div
-        className="glass-card relative w-full sm:max-w-3xl max-h-[96vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl border border-white/10 p-4 sm:p-5 shadow-[0_0_60px_rgba(34,211,238,0.25)] animate-in slide-in-from-bottom-4 duration-300"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <button
-          onClick={onClose}
-          className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-lg bg-secondary/60 hover:bg-secondary transition"
-        >
-          <X className="h-4 w-4" />
-        </button>
-        <div className="mb-3">
-          <h2 className="text-base sm:text-lg font-semibold flex items-center gap-2">
-            <span className="grid h-8 w-8 place-items-center rounded-lg bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-green)] text-[oklch(0.15_0.03_250)]">
-              {icon}
-            </span>
-            {title}
-          </h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            Sistem akan otomatis menyiapkan jurnal sesuai kaidah akuntansi.
-          </p>
-        </div>
-        {children}
-      </div>
-    </div>
+    <ActivityFormShell title={title} icon={icon} accent={accent}>
+      {children}
+    </ActivityFormShell>
   );
 }
 
