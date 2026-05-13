@@ -34,6 +34,7 @@ import { Route as AppLaporanBukuBesarPusatRouteImport } from './routes/_app.lapo
 import { Route as AppLaporanBukuBesarKonsolidasiRouteImport } from './routes/_app.laporan.buku-besar-konsolidasi'
 import { Route as AppLaporanBagiHasilRouteImport } from './routes/_app.laporan.bagi-hasil'
 import { Route as AppUspLaporanIndexRouteImport } from './routes/_app.usp.laporan.index'
+import { Route as AppUspKegiatanIndexRouteImport } from './routes/_app.usp.kegiatan.index'
 import { Route as AppUspLaporanRekonsiliasiRkRouteImport } from './routes/_app.usp.laporan.rekonsiliasi-rk'
 import { Route as AppUspLaporanNeracaRouteImport } from './routes/_app.usp.laporan.neraca'
 import { Route as AppUspLaporanLabaRugiRouteImport } from './routes/_app.usp.laporan.laba-rugi'
@@ -167,6 +168,11 @@ const AppUspLaporanIndexRoute = AppUspLaporanIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AppUspLaporanRoute,
 } as any)
+const AppUspKegiatanIndexRoute = AppUspKegiatanIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AppUspKegiatanRoute,
+} as any)
 const AppUspLaporanRekonsiliasiRkRoute =
   AppUspLaporanRekonsiliasiRkRouteImport.update({
     id: '/rekonsiliasi-rk',
@@ -207,7 +213,7 @@ export interface FileRoutesByFullPath {
   '/laporan/rekonsiliasi-rk': typeof AppLaporanRekonsiliasiRkRoute
   '/pengaturan/users': typeof AppPengaturanUsersRoute
   '/pusat/kegiatan': typeof AppPusatKegiatanRoute
-  '/usp/kegiatan': typeof AppUspKegiatanRoute
+  '/usp/kegiatan': typeof AppUspKegiatanRouteWithChildren
   '/usp/laporan': typeof AppUspLaporanRouteWithChildren
   '/usp/pinjaman': typeof AppUspPinjamanRoute
   '/usp/transfer': typeof AppUspTransferRoute
@@ -217,6 +223,7 @@ export interface FileRoutesByFullPath {
   '/usp/laporan/laba-rugi': typeof AppUspLaporanLabaRugiRoute
   '/usp/laporan/neraca': typeof AppUspLaporanNeracaRoute
   '/usp/laporan/rekonsiliasi-rk': typeof AppUspLaporanRekonsiliasiRkRoute
+  '/usp/kegiatan/': typeof AppUspKegiatanIndexRoute
   '/usp/laporan/': typeof AppUspLaporanIndexRoute
 }
 export interface FileRoutesByTo {
@@ -235,7 +242,6 @@ export interface FileRoutesByTo {
   '/laporan/rekonsiliasi-rk': typeof AppLaporanRekonsiliasiRkRoute
   '/pengaturan/users': typeof AppPengaturanUsersRoute
   '/pusat/kegiatan': typeof AppPusatKegiatanRoute
-  '/usp/kegiatan': typeof AppUspKegiatanRoute
   '/usp/pinjaman': typeof AppUspPinjamanRoute
   '/usp/transfer': typeof AppUspTransferRoute
   '/pengaturan': typeof AppPengaturanIndexRoute
@@ -244,6 +250,7 @@ export interface FileRoutesByTo {
   '/usp/laporan/laba-rugi': typeof AppUspLaporanLabaRugiRoute
   '/usp/laporan/neraca': typeof AppUspLaporanNeracaRoute
   '/usp/laporan/rekonsiliasi-rk': typeof AppUspLaporanRekonsiliasiRkRoute
+  '/usp/kegiatan': typeof AppUspKegiatanIndexRoute
   '/usp/laporan': typeof AppUspLaporanIndexRoute
 }
 export interface FileRoutesById {
@@ -266,7 +273,7 @@ export interface FileRoutesById {
   '/_app/laporan/rekonsiliasi-rk': typeof AppLaporanRekonsiliasiRkRoute
   '/_app/pengaturan/users': typeof AppPengaturanUsersRoute
   '/_app/pusat/kegiatan': typeof AppPusatKegiatanRoute
-  '/_app/usp/kegiatan': typeof AppUspKegiatanRoute
+  '/_app/usp/kegiatan': typeof AppUspKegiatanRouteWithChildren
   '/_app/usp/laporan': typeof AppUspLaporanRouteWithChildren
   '/_app/usp/pinjaman': typeof AppUspPinjamanRoute
   '/_app/usp/transfer': typeof AppUspTransferRoute
@@ -276,6 +283,7 @@ export interface FileRoutesById {
   '/_app/usp/laporan/laba-rugi': typeof AppUspLaporanLabaRugiRoute
   '/_app/usp/laporan/neraca': typeof AppUspLaporanNeracaRoute
   '/_app/usp/laporan/rekonsiliasi-rk': typeof AppUspLaporanRekonsiliasiRkRoute
+  '/_app/usp/kegiatan/': typeof AppUspKegiatanIndexRoute
   '/_app/usp/laporan/': typeof AppUspLaporanIndexRoute
 }
 export interface FileRouteTypes {
@@ -308,6 +316,7 @@ export interface FileRouteTypes {
     | '/usp/laporan/laba-rugi'
     | '/usp/laporan/neraca'
     | '/usp/laporan/rekonsiliasi-rk'
+    | '/usp/kegiatan/'
     | '/usp/laporan/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -326,7 +335,6 @@ export interface FileRouteTypes {
     | '/laporan/rekonsiliasi-rk'
     | '/pengaturan/users'
     | '/pusat/kegiatan'
-    | '/usp/kegiatan'
     | '/usp/pinjaman'
     | '/usp/transfer'
     | '/pengaturan'
@@ -335,6 +343,7 @@ export interface FileRouteTypes {
     | '/usp/laporan/laba-rugi'
     | '/usp/laporan/neraca'
     | '/usp/laporan/rekonsiliasi-rk'
+    | '/usp/kegiatan'
     | '/usp/laporan'
   id:
     | '__root__'
@@ -366,6 +375,7 @@ export interface FileRouteTypes {
     | '/_app/usp/laporan/laba-rugi'
     | '/_app/usp/laporan/neraca'
     | '/_app/usp/laporan/rekonsiliasi-rk'
+    | '/_app/usp/kegiatan/'
     | '/_app/usp/laporan/'
   fileRoutesById: FileRoutesById
 }
@@ -551,6 +561,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppUspLaporanIndexRouteImport
       parentRoute: typeof AppUspLaporanRoute
     }
+    '/_app/usp/kegiatan/': {
+      id: '/_app/usp/kegiatan/'
+      path: '/'
+      fullPath: '/usp/kegiatan/'
+      preLoaderRoute: typeof AppUspKegiatanIndexRouteImport
+      parentRoute: typeof AppUspKegiatanRoute
+    }
     '/_app/usp/laporan/rekonsiliasi-rk': {
       id: '/_app/usp/laporan/rekonsiliasi-rk'
       path: '/rekonsiliasi-rk'
@@ -596,6 +613,18 @@ const AppPengaturanRouteWithChildren = AppPengaturanRoute._addFileChildren(
   AppPengaturanRouteChildren,
 )
 
+interface AppUspKegiatanRouteChildren {
+  AppUspKegiatanIndexRoute: typeof AppUspKegiatanIndexRoute
+}
+
+const AppUspKegiatanRouteChildren: AppUspKegiatanRouteChildren = {
+  AppUspKegiatanIndexRoute: AppUspKegiatanIndexRoute,
+}
+
+const AppUspKegiatanRouteWithChildren = AppUspKegiatanRoute._addFileChildren(
+  AppUspKegiatanRouteChildren,
+)
+
 interface AppUspLaporanRouteChildren {
   AppUspLaporanBukuBesarRoute: typeof AppUspLaporanBukuBesarRoute
   AppUspLaporanLabaRugiRoute: typeof AppUspLaporanLabaRugiRoute
@@ -617,7 +646,7 @@ const AppUspLaporanRouteWithChildren = AppUspLaporanRoute._addFileChildren(
 )
 
 interface AppUspRouteChildren {
-  AppUspKegiatanRoute: typeof AppUspKegiatanRoute
+  AppUspKegiatanRoute: typeof AppUspKegiatanRouteWithChildren
   AppUspLaporanRoute: typeof AppUspLaporanRouteWithChildren
   AppUspPinjamanRoute: typeof AppUspPinjamanRoute
   AppUspTransferRoute: typeof AppUspTransferRoute
@@ -625,7 +654,7 @@ interface AppUspRouteChildren {
 }
 
 const AppUspRouteChildren: AppUspRouteChildren = {
-  AppUspKegiatanRoute: AppUspKegiatanRoute,
+  AppUspKegiatanRoute: AppUspKegiatanRouteWithChildren,
   AppUspLaporanRoute: AppUspLaporanRouteWithChildren,
   AppUspPinjamanRoute: AppUspPinjamanRoute,
   AppUspTransferRoute: AppUspTransferRoute,
