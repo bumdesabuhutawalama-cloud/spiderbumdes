@@ -1,85 +1,82 @@
-# Realtime Sync Setelah Transaksi
+## Tujuan
 
-## Masalah
-Saat audit, hampir semua mutasi transaksi (Penyertaan Modal, Belanja Aset, Penerimaan Kas, Pengeluaran, Pinjaman/Angsuran, Transfer Antar Entitas, Bagi Hasil) memang sudah memanggil `invalidateQueries({ queryKey: ["balances"] })` dan `["journal_entries"]`. Tetapi banyak query laporan lain memakai **queryKey berbeda** sehingga tidak ikut refetch:
+Mengganti seluruh form "Catat Kegiatan" yang saat ini muncul sebagai modal/bottom-sheet menjadi **halaman penuh dengan route sendiri**. Halaman /usp/kegiatan tetap menjadi hub kartu pemilihan, tapi klik kartu akan **navigate** ke route form (bukan membuka overlay).
 
-- `["ledger-…"]` → Buku Besar Pusat / Unit / Konsolidasi
-- `["coa_accounts_dashboard"]`, `["entity_rk_account_ids_dashboard"]`, `["units_top_perf"]`, `["unit_revenues_month", …]`, `["revenue_trend_12m", …]` → Dashboard
-- `["net-profit", …]`, `["bh-liab-balance", …]` → Bagi Hasil
-- `["rk_lines", …]` → Rekonsiliasi RK
-- `["entity_transfers"]`, `["loans", …]`, `["loan_installments", …]`
+Manfaat:
+- Tidak ada masalah scroll mentok di bottom-sheet (form bisa scroll natural di page).
+- Bisa di-bookmark, refresh, dan back-button browser bekerja normal.
+- Mobile-friendly: form jadi 1 layar penuh, ramah jempol.
+- SSR/SEO friendly, tidak ada dashboard bocor di belakang form.
 
-Akibatnya Dashboard, Buku Besar, Rekonsiliasi RK, Bagi Hasil, dan beberapa kartu Neraca/L/R tidak update sampai user refresh manual.
+## Struktur Route Baru
 
-## Solusi
-Buat satu helper terpusat dan panggil dari setiap mutasi transaksi. Tidak ada perubahan logika akuntansi — hanya cache layer React Query.
+Saya usulkan pakai sub-route konsisten di bawah `/usp/kegiatan/...` agar breadcrumb dan UspNav tetap rapi (alternatif `/operasional/pengeluaran` membuat hirarki pecah). Mapping:
 
-### 1. `src/lib/query-invalidate.ts` (baru)
-```ts
-import type { QueryClient } from "@tanstack/react-query";
-
-// Semua queryKey yang membaca jurnal / saldo / laporan keuangan
-const FINANCIAL_KEYS = [
-  "balances", "journal_entries", "journal_entry_lines",
-  "ledger", "ledger-entities", "coa-for-ledger",
-  "reports", "report_cache",
-  "entity_transfers", "entity_rk_accounts", "entity_rk_account_ids",
-  "entity_rk_account_ids_dashboard",
-  "loans", "loan_installments",
-  "net-profit", "bh-liab-balance",
-  "rk_lines",
-  "coa_accounts_dashboard",
-  "units_top_perf", "unit_revenues_month", "revenue_trend_12m",
-  "usp_loan_stats", "usp_recent_activity",
-  "pdc", "pdr",
-];
-
-export async function invalidateFinancials(qc: QueryClient) {
-  await qc.invalidateQueries({
-    predicate: (q) => {
-      const k = q.queryKey?.[0];
-      if (typeof k !== "string") return false;
-      // match exact + prefix (mis. "ledger-pusat-...", "balances-asof-...")
-      return FINANCIAL_KEYS.some((f) => k === f || k.startsWith(f + "-") || k.startsWith(f));
-    },
-    refetchType: "active", // hanya refetch query yang sedang dipakai → hindari double fetch
-  });
-}
+```text
+/usp/kegiatan                       -> daftar kartu (sudah ada)
+/usp/kegiatan/penyertaan-modal      -> Penyertaan Modal
+/usp/kegiatan/belanja-aset          -> Belanja Aset / Modal
+/usp/kegiatan/penerimaan-kas        -> Penerimaan Kas
+/usp/kegiatan/pengeluaran           -> Pengeluaran Operasional
+/usp/kegiatan/pencairan             -> Pencairan Pinjaman USP
+/usp/kegiatan/angsuran              -> Terima Angsuran USP
+/usp/kegiatan/denda                 -> Terima Denda USP
+/usp/kegiatan/beban                 -> Beban Operasional USP
 ```
 
-`refetchType: "active"` memastikan hanya halaman yang sedang dibuka melakukan network call; tab lain ditandai stale dan akan refetch saat dibuka.
+Layout: setiap halaman pakai `PageHeader` + tombol "Kembali ke Catat Kegiatan", lalu form di dalam container `glass-card` yang flow natural di page (bukan `fixed inset-0`).
 
-### 2. Audit & ganti panggilan invalidate
+## Yang Akan Diubah
 
-Ganti blok berulang seperti:
-```ts
-qc.invalidateQueries({ queryKey: ["balances"] });
-qc.invalidateQueries({ queryKey: ["journal_entries"] });
+### 1. Halaman hub `/usp/kegiatan`
+- Hapus semua state `openXxx` dan render dialog.
+- Ubah `ActivityCard` menjadi `<Link>` ke route masing-masing (preload `intent`).
+- Tetap pakai grid kartu yang sudah ada.
+
+### 2. Komponen form (refactor, bukan rewrite)
+- File `src/components/usp-dialogs.tsx` -> rename konseptual menjadi form sections. Hapus komponen `Shell` (yang `fixed inset-0`). Ganti dengan komponen `FormPage` baru di `src/components/activity-form-page.tsx` yang:
+  - Render header + deskripsi
+  - Render form children dengan padding normal (bukan overlay)
+  - Tombol "Batal" -> navigate kembali ke `/usp/kegiatan` (pakai `useNavigate`)
+  - Setelah sukses simpan -> navigate kembali + toast sukses
+- 4 form yang berada inline di `_app.usp.kegiatan.tsx` (PenyertaanModal, BelanjaAset, PenerimaanKas, PengeluaranOperasional) dipindah ke file modul masing-masing di `src/components/activities/` agar tidak menumpuk dan hub jadi ringan.
+
+### 3. File route baru (8 file)
+Setiap file ikut pola minimal:
+```tsx
+export const Route = createFileRoute("/_app/usp/kegiatan/pencairan")({
+  head: () => ({ meta: [{ title: "Pencairan Pinjaman USP · BUMDes" }] }),
+  component: PencairanPage,
+});
 ```
-menjadi:
-```ts
-await invalidateFinancials(qc);
-```
+Tiap component memanggil form section yang sudah di-extract, dengan `onClose` diganti menjadi handler navigate kembali.
 
-File yang disentuh (hanya bagian `onSuccess` mutasi):
-- `src/routes/_app.usp.kegiatan.tsx` (4 dialog: Penyertaan, Belanja Aset, Penerimaan, Pengeluaran)
-- `src/components/usp-dialogs.tsx` (4 dialog pinjaman + angsuran)
-- `src/routes/_app.usp.transfer.tsx` (Transfer Antar Entitas)
-- `src/routes/_app.laporan.bagi-hasil.tsx` (mutasi `tetapkan` & `bayar` — sekarang `invalidateQueries()` tanpa key, ganti ke helper agar lebih terarah)
-- `src/routes/_app.coa.tsx` (sudah ada predicate sendiri untuk COA — tambahkan panggilan helper agar laporan ikut invalidate setelah edit COA)
+### 4. Layout `_app.usp.kegiatan.tsx` perlu `<Outlet />`
+Karena sekarang ada child routes, file `_app.usp.kegiatan.tsx` jadi layout route. Solusi paling sederhana:
+- Rename file lama berisi grid kartu menjadi `_app.usp.kegiatan.index.tsx`.
+- Buat `_app.usp.kegiatan.tsx` baru sebagai layout tipis: `() => <Outlet />`.
 
-### 3. Konsistensi key Buku Besar
-`src/lib/ledger.ts` saat ini pakai key array kompleks. Tambahkan prefix `"ledger"` di awal agar terjaring helper:
-```ts
-queryKey: ["ledger", mode, unitId, startDate, endDate, accountId]
-```
-(Hanya rename key, hook tetap sama.)
+### 5. Pembersihan
+- Hapus prop `onClose` pada form yang sudah jadi page.
+- Hapus import dialog yang tidak terpakai.
+- Tidak ada perubahan logika bisnis akuntansi (mutation, schedule, journal lines tetap sama persis).
 
-### 4. Tidak ada perubahan logika akuntansi
-- Tidak menyentuh trigger DB, tidak mengubah struktur jurnal, tidak menyentuh perhitungan saldo di `account-balances.ts` / `NeracaSheet` / `BukuBesarSheet`.
-- Tidak mengaktifkan Supabase Realtime (postgres_changes) — invalidate setelah mutasi sudah cukup dan hemat koneksi. Bisa ditambahkan nanti bila perlu sinkron antar-user.
+## Detail Teknis
 
-## Hasil
-- Setelah klik "Simpan" pada form transaksi apapun: Neraca, Laba Rugi, Buku Besar, Dashboard saldo, kartu unit, Rekonsiliasi RK, dan Bagi Hasil otomatis refetch tanpa reload browser.
-- Tidak ada double-fetch berlebihan karena memakai `refetchType: "active"`.
-- Satu sumber kebenaran untuk daftar key finansial → mudah dirawat saat menambah laporan baru.
+- Pakai `useNavigate({ from: Route.fullPath })` untuk back-navigation.
+- Form scroll memakai scroll natural halaman (sudah ditangani layout `_app.tsx`), tidak perlu `max-h-[96vh] overflow-y-auto` lagi.
+- Pertahankan semua RLS, mutation, dan auto-journaling — hanya pembungkus UI yang berubah.
+- Type-safety: route baru otomatis di-generate `routeTree.gen.ts` oleh Vite plugin saat dev.
+
+## Yang TIDAK Berubah
+
+- Skema database, RLS, fungsi `has_role`, `is_pusat`, dsb.
+- Logika perhitungan jadwal angsuran, alokasi bunga/pokok, posting jurnal.
+- Halaman lain (Dashboard, Pinjaman, Transfer, Laporan).
+- Branding & sidebar.
+
+## Hasil Akhir
+
+- Klik kartu di `/usp/kegiatan` -> berpindah ke halaman form, dashboard tidak terlihat di belakang.
+- Form bisa di-scroll sampai habis, tombol Simpan/Batal selalu tercapai.
+- Back browser kembali ke daftar kartu.
