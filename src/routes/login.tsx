@@ -103,7 +103,7 @@ function LoginPage() {
             </div>
           </div>
 
-          <h1 className="mt-12 font-display text-4xl font-bold leading-tight">
+          <h1 className="mt-12 font-display text-4xl font-bold leading-tight text-white" style={{ color: "#ffffff" }}>
             Sistem keuangan modern <br />untuk desa yang transparan.
           </h1>
           <p className="mt-4 max-w-md text-white/80">
