@@ -76,29 +76,32 @@ function UnitLoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen flex items-center justify-center p-4 text-foreground">
+    <div className="relative min-h-screen flex items-center justify-center p-4 text-foreground bg-grad-soft">
       <CinematicBackground />
       <div className="relative w-full max-w-md">
-        <div className="glass-card rounded-2xl p-6 sm:p-8 space-y-6">
+        <div className="form-card space-y-6">
           <div className="flex flex-col items-center text-center">
-            <div className="relative grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-green)]">
-              <Building2 className="h-7 w-7 text-[oklch(0.15_0.03_250)]" />
+            <div
+              className="grid h-14 w-14 place-items-center rounded-2xl"
+              style={{ background: "var(--grad-navy)", boxShadow: "var(--shadow-btn)" }}
+            >
+              <Building2 className="h-7 w-7 text-white" />
             </div>
-            <h1 className="mt-4 text-xl font-semibold">
+            <h1 className="mt-4 font-display text-xl font-bold text-brand">
               Login {unit?.name ?? unitParam.toUpperCase()}
             </h1>
-            <p className="text-sm text-muted-foreground inline-flex items-center gap-1.5">
-              <ShieldCheck className="h-3.5 w-3.5 text-[var(--neon-cyan)]" />
+            <p className="text-sm text-brand-muted inline-flex items-center gap-1.5 mt-1">
+              <ShieldCheck className="h-3.5 w-3.5" style={{ color: "var(--blue-500)" }} />
               Akses khusus unit usaha
             </p>
           </div>
 
           {unitLoading ? (
             <div className="grid place-items-center py-8">
-              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+              <Loader2 className="h-5 w-5 animate-spin text-brand-muted" />
             </div>
           ) : !unit ? (
-            <div className="rounded-lg border border-destructive/40 bg-destructive/5 px-3 py-3 text-sm text-destructive">
+            <div className="rounded-xl border border-destructive/40 bg-destructive/5 px-3 py-3 text-sm text-destructive">
               Unit "{unitParam}" tidak ditemukan atau tidak aktif.
               <div className="mt-2">
                 <Link to="/login" className="underline">Kembali ke login utama</Link>
@@ -107,35 +110,17 @@ function UnitLoginPage() {
           ) : (
             <form onSubmit={handleSubmit} className="space-y-4">
               <Field label="Email" icon={<Mail className="h-4 w-4" />}>
-                <input
-                  type="email"
-                  required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="user@bumdes.local"
-                  className={inputCls}
-                />
+                <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="user@bumdes.local" className={inputCls} />
               </Field>
               <Field label="Password" icon={<Lock className="h-4 w-4" />}>
-                <input
-                  type="password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="••••••••"
-                  className={inputCls}
-                />
+                <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className={inputCls} />
               </Field>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-green)] py-2.5 text-sm font-semibold text-[oklch(0.15_0.03_250)] disabled:opacity-60"
-              >
+              <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-60">
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
                 Masuk ke {unit.name}
               </button>
-              <p className="text-center text-[11px] text-muted-foreground">
-                <Link to="/login" className="hover:text-foreground">
+              <p className="text-center text-[11px] text-brand-muted">
+                <Link to="/login" className="hover:text-brand">
                   Login admin pusat →
                 </Link>
               </p>
@@ -147,8 +132,7 @@ function UnitLoginPage() {
   );
 }
 
-const inputCls =
-  "w-full rounded-lg border border-border/60 bg-secondary/40 pl-9 pr-3 py-2.5 text-sm outline-none focus:border-[var(--neon-cyan)]/60";
+const inputCls = "input-modern pl-10";
 
 function Field({
   label,
