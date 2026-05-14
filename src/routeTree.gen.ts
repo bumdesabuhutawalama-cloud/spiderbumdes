@@ -16,6 +16,7 @@ import { Route as LoginUnitRouteImport } from './routes/login.$unit'
 import { Route as AppUspRouteImport } from './routes/_app.usp'
 import { Route as AppTransferAntarEntitasRouteImport } from './routes/_app.transfer-antar-entitas'
 import { Route as AppPengaturanRouteImport } from './routes/_app.pengaturan'
+import { Route as AppLaporanPusatRouteImport } from './routes/_app.laporan-pusat'
 import { Route as AppCoaRouteImport } from './routes/_app.coa'
 import { Route as AppCatatKegiatanRouteImport } from './routes/_app.catat-kegiatan'
 import { Route as AppUspIndexRouteImport } from './routes/_app.usp.index'
@@ -80,6 +81,11 @@ const AppTransferAntarEntitasRoute = AppTransferAntarEntitasRouteImport.update({
 const AppPengaturanRoute = AppPengaturanRouteImport.update({
   id: '/pengaturan',
   path: '/pengaturan',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppLaporanPusatRoute = AppLaporanPusatRouteImport.update({
+  id: '/laporan-pusat',
+  path: '/laporan-pusat',
   getParentRoute: () => AppRoute,
 } as any)
 const AppCoaRoute = AppCoaRouteImport.update({
@@ -252,6 +258,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRouteWithChildren
   '/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/coa': typeof AppCoaRoute
+  '/laporan-pusat': typeof AppLaporanPusatRoute
   '/pengaturan': typeof AppPengaturanRouteWithChildren
   '/transfer-antar-entitas': typeof AppTransferAntarEntitasRoute
   '/usp': typeof AppUspRouteWithChildren
@@ -290,6 +297,7 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRouteWithChildren
   '/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/coa': typeof AppCoaRoute
+  '/laporan-pusat': typeof AppLaporanPusatRoute
   '/transfer-antar-entitas': typeof AppTransferAntarEntitasRoute
   '/login/$unit': typeof LoginUnitRoute
   '/': typeof AppIndexRoute
@@ -327,6 +335,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRouteWithChildren
   '/_app/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/_app/coa': typeof AppCoaRoute
+  '/_app/laporan-pusat': typeof AppLaporanPusatRoute
   '/_app/pengaturan': typeof AppPengaturanRouteWithChildren
   '/_app/transfer-antar-entitas': typeof AppTransferAntarEntitasRoute
   '/_app/usp': typeof AppUspRouteWithChildren
@@ -369,6 +378,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/catat-kegiatan'
     | '/coa'
+    | '/laporan-pusat'
     | '/pengaturan'
     | '/transfer-antar-entitas'
     | '/usp'
@@ -407,6 +417,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/catat-kegiatan'
     | '/coa'
+    | '/laporan-pusat'
     | '/transfer-antar-entitas'
     | '/login/$unit'
     | '/'
@@ -443,6 +454,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/_app/catat-kegiatan'
     | '/_app/coa'
+    | '/_app/laporan-pusat'
     | '/_app/pengaturan'
     | '/_app/transfer-antar-entitas'
     | '/_app/usp'
@@ -533,6 +545,13 @@ declare module '@tanstack/react-router' {
       path: '/pengaturan'
       fullPath: '/pengaturan'
       preLoaderRoute: typeof AppPengaturanRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/laporan-pusat': {
+      id: '/_app/laporan-pusat'
+      path: '/laporan-pusat'
+      fullPath: '/laporan-pusat'
+      preLoaderRoute: typeof AppLaporanPusatRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/coa': {
@@ -839,6 +858,7 @@ const AppUspRouteWithChildren =
 interface AppRouteChildren {
   AppCatatKegiatanRoute: typeof AppCatatKegiatanRoute
   AppCoaRoute: typeof AppCoaRoute
+  AppLaporanPusatRoute: typeof AppLaporanPusatRoute
   AppPengaturanRoute: typeof AppPengaturanRouteWithChildren
   AppTransferAntarEntitasRoute: typeof AppTransferAntarEntitasRoute
   AppUspRoute: typeof AppUspRouteWithChildren
@@ -856,6 +876,7 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppCatatKegiatanRoute: AppCatatKegiatanRoute,
   AppCoaRoute: AppCoaRoute,
+  AppLaporanPusatRoute: AppLaporanPusatRoute,
   AppPengaturanRoute: AppPengaturanRouteWithChildren,
   AppTransferAntarEntitasRoute: AppTransferAntarEntitasRoute,
   AppUspRoute: AppUspRouteWithChildren,
