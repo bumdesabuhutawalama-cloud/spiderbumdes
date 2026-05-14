@@ -11,13 +11,13 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as AppRouteImport } from './routes/_app'
-import { Route as AppIndexRouteImport } from './routes/_app.index'
 import { Route as LoginUnitRouteImport } from './routes/login.$unit'
 import { Route as AppUspRouteImport } from './routes/_app.usp'
 import { Route as AppTransferAntarEntitasRouteImport } from './routes/_app.transfer-antar-entitas'
 import { Route as AppPengaturanRouteImport } from './routes/_app.pengaturan'
 import { Route as AppLaporanPusatRouteImport } from './routes/_app.laporan-pusat'
 import { Route as AppJurnalKoreksiRouteImport } from './routes/_app.jurnal-koreksi'
+import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppCoaRouteImport } from './routes/_app.coa'
 import { Route as AppCatatKegiatanRouteImport } from './routes/_app.catat-kegiatan'
 import { Route as AppUspIndexRouteImport } from './routes/_app.usp.index'
@@ -59,11 +59,6 @@ const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
 } as any)
-const AppIndexRoute = AppIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AppRoute,
-} as any)
 const LoginUnitRoute = LoginUnitRouteImport.update({
   id: '/$unit',
   path: '/$unit',
@@ -92,6 +87,11 @@ const AppLaporanPusatRoute = AppLaporanPusatRouteImport.update({
 const AppJurnalKoreksiRoute = AppJurnalKoreksiRouteImport.update({
   id: '/jurnal-koreksi',
   path: '/jurnal-koreksi',
+  getParentRoute: () => AppRoute,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
   getParentRoute: () => AppRoute,
 } as any)
 const AppCoaRoute = AppCoaRouteImport.update({
@@ -260,10 +260,11 @@ const AppUspKegiatanAngsuranRoute = AppUspKegiatanAngsuranRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AppIndexRoute
+  '/': typeof AppRouteWithChildren
   '/login': typeof LoginRouteWithChildren
   '/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/coa': typeof AppCoaRoute
+  '/dashboard': typeof AppDashboardRoute
   '/jurnal-koreksi': typeof AppJurnalKoreksiRoute
   '/laporan-pusat': typeof AppLaporanPusatRoute
   '/pengaturan': typeof AppPengaturanRouteWithChildren
@@ -301,14 +302,15 @@ export interface FileRoutesByFullPath {
   '/usp/laporan/': typeof AppUspLaporanIndexRoute
 }
 export interface FileRoutesByTo {
+  '/': typeof AppRouteWithChildren
   '/login': typeof LoginRouteWithChildren
   '/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/coa': typeof AppCoaRoute
+  '/dashboard': typeof AppDashboardRoute
   '/jurnal-koreksi': typeof AppJurnalKoreksiRoute
   '/laporan-pusat': typeof AppLaporanPusatRoute
   '/transfer-antar-entitas': typeof AppTransferAntarEntitasRoute
   '/login/$unit': typeof LoginUnitRoute
-  '/': typeof AppIndexRoute
   '/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
   '/laporan/buku-besar-konsolidasi': typeof AppLaporanBukuBesarKonsolidasiRoute
   '/laporan/buku-besar-pusat': typeof AppLaporanBukuBesarPusatRoute
@@ -343,13 +345,13 @@ export interface FileRoutesById {
   '/login': typeof LoginRouteWithChildren
   '/_app/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/_app/coa': typeof AppCoaRoute
+  '/_app/dashboard': typeof AppDashboardRoute
   '/_app/jurnal-koreksi': typeof AppJurnalKoreksiRoute
   '/_app/laporan-pusat': typeof AppLaporanPusatRoute
   '/_app/pengaturan': typeof AppPengaturanRouteWithChildren
   '/_app/transfer-antar-entitas': typeof AppTransferAntarEntitasRoute
   '/_app/usp': typeof AppUspRouteWithChildren
   '/login/$unit': typeof LoginUnitRoute
-  '/_app/': typeof AppIndexRoute
   '/_app/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
   '/_app/laporan/buku-besar-konsolidasi': typeof AppLaporanBukuBesarKonsolidasiRoute
   '/_app/laporan/buku-besar-pusat': typeof AppLaporanBukuBesarPusatRoute
@@ -387,6 +389,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/catat-kegiatan'
     | '/coa'
+    | '/dashboard'
     | '/jurnal-koreksi'
     | '/laporan-pusat'
     | '/pengaturan'
@@ -424,14 +427,15 @@ export interface FileRouteTypes {
     | '/usp/laporan/'
   fileRoutesByTo: FileRoutesByTo
   to:
+    | '/'
     | '/login'
     | '/catat-kegiatan'
     | '/coa'
+    | '/dashboard'
     | '/jurnal-koreksi'
     | '/laporan-pusat'
     | '/transfer-antar-entitas'
     | '/login/$unit'
-    | '/'
     | '/laporan/bagi-hasil'
     | '/laporan/buku-besar-konsolidasi'
     | '/laporan/buku-besar-pusat'
@@ -465,13 +469,13 @@ export interface FileRouteTypes {
     | '/login'
     | '/_app/catat-kegiatan'
     | '/_app/coa'
+    | '/_app/dashboard'
     | '/_app/jurnal-koreksi'
     | '/_app/laporan-pusat'
     | '/_app/pengaturan'
     | '/_app/transfer-antar-entitas'
     | '/_app/usp'
     | '/login/$unit'
-    | '/_app/'
     | '/_app/laporan/bagi-hasil'
     | '/_app/laporan/buku-besar-konsolidasi'
     | '/_app/laporan/buku-besar-pusat'
@@ -524,13 +528,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_app/': {
-      id: '/_app/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof AppIndexRouteImport
-      parentRoute: typeof AppRoute
-    }
     '/login/$unit': {
       id: '/login/$unit'
       path: '/$unit'
@@ -571,6 +568,13 @@ declare module '@tanstack/react-router' {
       path: '/jurnal-koreksi'
       fullPath: '/jurnal-koreksi'
       preLoaderRoute: typeof AppJurnalKoreksiRouteImport
+      parentRoute: typeof AppRoute
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
       parentRoute: typeof AppRoute
     }
     '/_app/coa': {
@@ -877,12 +881,12 @@ const AppUspRouteWithChildren =
 interface AppRouteChildren {
   AppCatatKegiatanRoute: typeof AppCatatKegiatanRoute
   AppCoaRoute: typeof AppCoaRoute
+  AppDashboardRoute: typeof AppDashboardRoute
   AppJurnalKoreksiRoute: typeof AppJurnalKoreksiRoute
   AppLaporanPusatRoute: typeof AppLaporanPusatRoute
   AppPengaturanRoute: typeof AppPengaturanRouteWithChildren
   AppTransferAntarEntitasRoute: typeof AppTransferAntarEntitasRoute
   AppUspRoute: typeof AppUspRouteWithChildren
-  AppIndexRoute: typeof AppIndexRoute
   AppLaporanBagiHasilRoute: typeof AppLaporanBagiHasilRoute
   AppLaporanBukuBesarKonsolidasiRoute: typeof AppLaporanBukuBesarKonsolidasiRoute
   AppLaporanBukuBesarPusatRoute: typeof AppLaporanBukuBesarPusatRoute
@@ -896,12 +900,12 @@ interface AppRouteChildren {
 const AppRouteChildren: AppRouteChildren = {
   AppCatatKegiatanRoute: AppCatatKegiatanRoute,
   AppCoaRoute: AppCoaRoute,
+  AppDashboardRoute: AppDashboardRoute,
   AppJurnalKoreksiRoute: AppJurnalKoreksiRoute,
   AppLaporanPusatRoute: AppLaporanPusatRoute,
   AppPengaturanRoute: AppPengaturanRouteWithChildren,
   AppTransferAntarEntitasRoute: AppTransferAntarEntitasRoute,
   AppUspRoute: AppUspRouteWithChildren,
-  AppIndexRoute: AppIndexRoute,
   AppLaporanBagiHasilRoute: AppLaporanBagiHasilRoute,
   AppLaporanBukuBesarKonsolidasiRoute: AppLaporanBukuBesarKonsolidasiRoute,
   AppLaporanBukuBesarPusatRoute: AppLaporanBukuBesarPusatRoute,

@@ -30,7 +30,7 @@ import {
   type AccountLite,
 } from "@/lib/account-balances";
 
-export const Route = createFileRoute("/_app/")({
+export const Route = createFileRoute("/_app/dashboard")({
   head: () => ({
     meta: [{ title: "Dashboard · Direktur BUMDes" }],
   }),
