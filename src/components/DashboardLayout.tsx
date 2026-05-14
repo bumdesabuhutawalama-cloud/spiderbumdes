@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ChevronDown, Search, Bell, Menu, Building2 } from "lucide-react";
 import { CinematicBackground } from "./CinematicBackground";
 import { AppSidebar, MobileSidebar } from "./AppSidebar";
