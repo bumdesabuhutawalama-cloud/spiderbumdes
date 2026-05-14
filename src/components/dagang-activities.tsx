@@ -266,7 +266,7 @@ function PembelianForm({ kredit, onClose }: { kredit: boolean; onClose: () => vo
               inputMode="numeric"
               value={hargaBeli ? Number(hargaBeli.replace(/[^\d]/g, "")).toLocaleString("id-ID") : ""}
               onChange={(e) => setHargaBeli(e.target.value.replace(/[^\d]/g, ""))}
-              className="input-glass pl-9"
+              className="input-glass pl-9!"
               placeholder="0"
             />
           </div>
@@ -493,7 +493,7 @@ function PenjualanForm({ kredit, onClose }: { kredit: boolean; onClose: () => vo
               inputMode="numeric"
               value={hargaJual ? Number(hargaJual.replace(/[^\d]/g, "")).toLocaleString("id-ID") : ""}
               onChange={(e) => setHargaJual(e.target.value.replace(/[^\d]/g, ""))}
-              className="input-glass pl-9"
+              className="input-glass pl-9!"
               placeholder="0"
             />
           </div>
@@ -647,7 +647,7 @@ function SimpleCashForm({
               inputMode="numeric"
               value={jumlah ? Number(jumlah.replace(/[^\d]/g, "")).toLocaleString("id-ID") : ""}
               onChange={(e) => setJumlah(e.target.value.replace(/[^\d]/g, ""))}
-              className="input-glass pl-9"
+              className="input-glass pl-9!"
               placeholder="0"
             />
           </div>
