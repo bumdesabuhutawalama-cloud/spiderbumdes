@@ -112,22 +112,22 @@ function LabaRugiPage() {
       />
 
       <div className="glass-card rounded-2xl p-3 sm:p-5">
-        <div ref={reportRef} className="overflow-x-auto rounded-xl border border-amber-200/40 bg-[oklch(0.96_0.04_85)] text-[oklch(0.2_0.02_50)] shadow-inner">
-          <div className="min-w-[640px] p-4 sm:p-6 font-mono text-[13px]">
+        <div ref={reportRef} className="overflow-x-auto rounded-xl border border-slate-200 bg-white text-slate-900 shadow-md ring-1 ring-slate-100">
+          <div className="min-w-[640px] p-4 sm:p-6 font-sans text-[13px]">
             <div className="text-center mb-4 leading-tight">
-              <p className="text-[12px] uppercase tracking-wider text-[oklch(0.4_0.05_50)]">
+              <p className="text-[12px] uppercase tracking-wider text-slate-500">
                 Laporan Laba Rugi BUM Desa
               </p>
-              <p className="text-[14px] font-bold text-[oklch(0.55_0.18_25)]">Nama BUM Desa</p>
-              <p className="text-[13px] font-bold text-[oklch(0.55_0.18_25)]">LAPORAN LABA RUGI</p>
-              <p className="text-[11px] text-[oklch(0.4_0.05_50)]">
+              <p className="text-[14px] font-bold text-slate-900">Nama BUM Desa</p>
+              <p className="text-[13px] font-bold text-slate-900">LAPORAN LABA RUGI</p>
+              <p className="text-[11px] text-slate-500">
                 Periode {start} s/d {end}
               </p>
-              <p className="text-[11px] italic text-[oklch(0.4_0.05_50)]">dalam Rupiah</p>
+              <p className="text-[11px] italic text-slate-500">dalam Rupiah</p>
             </div>
 
             {isLoading && (
-              <div className="py-12 text-center text-[oklch(0.4_0.05_50)]">
+              <div className="py-12 text-center text-slate-500">
                 <Loader2 className="inline h-4 w-4 animate-spin mr-2" />
                 Memuat data laporan...
               </div>
@@ -141,7 +141,7 @@ function LabaRugiPage() {
             {!isLoading && !errAcc && computed && accounts && (
               <table className="w-full border-collapse text-[12px]">
                 <thead>
-                  <tr className="border-y-2 border-[oklch(0.55_0.18_25)] text-[oklch(0.55_0.18_25)] font-semibold">
+                  <tr className="border-y-2 border-slate-900 text-slate-900 font-semibold">
                     <th className="w-12 py-1.5 text-center">No.</th>
                     <th className="text-left py-1.5 px-2">Uraian</th>
                     <th className="w-28 py-1.5 text-right px-2">Periode Ini</th>
@@ -160,9 +160,9 @@ function LabaRugiPage() {
                       const rows: React.ReactNode[] = [];
                       no += 1;
                       rows.push(
-                        <tr key={`s-${si}`} className="bg-[oklch(0.92_0.05_85)]">
-                          <td className="py-1 text-center font-bold text-[oklch(0.55_0.18_25)]">{no}</td>
-                          <td colSpan={3} className="py-1 px-2 font-bold text-[oklch(0.55_0.18_25)]">
+                        <tr key={`s-${si}`} className="bg-slate-100">
+                          <td className="py-1 text-center font-bold text-slate-900">{no}</td>
+                          <td colSpan={3} className="py-1 px-2 font-bold text-slate-900">
                             {section.title}
                           </td>
                         </tr>,
@@ -189,26 +189,26 @@ function LabaRugiPage() {
                           <tr
                             key={a.id}
                             className={cn(
-                              "border-b border-amber-200/60",
-                              isHeader && "bg-[oklch(0.94_0.04_85)]",
+                              "border-b border-slate-200",
+                              isHeader && "bg-slate-50",
                             )}
                           >
-                            <td className="py-1 text-center text-[oklch(0.4_0.05_50)]">{no}</td>
+                            <td className="py-1 text-center text-slate-500">{no}</td>
                             <td
                               className={cn(
                                 "py-1 px-2",
                                 isHeader
-                                  ? "font-semibold text-[oklch(0.55_0.18_25)]"
-                                  : "text-[oklch(0.35_0.1_240)]",
+                                  ? "font-semibold text-slate-900"
+                                  : "text-slate-800",
                               )}
                               style={{ paddingLeft: 8 + indent }}
                             >
                               {a.name}
                             </td>
-                            <td className="py-1 px-2 text-right tabular-nums text-[oklch(0.35_0.1_240)] font-medium">
+                            <td className="py-1 px-2 text-right tabular-nums text-slate-800 font-medium">
                               {formatRpOrDash(cur)}
                             </td>
-                            <td className="py-1 px-2 text-right tabular-nums text-[oklch(0.35_0.1_240)] font-medium">
+                            <td className="py-1 px-2 text-right tabular-nums text-slate-800 font-medium">
                               {formatRpOrDash(prev)}
                             </td>
                           </tr>,
@@ -227,14 +227,14 @@ function LabaRugiPage() {
                       rows.push(
                         <tr
                           key={`t-${si}`}
-                          className="border-y-2 border-[oklch(0.55_0.18_25)] bg-[oklch(0.92_0.05_85)]"
+                          className="border-y-2 border-slate-900 bg-slate-100"
                         >
-                          <td className="py-1.5 text-center font-bold text-[oklch(0.55_0.18_25)]">{no}</td>
-                          <td className="py-1.5 px-2 font-bold text-[oklch(0.55_0.18_25)]">{section.total}</td>
-                          <td className="py-1.5 px-2 text-right font-bold text-[oklch(0.55_0.18_25)] tabular-nums">
+                          <td className="py-1.5 text-center font-bold text-slate-900">{no}</td>
+                          <td className="py-1.5 px-2 font-bold text-slate-900">{section.total}</td>
+                          <td className="py-1.5 px-2 text-right font-bold text-slate-900 tabular-nums">
                             {formatRpOrDash(secCur)}
                           </td>
-                          <td className="py-1.5 px-2 text-right font-bold text-[oklch(0.55_0.18_25)] tabular-nums">
+                          <td className="py-1.5 px-2 text-right font-bold text-slate-900 tabular-nums">
                             {formatRpOrDash(secPrev)}
                           </td>
                         </tr>,
@@ -246,15 +246,15 @@ function LabaRugiPage() {
                     rendered.push(
                       <tr
                         key="laba-bersih"
-                        className="border-y-2 border-[oklch(0.55_0.18_25)] bg-[oklch(0.88_0.06_85)]"
+                        className="border-y-2 border-slate-900 bg-slate-200"
                       >
-                        <td colSpan={2} className="py-2 px-2 font-bold text-[oklch(0.55_0.18_25)]">
+                        <td colSpan={2} className="py-2 px-2 font-bold text-slate-900">
                           LABA / (RUGI) BERSIH
                         </td>
-                        <td className="py-2 px-2 text-right font-bold text-[oklch(0.55_0.18_25)] tabular-nums">
+                        <td className="py-2 px-2 text-right font-bold text-slate-900 tabular-nums">
                           {formatRpOrDash(pendCur - bebanCur)}
                         </td>
-                        <td className="py-2 px-2 text-right font-bold text-[oklch(0.55_0.18_25)] tabular-nums">
+                        <td className="py-2 px-2 text-right font-bold text-slate-900 tabular-nums">
                           {formatRpOrDash(pendPrev - bebanPrev)}
                         </td>
                       </tr>,

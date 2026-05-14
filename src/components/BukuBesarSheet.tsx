@@ -225,14 +225,14 @@ export function BukuBesarSheet({
       </div>
 
       <div className="glass-card rounded-2xl p-3 sm:p-5">
-        <div ref={reportRef} className="overflow-x-auto rounded-xl border border-border/60 bg-card/60 p-4">
-          <div className="mb-3 flex flex-wrap items-baseline justify-between gap-3 border-b border-border/60 pb-3">
+        <div ref={reportRef} className="overflow-x-auto rounded-xl border border-slate-200 bg-white p-6 text-slate-900 shadow-sm">
+          <div className="mb-4 flex flex-wrap items-baseline justify-between gap-3 border-b border-slate-300 pb-3">
             <div>
-              <p className="text-[11px] uppercase tracking-[0.2em] text-muted-foreground">Buku Besar</p>
-              <h2 className="text-lg font-semibold">
+              <p className="text-[11px] uppercase tracking-[0.2em] text-slate-500">Buku Besar</p>
+              <h2 className="text-lg font-semibold text-slate-900">
                 {data?.account ? `${data.account.code} — ${data.account.name}` : "Pilih akun untuk menampilkan buku besar"}
               </h2>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-slate-500">
                 Periode {start} s.d. {end}
                 {mode === "konsolidasi" && entityFilter && entities && (
                   <> · Entity: {entities.find((x) => x.id === entityFilter)?.name}</>
@@ -242,41 +242,41 @@ export function BukuBesarSheet({
               </p>
             </div>
             {data?.account && (
-              <div className="text-right text-xs text-muted-foreground">
-                <div>Saldo Awal: <span className="font-mono text-foreground">{formatRp(data.opening)}</span></div>
-                <div>Saldo Akhir: <span className="font-mono text-[var(--neon-cyan)]">{formatRp(data.ending)}</span></div>
+              <div className="text-right text-xs text-slate-500">
+                <div>Saldo Awal: <span className="font-mono text-slate-900">{formatRp(data.opening)}</span></div>
+                <div>Saldo Akhir: <span className="font-mono font-semibold text-slate-900">{formatRp(data.ending)}</span></div>
               </div>
             )}
           </div>
 
           {isLoading && (
-            <div className="py-12 text-center text-sm text-muted-foreground">
+            <div className="py-12 text-center text-sm text-slate-500">
               <Loader2 className="mr-2 inline h-4 w-4 animate-spin" /> Memuat buku besar...
             </div>
           )}
           {error && (
-            <div className="py-8 text-center text-sm text-rose-400">
+            <div className="py-8 text-center text-sm text-rose-600">
               Gagal memuat: {(error as Error).message}
             </div>
           )}
 
           {!isLoading && !error && data?.account && (
             <>
-              <table className="w-full min-w-[860px] text-[13px]">
+              <table className="w-full min-w-[860px] border-collapse text-[13px]">
                 <thead>
-                  <tr className="border-b border-border/60 text-left text-[11px] uppercase tracking-wider text-muted-foreground">
-                    <th className="px-2 py-2">Tanggal</th>
-                    {(mode === "konsolidasi" || showEntityCol) && <th className="px-2 py-2">Entity</th>}
-                    <th className="px-2 py-2">Uraian</th>
-                    <th className="px-2 py-2">Bukti</th>
-                    <th className="px-2 py-2">Ref</th>
-                    <th className="px-2 py-2 text-right">Debit</th>
-                    <th className="px-2 py-2 text-right">Kredit</th>
-                    <th className="px-2 py-2 text-right">Saldo</th>
+                  <tr className="border-y-2 border-slate-900 text-left text-[11px] uppercase tracking-wider text-slate-700">
+                    <th className="px-2 py-2 font-semibold">Tanggal</th>
+                    {(mode === "konsolidasi" || showEntityCol) && <th className="px-2 py-2 font-semibold">Entity</th>}
+                    <th className="px-2 py-2 font-semibold">Uraian</th>
+                    <th className="px-2 py-2 font-semibold">Bukti</th>
+                    <th className="px-2 py-2 font-semibold">Ref</th>
+                    <th className="px-2 py-2 text-right font-semibold">Debit</th>
+                    <th className="px-2 py-2 text-right font-semibold">Kredit</th>
+                    <th className="px-2 py-2 text-right font-semibold">Saldo</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr className="border-b border-border/40 bg-secondary/30 italic text-muted-foreground">
+                  <tr className="border-b border-slate-200 bg-slate-50 italic text-slate-600">
                     <td className="px-2 py-1.5" colSpan={mode === "konsolidasi" ? 5 : 4}>Saldo Awal per {start}</td>
                     <td className="px-2 py-1.5" />
                     <td className="px-2 py-1.5" />
@@ -284,44 +284,44 @@ export function BukuBesarSheet({
                   </tr>
                   {pageLines.length === 0 && (
                     <tr>
-                      <td colSpan={mode === "konsolidasi" ? 8 : 7} className="px-2 py-8 text-center text-muted-foreground">
+                      <td colSpan={mode === "konsolidasi" ? 8 : 7} className="px-2 py-8 text-center text-slate-500">
                         Tidak ada transaksi pada periode ini.
                       </td>
                     </tr>
                   )}
-                  {pageLines.map((l) => (
-                    <tr key={l.id} className="border-b border-border/40 hover:bg-secondary/40">
-                      <td className="px-2 py-1.5 font-mono text-xs">{l.date}</td>
+                  {pageLines.map((l, idx) => (
+                    <tr key={l.id} className={cn("border-b border-slate-200 hover:bg-slate-50", idx % 2 === 1 && "bg-slate-50/60")}>
+                      <td className="px-2 py-1.5 font-mono text-xs text-slate-700">{l.date}</td>
                       {(mode === "konsolidasi" || showEntityCol) && (
                         <td className="px-2 py-1.5">
                           <Badge
                             variant="outline"
                             className={cn(
-                              "border-border/60 text-[10px]",
+                              "text-[10px]",
                               l.entity.id === "PUSAT"
-                                ? "border-[var(--neon-cyan)]/40 text-[var(--neon-cyan)]"
-                                : "border-emerald-500/40 text-emerald-400",
+                                ? "border-slate-400 text-slate-700"
+                                : "border-emerald-500 text-emerald-700",
                             )}
                           >
                             {l.entity.code}
                           </Badge>
                         </td>
                       )}
-                      <td className="px-2 py-1.5">{l.description ?? "-"}</td>
-                      <td className="px-2 py-1.5 font-mono text-xs text-muted-foreground">{l.bukti}</td>
-                      <td className="px-2 py-1.5 text-xs text-muted-foreground">{l.ref}</td>
-                      <td className="px-2 py-1.5 text-right font-mono tabular-nums">{l.debit ? formatRp(l.debit) : "-"}</td>
-                      <td className="px-2 py-1.5 text-right font-mono tabular-nums">{l.credit ? formatRp(l.credit) : "-"}</td>
-                      <td className="px-2 py-1.5 text-right font-mono tabular-nums text-[var(--neon-cyan)]">{formatRp(l.running)}</td>
+                      <td className="px-2 py-1.5 text-slate-800">{l.description ?? "-"}</td>
+                      <td className="px-2 py-1.5 font-mono text-xs text-slate-500">{l.bukti}</td>
+                      <td className="px-2 py-1.5 text-xs text-slate-500">{l.ref}</td>
+                      <td className="px-2 py-1.5 text-right font-mono tabular-nums text-slate-800">{l.debit ? formatRp(l.debit) : "-"}</td>
+                      <td className="px-2 py-1.5 text-right font-mono tabular-nums text-slate-800">{l.credit ? formatRp(l.credit) : "-"}</td>
+                      <td className="px-2 py-1.5 text-right font-mono tabular-nums font-semibold text-slate-900">{formatRp(l.running)}</td>
                     </tr>
                   ))}
                 </tbody>
                 <tfoot>
-                  <tr className="border-t-2 border-border bg-secondary/50 font-semibold">
+                  <tr className="border-y-2 border-slate-900 bg-slate-100 font-semibold text-slate-900">
                     <td className="px-2 py-2" colSpan={mode === "konsolidasi" ? 5 : 4}>TOTAL</td>
                     <td className="px-2 py-2 text-right font-mono tabular-nums">{formatRp(data.totalDebit)}</td>
                     <td className="px-2 py-2 text-right font-mono tabular-nums">{formatRp(data.totalCredit)}</td>
-                    <td className="px-2 py-2 text-right font-mono tabular-nums text-[var(--neon-cyan)]">{formatRp(data.ending)}</td>
+                    <td className="px-2 py-2 text-right font-mono tabular-nums">{formatRp(data.ending)}</td>
                   </tr>
                 </tfoot>
               </table>
