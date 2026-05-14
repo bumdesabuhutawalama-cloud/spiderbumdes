@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { createFileRoute, useNavigate, useParams, Link } from "@tanstack/react-router";
-import { Building2, Lock, Mail, Loader2, ShieldCheck } from "lucide-react";
+import { Building2, Lock, Mail, Loader2, ShieldCheck, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { CinematicBackground } from "@/components/CinematicBackground";
