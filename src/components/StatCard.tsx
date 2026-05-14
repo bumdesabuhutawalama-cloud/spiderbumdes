@@ -14,40 +14,31 @@ export function StatCard({
   icon: LucideIcon;
   accent?: "cyan" | "green";
 }) {
-  const isCyan = accent === "cyan";
+  const isPositive = !delta || !delta.trim().startsWith("-");
   return (
-    <div
-      className={cn(
-        "glass-card group relative overflow-hidden rounded-2xl p-5 transition-transform hover:-translate-y-0.5",
-        isCyan ? "hover:glow-cyan" : "hover:glow-green",
-      )}
-    >
+    <div className={cn("surface-card group relative overflow-hidden p-5")}>
       <div
-        className={cn(
-          "absolute -right-10 -top-10 h-32 w-32 rounded-full blur-2xl opacity-30 transition-opacity group-hover:opacity-60",
-          isCyan ? "bg-[var(--neon-cyan)]" : "bg-[var(--neon-green)]",
-        )}
+        className="absolute -right-12 -top-12 h-32 w-32 rounded-full opacity-30 blur-2xl transition-opacity group-hover:opacity-60"
+        style={{
+          background:
+            accent === "cyan"
+              ? "var(--blue-300)"
+              : "var(--navy-700)",
+        }}
       />
-      <div className="relative flex items-start justify-between">
-        <div>
-          <p className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+      <div className="relative flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[11px] font-medium uppercase tracking-[0.16em] text-brand-muted">
             {label}
           </p>
-          <p
-            className={cn(
-              "mt-2 text-2xl md:text-[28px] font-semibold",
-              isCyan ? "text-glow-cyan" : "text-glow-green",
-            )}
-          >
+          <p className="mt-2 font-display text-2xl font-bold text-brand md:text-[26px] truncate">
             {value}
           </p>
           {delta && (
-            <p className="mt-1 text-xs text-muted-foreground">
+            <p className="mt-1 text-xs text-brand-muted">
               <span
-                className={cn(
-                  "font-medium",
-                  isCyan ? "text-[var(--neon-cyan)]" : "text-[var(--neon-green)]",
-                )}
+                className="font-semibold"
+                style={{ color: isPositive ? "rgb(21,128,61)" : "rgb(190,18,60)" }}
               >
                 {delta}
               </span>{" "}
@@ -55,12 +46,7 @@ export function StatCard({
             </p>
           )}
         </div>
-        <div
-          className={cn(
-            "grid h-10 w-10 place-items-center rounded-xl border border-border/60 bg-background/50",
-            isCyan ? "text-[var(--neon-cyan)]" : "text-[var(--neon-green)]",
-          )}
-        >
+        <div className="icon-badge-navy">
           <Icon className="h-5 w-5" />
         </div>
       </div>
