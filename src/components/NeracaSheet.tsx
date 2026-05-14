@@ -214,19 +214,19 @@ export function NeracaSheet({
       />
 
       <div className="glass-card rounded-2xl p-3 sm:p-5">
-        <div ref={reportRef} className="overflow-x-auto rounded-xl border border-amber-200/40 bg-[oklch(0.96_0.04_85)] text-[oklch(0.2_0.02_50)] shadow-inner">
-          <div className="min-w-[640px] p-4 sm:p-6 font-mono text-[13px]">
+        <div ref={reportRef} className="overflow-x-auto rounded-xl border border-slate-200 bg-white text-slate-900 shadow-sm">
+          <div className="min-w-[640px] p-4 sm:p-6 font-sans text-[13px]">
             <div className="text-center mb-4 leading-tight">
-              <p className="text-[12px] uppercase tracking-wider text-[oklch(0.4_0.05_50)]">{heading.line1}</p>
-              <p className="text-[14px] font-bold text-[oklch(0.55_0.18_25)]">Nama BUM Desa</p>
+              <p className="text-[12px] uppercase tracking-wider text-slate-500">{heading.line1}</p>
+              <p className="text-[14px] font-bold text-slate-900">Nama BUM Desa</p>
               {heading.line2 && (
-                <p className="text-[13px] font-semibold text-[oklch(0.55_0.18_25)]">{heading.line2}</p>
+                <p className="text-[13px] font-semibold text-slate-900">{heading.line2}</p>
               )}
-              <p className="text-[13px] font-bold text-[oklch(0.55_0.18_25)]">{heading.line3}</p>
-              <p className="text-[11px] text-[oklch(0.4_0.05_50)]">
+              <p className="text-[13px] font-bold text-slate-900">{heading.line3}</p>
+              <p className="text-[11px] text-slate-500">
                 per {asOf} dan {prevAsOf}
               </p>
-              <p className="text-[11px] italic text-[oklch(0.4_0.05_50)]">dalam Rupiah</p>
+              <p className="text-[11px] italic text-slate-500">dalam Rupiah</p>
             </div>
 
             {isLoading && (
@@ -234,7 +234,7 @@ export function NeracaSheet({
                 {Array.from({ length: 8 }).map((_, i) => (
                   <div
                     key={i}
-                    className="h-5 w-full animate-pulse rounded bg-[oklch(0.9_0.04_85)]"
+                    className="h-5 w-full animate-pulse rounded bg-slate-200"
                     style={{ width: `${60 + ((i * 7) % 35)}%` }}
                   />
                 ))}
@@ -267,7 +267,7 @@ export function NeracaSheet({
             {!isLoading && !error && computed && (
               <table className="w-full border-collapse text-[12px]">
                 <thead>
-                  <tr className="border-y-2 border-[oklch(0.55_0.18_25)] text-[oklch(0.55_0.18_25)] font-semibold">
+                  <tr className="border-y-2 border-slate-900 text-slate-900 font-semibold">
                     <th className="w-12 py-1.5 text-center">No.</th>
                     <th className="text-left py-1.5 px-2">Uraian</th>
                     <th className="w-28 py-1.5 text-right px-2">{currentYear}</th>
@@ -288,9 +288,9 @@ export function NeracaSheet({
                       const rows: React.ReactNode[] = [];
                       no += 1;
                       rows.push(
-                        <tr key={`s-${si}`} className="bg-[oklch(0.92_0.05_85)]">
-                          <td className="py-1 text-center font-bold text-[oklch(0.55_0.18_25)]">{no}</td>
-                          <td colSpan={3} className="py-1 px-2 font-bold text-[oklch(0.55_0.18_25)]">
+                        <tr key={`s-${si}`} className="bg-slate-100">
+                          <td className="py-1 text-center font-bold text-slate-900">{no}</td>
+                          <td colSpan={3} className="py-1 px-2 font-bold text-slate-900">
                             {section.title}
                           </td>
                         </tr>,
@@ -316,33 +316,33 @@ export function NeracaSheet({
                           <tr
                             key={a.id}
                             className={cn(
-                              "border-b border-amber-200/60",
-                              isHeader && "bg-[oklch(0.94_0.04_85)]",
-                              isRkInfo && "bg-[oklch(0.95_0.02_85)]/60",
+                              "border-b border-slate-200",
+                              isHeader && "bg-slate-50",
+                              isRkInfo && "bg-slate-50",
                             )}
                           >
-                            <td className="py-1 text-center text-[oklch(0.4_0.05_50)]">{no}</td>
+                            <td className="py-1 text-center text-slate-500">{no}</td>
                             <td
                               className={cn(
                                 "py-1 px-2",
                                 isHeader
-                                  ? "font-semibold text-[oklch(0.55_0.18_25)]"
-                                  : "text-[oklch(0.35_0.1_240)]",
-                                isRkInfo && "italic text-[oklch(0.5_0.03_240)]",
+                                  ? "font-semibold text-slate-900"
+                                  : "text-slate-800",
+                                isRkInfo && "italic text-slate-500",
                               )}
                               style={{ paddingLeft: 8 + indent }}
                             >
                               {a.name}
                               {isRkInfo && (
-                                <span className="ml-2 inline-block rounded border border-[oklch(0.7_0.05_240)]/50 bg-[oklch(0.92_0.02_240)] px-1.5 py-0 text-[10px] font-normal not-italic text-[oklch(0.45_0.05_240)]">
+                                <span className="ml-2 inline-block rounded border border-slate-300 bg-slate-100 px-1.5 py-0 text-[10px] font-normal not-italic text-slate-600">
                                   Akun Antar Unit · Eliminasi Perhitungan
                                 </span>
                               )}
                             </td>
-                            <td className={cn("py-1 px-2 text-right font-medium tabular-nums", isRkInfo ? "italic text-[oklch(0.5_0.03_240)]" : "text-[oklch(0.35_0.1_240)]")}>
+                            <td className={cn("py-1 px-2 text-right font-medium tabular-nums", isRkInfo ? "italic text-slate-500" : "text-slate-800")}>
                               {formatRpOrDash(cur)}
                             </td>
-                            <td className={cn("py-1 px-2 text-right font-medium tabular-nums", isRkInfo ? "italic text-[oklch(0.5_0.03_240)]" : "text-[oklch(0.35_0.1_240)]")}>
+                            <td className={cn("py-1 px-2 text-right font-medium tabular-nums", isRkInfo ? "italic text-slate-500" : "text-slate-800")}>
                               {formatRpOrDash(prev)}
                             </td>
                           </tr>,
@@ -356,15 +356,15 @@ export function NeracaSheet({
                         {
                           no += 1;
                           rows.push(
-                          <tr key="laba-berjalan" className="border-b border-amber-200/60">
-                            <td className="py-1 text-center text-[oklch(0.4_0.05_50)]">{no}</td>
-                            <td className="py-1 px-2 italic text-[oklch(0.35_0.1_240)]" style={{ paddingLeft: 20 }}>
+                          <tr key="laba-berjalan" className="border-b border-slate-200">
+                            <td className="py-1 text-center text-slate-500">{no}</td>
+                            <td className="py-1 px-2 italic text-slate-800" style={{ paddingLeft: 20 }}>
                               Laba / (Rugi) Tahun Berjalan
                             </td>
-                            <td className="py-1 px-2 text-right tabular-nums text-[oklch(0.35_0.1_240)] font-medium">
+                            <td className="py-1 px-2 text-right tabular-nums text-slate-800 font-medium">
                               {formatRpOrDash(computed.labaCur)}
                             </td>
-                            <td className="py-1 px-2 text-right tabular-nums text-[oklch(0.35_0.1_240)] font-medium">
+                            <td className="py-1 px-2 text-right tabular-nums text-slate-800 font-medium">
                               {formatRpOrDash(computed.labaPrev)}
                             </td>
                           </tr>,
@@ -387,14 +387,14 @@ export function NeracaSheet({
                       rows.push(
                         <tr
                           key={`t-${si}`}
-                          className="border-y-2 border-[oklch(0.55_0.18_25)] bg-[oklch(0.92_0.05_85)]"
+                          className="border-y-2 border-slate-900 bg-slate-100"
                         >
-                          <td className="py-1.5 text-center font-bold text-[oklch(0.55_0.18_25)]">{no}</td>
-                          <td className="py-1.5 px-2 font-bold text-[oklch(0.55_0.18_25)]">{section.total}</td>
-                          <td className="py-1.5 px-2 text-right font-bold text-[oklch(0.55_0.18_25)] tabular-nums">
+                          <td className="py-1.5 text-center font-bold text-slate-900">{no}</td>
+                          <td className="py-1.5 px-2 font-bold text-slate-900">{section.total}</td>
+                          <td className="py-1.5 px-2 text-right font-bold text-slate-900 tabular-nums">
                             {formatRpOrDash(secCur)}
                           </td>
-                          <td className="py-1.5 px-2 text-right font-bold text-[oklch(0.55_0.18_25)] tabular-nums">
+                          <td className="py-1.5 px-2 text-right font-bold text-slate-900 tabular-nums">
                             {formatRpOrDash(secPrev)}
                           </td>
                         </tr>,
@@ -406,15 +406,15 @@ export function NeracaSheet({
                     rendered.push(
                       <tr
                         key="grand-total"
-                        className="border-y-2 border-[oklch(0.55_0.18_25)] bg-[oklch(0.88_0.06_85)]"
+                        className="border-y-2 border-slate-900 bg-slate-200"
                       >
-                        <td colSpan={2} className="py-2 px-2 font-bold text-[oklch(0.55_0.18_25)]">
+                        <td colSpan={2} className="py-2 px-2 font-bold text-slate-900">
                           TOTAL KEWAJIBAN DAN EKUITAS
                         </td>
-                        <td className="py-2 px-2 text-right font-bold text-[oklch(0.55_0.18_25)] tabular-nums">
+                        <td className="py-2 px-2 text-right font-bold text-slate-900 tabular-nums">
                           {formatRpOrDash(totalKewajibanCur + totalEkuitasCur)}
                         </td>
-                        <td className="py-2 px-2 text-right font-bold text-[oklch(0.55_0.18_25)] tabular-nums">
+                        <td className="py-2 px-2 text-right font-bold text-slate-900 tabular-nums">
                           {formatRpOrDash(totalKewajibanPrev + totalEkuitasPrev)}
                         </td>
                       </tr>,
