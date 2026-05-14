@@ -63,7 +63,7 @@ function HomePage() {
             <Sparkles className="h-3.5 w-3.5" /> Akuntansi tanpa ribet
           </span>
 
-          <h1 className="mt-5 font-display text-4xl font-bold leading-[1.1] tracking-tight md:text-5xl lg:text-[56px]">
+          <h1 className="mt-5 font-display font-bold leading-[1.1] tracking-tight md:text-5xl lg:text-[56px] text-center border-double text-2xl">
             Kelola keuangan BUMDes
             <br />
             <span
