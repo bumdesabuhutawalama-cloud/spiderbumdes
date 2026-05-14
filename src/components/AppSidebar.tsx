@@ -73,7 +73,18 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
           </>
         )}
 
-        {isUnit && (
+        {isUnit && role?.unitCode === "DAGANG" && (
+          <>
+            <NavLink item={{ to: "/dagang", label: "Dashboard Dagang", icon: LayoutDashboard }} active={path === "/dagang"} onNavigate={onNavigate} />
+            <NavLink item={{ to: "/dagang/kegiatan", label: "Catat Kegiatan", icon: ClipboardList }} active={isActive("/dagang/kegiatan")} onNavigate={onNavigate} />
+            <NavLink item={{ to: "/dagang/stok", label: "Stok Barang", icon: Store }} active={isActive("/dagang/stok")} onNavigate={onNavigate} />
+            <NavLink item={{ to: "/dagang/transfer", label: "Transfer Antar Unit", icon: GitCompare }} active={isActive("/dagang/transfer")} onNavigate={onNavigate} />
+            <NavLink item={{ to: "/dagang/laporan", label: "Laporan Dagang", icon: FileBarChart }} active={isActive("/dagang/laporan")} onNavigate={onNavigate} />
+            <NavLink item={{ to: "/jurnal-koreksi", label: "Jurnal Koreksi", icon: FileEdit }} active={isActive("/jurnal-koreksi")} onNavigate={onNavigate} />
+          </>
+        )}
+
+        {isUnit && role?.unitCode !== "DAGANG" && (
           <>
             <NavLink item={{ to: "/usp", label: "Dashboard USP", icon: LayoutDashboard }} active={path === "/usp"} onNavigate={onNavigate} />
             <NavLink item={{ to: "/usp/pinjaman", label: "Data Pinjaman", icon: HandCoins }} active={isActive("/usp/pinjaman")} onNavigate={onNavigate} />
