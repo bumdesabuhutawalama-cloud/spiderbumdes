@@ -205,7 +205,7 @@ export function PenyertaanModalForm({ onClose }: { onClose: () => void }) {
           <Field label="Jumlah Modal">
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">Rp</span>
-              <input ref={jumlahRef} inputMode="numeric" value={jumlah ? Number(jumlah.replace(/[^\d]/g, "")).toLocaleString("id-ID") : ""} onChange={(e) => setJumlah(e.target.value.replace(/[^\d]/g, ""))} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); keteranganRef.current?.focus(); } }} placeholder="0" className="input-glass pl-9" />
+              <input ref={jumlahRef} inputMode="numeric" value={jumlah ? Number(jumlah.replace(/[^\d]/g, "")).toLocaleString("id-ID") : ""} onChange={(e) => setJumlah(e.target.value.replace(/[^\d]/g, ""))} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); keteranganRef.current?.focus(); } }} placeholder="0" className="input-glass pl-9!" />
             </div>
           </Field>
           <div className="sm:col-span-2">
@@ -320,7 +320,7 @@ export function BelanjaAsetForm({ onClose }: { onClose: () => void }) {
           <Field label="Jumlah Belanja">
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">Rp</span>
-              <input ref={jumlahRef} inputMode="numeric" value={jumlah ? Number(jumlah.replace(/[^\d]/g, "")).toLocaleString("id-ID") : ""} onChange={(e) => setJumlah(e.target.value.replace(/[^\d]/g, ""))} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); keteranganRef.current?.focus(); } }} placeholder="0" className="input-glass pl-9" />
+              <input ref={jumlahRef} inputMode="numeric" value={jumlah ? Number(jumlah.replace(/[^\d]/g, "")).toLocaleString("id-ID") : ""} onChange={(e) => setJumlah(e.target.value.replace(/[^\d]/g, ""))} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); keteranganRef.current?.focus(); } }} placeholder="0" className="input-glass pl-9!" />
             </div>
           </Field>
           <div className="sm:col-span-2">
@@ -449,7 +449,7 @@ export function PenerimaanKasForm({ onClose }: { onClose: () => void }) {
           <Field label="Jumlah Diterima">
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">Rp</span>
-              <input ref={jumlahRef} inputMode="numeric" value={jumlah ? Number(jumlah.replace(/[^\d]/g, "")).toLocaleString("id-ID") : ""} onChange={(e) => setJumlah(e.target.value.replace(/[^\d]/g, ""))} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); keteranganRef.current?.focus(); } }} placeholder="0" className="input-glass pl-9" />
+              <input ref={jumlahRef} inputMode="numeric" value={jumlah ? Number(jumlah.replace(/[^\d]/g, "")).toLocaleString("id-ID") : ""} onChange={(e) => setJumlah(e.target.value.replace(/[^\d]/g, ""))} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); keteranganRef.current?.focus(); } }} placeholder="0" className="input-glass pl-9!" />
             </div>
           </Field>
           <div className="sm:col-span-2">
@@ -580,7 +580,7 @@ export function PengeluaranOperasionalForm({ onClose }: { onClose: () => void })
           <Field label="Jumlah Dibayar">
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">Rp</span>
-              <input ref={jumlahRef} inputMode="numeric" value={jumlah ? Number(jumlah.replace(/[^\d]/g, "")).toLocaleString("id-ID") : ""} onChange={(e) => setJumlah(e.target.value.replace(/[^\d]/g, ""))} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); keteranganRef.current?.focus(); } }} placeholder="0" className="input-glass pl-9" />
+              <input ref={jumlahRef} inputMode="numeric" value={jumlah ? Number(jumlah.replace(/[^\d]/g, "")).toLocaleString("id-ID") : ""} onChange={(e) => setJumlah(e.target.value.replace(/[^\d]/g, ""))} onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); keteranganRef.current?.focus(); } }} placeholder="0" className="input-glass pl-9!" />
             </div>
           </Field>
           <div className="sm:col-span-2">

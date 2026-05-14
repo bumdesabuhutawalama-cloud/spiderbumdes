@@ -105,7 +105,7 @@ function MoneyInput({
         value={value ? Number(value.replace(/[^\d]/g, "")).toLocaleString("id-ID") : ""}
         onChange={(e) => onChange(e.target.value.replace(/[^\d]/g, ""))}
         placeholder={placeholder}
-        className="input-glass pl-9"
+        className="input-glass pl-9!"
       />
     </div>
   );
