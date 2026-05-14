@@ -1,56 +1,53 @@
-const PARTICLES = Array.from({ length: 28 }, (_, i) => ({
-  id: i,
-  left: Math.random() * 100,
-  top: Math.random() * 100,
-  size: Math.random() * 4 + 2,
-  delay: Math.random() * 8,
-  duration: 6 + Math.random() * 8,
-  color: i % 3 === 0 ? "var(--neon-green)" : "var(--neon-cyan)",
-}));
-
+/**
+ * Premium light "soft sky" background.
+ * Kept the same export name so existing imports keep working,
+ * but the visual is now white→soft-blue with subtle blue glows
+ * to match the GovTech / fintech design system.
+ */
 export function CinematicBackground() {
   return (
     <div
       aria-hidden
       className="pointer-events-none fixed inset-0 -z-10 overflow-hidden"
     >
-      {/* Base gradient */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_50%_-20%,oklch(0.3_0.1_200/0.4),transparent_60%)]" />
+      {/* Base wash */}
+      <div className="absolute inset-0 bg-grad-soft" />
 
-      {/* Drifting blobs */}
-      <div className="absolute -top-40 -left-40 h-[40rem] w-[40rem] rounded-full bg-[radial-gradient(circle,oklch(0.5_0.18_195/0.18),transparent_70%)] animate-drift" />
+      {/* Soft drifting blue blobs */}
       <div
-        className="absolute -bottom-40 -right-40 h-[36rem] w-[36rem] rounded-full bg-[radial-gradient(circle,oklch(0.5_0.2_160/0.15),transparent_70%)] animate-drift"
-        style={{ animationDelay: "-10s" }}
+        className="absolute -top-40 -left-40 h-[40rem] w-[40rem] rounded-full animate-drift"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(47,111,237,0.18), transparent 70%)",
+        }}
+      />
+      <div
+        className="absolute -bottom-48 -right-40 h-[36rem] w-[36rem] rounded-full animate-drift"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(15,42,95,0.14), transparent 70%)",
+          animationDelay: "-10s",
+        }}
+      />
+      <div
+        className="absolute top-1/3 right-1/4 h-[22rem] w-[22rem] rounded-full"
+        style={{
+          background:
+            "radial-gradient(circle, rgba(111,160,255,0.18), transparent 70%)",
+        }}
       />
 
       {/* Subtle grid */}
-      <div className="absolute inset-0 grid-bg opacity-40" />
+      <div className="absolute inset-0 grid-bg opacity-60" />
 
-      {/* Scanning line */}
-      <div className="absolute inset-x-0 h-px bg-gradient-to-r from-transparent via-[oklch(0.85_0.18_195/0.5)] to-transparent animate-scan-line" />
-
-      {/* Glowing particles */}
-      {PARTICLES.map((p) => (
-        <span
-          key={p.id}
-          className="absolute rounded-full animate-float-particle"
-          style={{
-            left: `${p.left}%`,
-            top: `${p.top}%`,
-            width: p.size,
-            height: p.size,
-            background: p.color,
-            boxShadow: `0 0 ${p.size * 4}px ${p.color}`,
-            animationDelay: `${p.delay}s`,
-            animationDuration: `${p.duration}s`,
-            opacity: 0.7,
-          }}
-        />
-      ))}
-
-      {/* Vignette */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_40%,oklch(0.08_0.02_250/0.7))]" />
+      {/* Soft top vignette to add depth */}
+      <div
+        className="absolute inset-x-0 top-0 h-[40vh]"
+        style={{
+          background:
+            "linear-gradient(180deg, rgba(255,255,255,0.6), transparent)",
+        }}
+      />
     </div>
   );
 }
