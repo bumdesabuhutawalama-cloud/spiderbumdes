@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { createFileRoute, useNavigate, useParams, Link } from "@tanstack/react-router";
-import { Building2, Lock, Mail, Loader2, ShieldCheck } from "lucide-react";
+import { Building2, Lock, Mail, Loader2, ShieldCheck, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { CinematicBackground } from "@/components/CinematicBackground";
@@ -21,6 +21,7 @@ function UnitLoginPage() {
   const [loading, setLoading] = useState(false);
   const [unit, setUnit] = useState<UnitInfo | null>(null);
   const [unitLoading, setUnitLoading] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const { setUser, setRole } = useAuthStore();
 
   useEffect(() => {
@@ -113,7 +114,10 @@ function UnitLoginPage() {
                 <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="user@bumdes.local" className={inputCls} />
               </Field>
               <Field label="Password" icon={<Lock className="h-4 w-4" />}>
-                <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className={inputCls} />
+                <input type={showPassword ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className={`${inputCls} pr-10`} />
+                <button type="button" onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? "Sembunyikan password" : "Lihat password"} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
               </Field>
               <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-60">
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
