@@ -214,7 +214,7 @@ export function NeracaSheet({
       />
 
       <div className="glass-card rounded-2xl p-3 sm:p-5">
-        <div ref={reportRef} className="overflow-x-auto rounded-xl border border-slate-200 bg-white text-slate-900 shadow-sm">
+        <div ref={reportRef} className="overflow-x-auto rounded-xl border border-slate-200 bg-white text-slate-900 shadow-md ring-1 ring-slate-100">
           <div className="min-w-[640px] p-4 sm:p-6 font-sans text-[13px]">
             <div className="text-center mb-4 leading-tight">
               <p className="text-[12px] uppercase tracking-wider text-slate-500">{heading.line1}</p>
