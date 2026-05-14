@@ -185,9 +185,13 @@ export type Database = {
       }
       journal_entries: {
         Row: {
+          correction_reason: string | null
+          correction_type: string | null
           created_at: string
           description: string | null
           id: string
+          original_journal_id: string | null
+          status: string
           total_amount: number
           transaction_date: string
           transaction_type: string
@@ -195,9 +199,13 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          correction_reason?: string | null
+          correction_type?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          original_journal_id?: string | null
+          status?: string
           total_amount?: number
           transaction_date: string
           transaction_type: string
@@ -205,16 +213,28 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          correction_reason?: string | null
+          correction_type?: string | null
           created_at?: string
           description?: string | null
           id?: string
+          original_journal_id?: string | null
+          status?: string
           total_amount?: number
           transaction_date?: string
           transaction_type?: string
           transfer_group_id?: string | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "journal_entries_original_journal_id_fkey"
+            columns: ["original_journal_id"]
+            isOneToOne: false
+            referencedRelation: "journal_entries"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       journal_entry_lines: {
         Row: {

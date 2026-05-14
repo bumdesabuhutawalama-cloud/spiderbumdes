@@ -11,6 +11,7 @@ import {
   GitCompare,
   ClipboardList,
   Users,
+  FileEdit,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -68,6 +69,12 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
             />
 
             <NavLink
+              item={{ to: "/jurnal-koreksi", label: "Jurnal Koreksi", icon: FileEdit }}
+              active={isActive("/jurnal-koreksi")}
+              onNavigate={onNavigate}
+            />
+
+            <NavLink
               item={{ to: "/usp", label: "Unit Simpan Pinjam", icon: HandCoins }}
               active={isActive("/usp")}
               onNavigate={onNavigate}
@@ -112,6 +119,11 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
             <NavLink
               item={{ to: "/usp/laporan", label: "Laporan USP", icon: FileBarChart }}
               active={isActive("/usp/laporan")}
+              onNavigate={onNavigate}
+            />
+            <NavLink
+              item={{ to: "/jurnal-koreksi", label: "Jurnal Koreksi", icon: FileEdit }}
+              active={isActive("/jurnal-koreksi")}
               onNavigate={onNavigate}
             />
           </>
