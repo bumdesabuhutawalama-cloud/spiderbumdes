@@ -203,7 +203,7 @@ function LoginPage() {
   );
 }
 
-const inputCls = "input-modern pl-10";
+const inputCls = "input-modern pl-10!";
 
 function Field({ label, icon, children }: { label: string; icon: React.ReactNode; children: React.ReactNode }) {
   return (
