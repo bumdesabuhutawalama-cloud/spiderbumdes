@@ -192,10 +192,10 @@ function NavLink({
       to={item.to}
       onClick={onNavigate}
       className={cn(
-        "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
+        "group relative flex items-center gap-3 rounded-xl px-3.5 py-3 text-[15px] font-medium transition-all duration-200",
         active
-          ? "text-white"
-          : "text-brand-muted hover:bg-[var(--blue-50)] hover:text-brand",
+          ? "text-white scale-[1.01]"
+          : "text-brand-muted hover:bg-[var(--blue-50)] hover:text-brand hover:translate-x-0.5",
       )}
       style={
         active
@@ -205,11 +205,11 @@ function NavLink({
     >
       <Icon
         className={cn(
-          "h-4 w-4 transition-colors",
+          "h-5 w-5 shrink-0 transition-colors",
           active ? "text-white" : "group-hover:text-[var(--blue-500)]",
         )}
       />
-      <span>{item.label}</span>
+      <span className="truncate">{item.label}</span>
     </Link>
   );
 }
