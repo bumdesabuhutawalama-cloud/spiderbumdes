@@ -8,6 +8,7 @@ import {
   LogOut,
   Building2,
   HandCoins,
+  Store,
   GitCompare,
   ClipboardList,
   Users,

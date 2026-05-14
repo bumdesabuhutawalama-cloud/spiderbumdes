@@ -41,23 +41,16 @@ function AppLayout() {
 
   // Authorization guards
   if (isUnit) {
-    // admin_unit: redirect root & pusat-only paths to /usp
+    const unitHome = role?.unitCode === "DAGANG" ? "/dagang" : "/usp";
     const isPusatRoute = PUSAT_ONLY_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
     if (isPusatRoute) {
-      return <Navigate to="/usp" />;
+      return <Navigate to={unitHome} />;
     }
-    // Block /usp/* if user's unit is not USP
     if (pathname.startsWith("/usp") && role?.unitCode && role.unitCode !== "USP") {
-      return (
-        <div className="min-h-screen grid place-items-center p-6 text-center">
-          <div>
-            <p className="text-lg font-semibold">Akses ditolak</p>
-            <p className="text-sm text-muted-foreground mt-1">
-              Akun ini tidak memiliki akses ke modul USP.
-            </p>
-          </div>
-        </div>
-      );
+      return <Navigate to={unitHome} />;
+    }
+    if (pathname.startsWith("/dagang") && role?.unitCode && role.unitCode !== "DAGANG") {
+      return <Navigate to={unitHome} />;
     }
   }
 
