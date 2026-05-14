@@ -158,7 +158,7 @@ export function MobileSidebar({
       />
       <aside
         className={cn(
-          "absolute left-0 top-0 h-full w-[80vw] max-w-xs flex flex-col bg-white transition-transform duration-300 ease-out",
+          "absolute left-0 top-0 h-full w-[86vw] max-w-sm flex flex-col bg-white transition-transform duration-300 ease-out",
           open ? "translate-x-0" : "-translate-x-full",
         )}
         style={{ boxShadow: "var(--shadow-lg)", borderRight: "1px solid var(--border-soft)" }}
@@ -166,10 +166,10 @@ export function MobileSidebar({
         <button
           onClick={() => onOpenChange(false)}
           aria-label="Tutup menu"
-          className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-lg border bg-white text-brand-muted hover:text-brand"
+          className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-xl border bg-white text-brand-muted hover:text-brand transition"
           style={{ borderColor: "var(--border-soft)" }}
         >
-          <X className="h-4 w-4" />
+          <X className="h-5 w-5" />
         </button>
         <SidebarInner onNavigate={() => onOpenChange(false)} />
       </aside>
