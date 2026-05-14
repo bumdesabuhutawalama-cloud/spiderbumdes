@@ -300,13 +300,15 @@ export function NeracaSheet({
                         (a) => a.type === section.type && computed.activeIds.has(a.id),
                       );
                       // Total per seksi memakai sumByType agar akun kontra dikurangkan dengan benar.
-                      let secCur = sumByType(accounts ?? [], computed.signedCur, [section.type]);
-                      let secPrev = sumByType(accounts ?? [], computed.signedPrev, [section.type]);
+                      // Pada mode Pusat, akun RK antar unit dieliminasi dari total (informational only).
+                      let secCur = sumByType(computed.totalsAccounts, computed.signedCur, [section.type]);
+                      let secPrev = sumByType(computed.totalsAccounts, computed.signedPrev, [section.type]);
                       sectionAccounts.forEach((a) => {
                         const isHeader = a.entry_type === "Header";
+                        const isRkInfo = computed.isRk(a.id);
                         const cur = computed.signedCur.get(a.id) ?? 0;
                         const prev = computed.signedPrev.get(a.id) ?? 0;
-                        
+
                         no += 1;
                         const depth = a.code.split(/[.\-]/).filter(Boolean).length;
                         const indent = Math.max(0, depth - 2) * 12;
@@ -316,6 +318,7 @@ export function NeracaSheet({
                             className={cn(
                               "border-b border-amber-200/60",
                               isHeader && "bg-[oklch(0.94_0.04_85)]",
+                              isRkInfo && "bg-[oklch(0.95_0.02_85)]/60",
                             )}
                           >
                             <td className="py-1 text-center text-[oklch(0.4_0.05_50)]">{no}</td>
@@ -325,15 +328,21 @@ export function NeracaSheet({
                                 isHeader
                                   ? "font-semibold text-[oklch(0.55_0.18_25)]"
                                   : "text-[oklch(0.35_0.1_240)]",
+                                isRkInfo && "italic text-[oklch(0.5_0.03_240)]",
                               )}
                               style={{ paddingLeft: 8 + indent }}
                             >
                               {a.name}
+                              {isRkInfo && (
+                                <span className="ml-2 inline-block rounded border border-[oklch(0.7_0.05_240)]/50 bg-[oklch(0.92_0.02_240)] px-1.5 py-0 text-[10px] font-normal not-italic text-[oklch(0.45_0.05_240)]">
+                                  Akun Antar Unit · Eliminasi Perhitungan
+                                </span>
+                              )}
                             </td>
-                            <td className="py-1 px-2 text-right text-[oklch(0.35_0.1_240)] font-medium tabular-nums">
+                            <td className={cn("py-1 px-2 text-right font-medium tabular-nums", isRkInfo ? "italic text-[oklch(0.5_0.03_240)]" : "text-[oklch(0.35_0.1_240)]")}>
                               {formatRpOrDash(cur)}
                             </td>
-                            <td className="py-1 px-2 text-right text-[oklch(0.35_0.1_240)] font-medium tabular-nums">
+                            <td className={cn("py-1 px-2 text-right font-medium tabular-nums", isRkInfo ? "italic text-[oklch(0.5_0.03_240)]" : "text-[oklch(0.35_0.1_240)]")}>
                               {formatRpOrDash(prev)}
                             </td>
                           </tr>,
