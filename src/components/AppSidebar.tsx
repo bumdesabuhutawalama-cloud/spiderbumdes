@@ -99,9 +99,9 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
       <div className="border-t p-3" style={{ borderColor: "var(--border-soft)" }}>
         <button
           onClick={() => void signOut()}
-          className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-brand-muted transition-all hover:bg-red-50 hover:text-red-600"
+          className="group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-[15px] font-medium text-brand-muted transition-all hover:bg-red-50 hover:text-red-600"
         >
-          <LogOut className="h-4 w-4" />
+          <LogOut className="h-5 w-5" />
           Logout
         </button>
       </div>
@@ -112,7 +112,7 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
 export function AppSidebar() {
   return (
     <aside
-      className="hidden md:flex sticky top-0 h-screen w-64 shrink-0 flex-col surface-glass"
+      className="hidden md:flex sticky top-0 h-screen w-72 shrink-0 flex-col surface-glass"
       style={{ borderRight: "1px solid var(--border-soft)" }}
     >
       <SidebarInner />
