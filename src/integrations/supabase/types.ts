@@ -393,6 +393,62 @@ export type Database = {
           },
         ]
       }
+      products: {
+        Row: {
+          avg_cost: number
+          code: string
+          created_at: string
+          id: string
+          min_stock: number
+          name: string
+          notes: string | null
+          selling_price: number
+          status: string
+          stock_qty: number
+          unit_id: string | null
+          uom: string
+          updated_at: string
+        }
+        Insert: {
+          avg_cost?: number
+          code: string
+          created_at?: string
+          id?: string
+          min_stock?: number
+          name: string
+          notes?: string | null
+          selling_price?: number
+          status?: string
+          stock_qty?: number
+          unit_id?: string | null
+          uom?: string
+          updated_at?: string
+        }
+        Update: {
+          avg_cost?: number
+          code?: string
+          created_at?: string
+          id?: string
+          min_stock?: number
+          name?: string
+          notes?: string | null
+          selling_price?: number
+          status?: string
+          stock_qty?: number
+          unit_id?: string | null
+          uom?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           created_at: string
@@ -518,6 +574,66 @@ export type Database = {
           unit_id?: string | null
         }
         Relationships: []
+      }
+      stock_movements: {
+        Row: {
+          created_at: string
+          id: string
+          journal_entry_id: string | null
+          movement_date: string
+          movement_type: string
+          notes: string | null
+          product_id: string
+          qty: number
+          reference: string | null
+          total_value: number
+          unit_cost: number
+          unit_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          journal_entry_id?: string | null
+          movement_date?: string
+          movement_type: string
+          notes?: string | null
+          product_id: string
+          qty: number
+          reference?: string | null
+          total_value?: number
+          unit_cost?: number
+          unit_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          journal_entry_id?: string | null
+          movement_date?: string
+          movement_type?: string
+          notes?: string | null
+          product_id?: string
+          qty?: number
+          reference?: string | null
+          total_value?: number
+          unit_cost?: number
+          unit_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stock_movements_unit_id_fkey"
+            columns: ["unit_id"]
+            isOneToOne: false
+            referencedRelation: "units"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       units: {
         Row: {
