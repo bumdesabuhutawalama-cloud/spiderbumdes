@@ -188,6 +188,128 @@
   }
 }
 
+/* =========================================================
+   GOVTECH BLUE DESIGN SYSTEM (global, reusable)
+   Use these tokens & utilities for landing AND dashboard cards.
+   ========================================================= */
+:root {
+  --brand-900: #0F2A5F;
+  --brand-700: #1E4FA3;
+  --brand-500: #2F6FED;
+  --brand-50:  #F0F4FF;
+  --brand-bg:  #F4F7FC;
+  --brand-surface: #FFFFFF;
+  --brand-border: #E6ECF5;
+  --brand-text:  #0B1F44;
+  --brand-muted: #6B7A99;
+  --brand-input-bg: #F7F9FD;
+
+  --brand-gradient: linear-gradient(135deg, #1E4FA3, #0F2A5F);
+  --brand-shadow-card: 0 10px 30px rgba(15, 42, 95, 0.08);
+  --brand-shadow-form: 0 20px 40px rgba(15, 42, 95, 0.10);
+  --brand-shadow-btn:  0 8px 20px rgba(15, 42, 95, 0.25);
+}
+
+@layer utilities {
+  /* Soft section background (e.g. landing sections) */
+  .bg-brand-soft { background-color: var(--brand-bg); }
+
+  /* Floating info card: icon left, text right */
+  .info-card {
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-border);
+    border-radius: 16px;
+    box-shadow: var(--brand-shadow-card);
+    padding: 24px;
+    color: var(--brand-text);
+    transition: transform 200ms ease, box-shadow 200ms ease;
+  }
+  .info-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 36px rgba(15, 42, 95, 0.12);
+  }
+  .info-card__title {
+    font-weight: 600;
+    font-size: 18px;
+    line-height: 1.3;
+    color: var(--brand-text);
+  }
+  .info-card__desc {
+    font-weight: 400;
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: var(--brand-muted);
+  }
+
+  /* Soft icon badge inside cards */
+  .icon-badge {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background: var(--brand-50);
+    color: var(--brand-500);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+
+  /* Glass-soft form container */
+  .form-card {
+    background: var(--brand-surface);
+    border: 1px solid var(--brand-border);
+    border-radius: 20px;
+    box-shadow: var(--brand-shadow-form);
+    padding: 32px;
+    color: var(--brand-text);
+  }
+
+  /* Soft input field */
+  .input-soft {
+    width: 100%;
+    background: var(--brand-input-bg);
+    border: 1px solid var(--brand-border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-size: 14px;
+    color: var(--brand-text);
+    transition: border-color 150ms ease, box-shadow 150ms ease;
+  }
+  .input-soft::placeholder { color: var(--brand-muted); }
+  .input-soft:focus {
+    outline: none;
+    border-color: var(--brand-500);
+    box-shadow: 0 0 0 3px rgba(47, 111, 237, 0.15);
+  }
+
+  /* Primary brand button */
+  .btn-brand {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    background: var(--brand-gradient);
+    color: #ffffff;
+    border-radius: 12px;
+    padding: 12px 22px;
+    font-weight: 600;
+    font-size: 14px;
+    box-shadow: var(--brand-shadow-btn);
+    transition: transform 150ms ease, filter 150ms ease, box-shadow 150ms ease;
+    border: none;
+    cursor: pointer;
+  }
+  .btn-brand:hover {
+    filter: brightness(1.08);
+    transform: translateY(-1px);
+    box-shadow: 0 10px 24px rgba(15, 42, 95, 0.30);
+  }
+  .btn-brand:active { transform: translateY(0); }
+
+  /* Text helpers */
+  .text-brand        { color: var(--brand-text); }
+  .text-brand-muted  { color: var(--brand-muted); }
+}
+
 /* Cinematic background animations */
 @keyframes float-particle {
   0%, 100% { transform: translate3d(0, 0, 0) scale(1); opacity: 0.6; }
