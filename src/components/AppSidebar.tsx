@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
 import {
   LayoutDashboard,
@@ -6,17 +6,11 @@ import {
   FileBarChart,
   Settings,
   LogOut,
-  ChevronDown,
   Building2,
-  Scale,
-  TrendingUp,
-  PieChart,
-  FileSpreadsheet,
   HandCoins,
   GitCompare,
   ClipboardList,
   Users,
-  BookOpen,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
