@@ -10,8 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { JournalCorrectionWizard } from "@/components/JournalCorrectionWizard";
 
 export const Route = createFileRoute("/_app/jurnal-koreksi")({
-  component: JurnalKoreksiPage,
+  component: () => <JurnalKoreksiPage />,
 });
+
+export function JurnalKoreksiPage({ prefix, title, subtitle }: { prefix?: string; title?: string; subtitle?: string } = {}) {
 
 type Row = {
   id: string;
