@@ -1,57 +1,87 @@
-## Fitur: Auto Journal Correction Wizard
+## Tujuan
 
-Tujuan: tambah menu "Jurnal Koreksi" yang membuat jurnal baru terhubung ke jurnal asli, tanpa mengedit jurnal lama dan tanpa user menyentuh debit/kredit (kecuali mode gabungan).
+Menambahkan **website publik** di depan sistem (sebagai landing utama domain) tanpa menyentuh logika akuntansi, database, autentikasi, role, atau dashboard internal yang sudah berjalan.
 
-### 1. Database (migration)
+## Pemisahan Arsitektur
 
-Tambah kolom pada `journal_entries`:
-- `original_journal_id uuid NULL` — referensi ke jurnal yang dikoreksi
-- `correction_type text NULL` — `reversal` | `adjust_amount` | `reclass` | `full_adjustment`
-- `correction_reason text NULL`
-- `status text NOT NULL DEFAULT 'Posted'` — nilai: `Posted` | `Corrected`
+Dua layout terpisah, hidup berdampingan:
 
-Index: `idx_journal_entries_original` pada `original_journal_id`.
+```
+src/routes/
+├── __root.tsx                  (tetap, hanya provider global)
+│
+├── _public.tsx                 (BARU) layout publik: header + footer publik
+│   ├── _public.index.tsx       → /            Beranda
+│   ├── _public.tentang.tsx     → /tentang     Tentang BUMDes
+│   ├── _public.unit-usaha.tsx  → /unit-usaha  Unit Usaha
+│   ├── _public.transparansi.tsx→ /transparansi Laporan publik (read-only)
+│   └── _public.kontak.tsx      → /kontak      Kontak
+│
+├── login.tsx                   (TETAP, tidak diubah)
+└── _app.*                      (TETAP, semua dashboard internal tidak diubah)
+```
 
-Tidak mengubah kolom/logic existing. Trigger balance & cache tetap berjalan otomatis untuk jurnal koreksi karena memakai `journal_entries` + `journal_entry_lines` yang sudah ada.
+Halaman lama `_app.index.tsx` (dashboard pusat di `/`) dipindahkan rutenya ke `/dashboard` agar `/` bebas untuk landing publik. Cukup rename file → `_app.dashboard.tsx`. Redirect setelah login Admin Pusat diubah dari `to: "/"` menjadi `to: "/dashboard"` di `src/routes/login.tsx` dan guard `_app.tsx` (`PUSAT_ONLY_PREFIXES` + redirect `admin_unit`). **Tidak ada logika akuntansi/database/role yang berubah** — hanya path tujuan navigasi.
 
-### 2. Service layer (`src/lib/journal-correction.ts`)
+## Header Publik
 
-Fungsi-fungsi:
-- `fetchJournal(id)` → ambil jurnal + lines + (jika ada) link koreksi
-- `createReversal(journalId, reason, date)` → swap debit/credit semua line, set metadata, mark original = Corrected
-- `createAmountAdjustment(journalId, newAmount, reason, date)` → hitung selisih, scale tiap line proporsional terhadap `total_amount` lama, akun tetap sama, debit/credit sama (jika selisih negatif → swap)
-- `createReclass({ journalId, lineId, newAccountId, reason, date })` → 1 jurnal: debit akun baru + kredit akun lama (atau swap jika baris asli adalah credit) sebesar nominal baris terpilih
-- `createFullAdjustment({ journalId, lines, reason, date })` → terima lines lengkap dari user (validasi balanced)
+Navigasi: Beranda · Tentang · Unit Usaha · Transparansi · Kontak · **[Login]** (tombol kanan, link ke `/login`).
 
-Semua fungsi:
-1. Insert `journal_entries` baru dengan `original_journal_id`, `correction_type`, `correction_reason`, `status='Posted'`, `transaction_type='KOREKSI'`.
-2. Insert `journal_entry_lines` (trigger akan re-balance otomatis).
-3. UPDATE jurnal lama set `status='Corrected'`.
+Bila user sudah login (cek `useAuth` ringan di header), tombol berubah jadi **"Buka Dashboard"** → `/dashboard` atau `/usp` sesuai role.
 
-### 3. UI
+## Konten Halaman (copy realistis, sentence case)
 
-**Route baru:** `src/routes/_app.jurnal-koreksi.tsx`
-- Tabel jurnal: tanggal, deskripsi, total, status (badge `Posted`/`Corrected`), tombol "Koreksi" (disabled jika sudah Corrected), kolom "Koreksi oleh" link ke jurnal koreksi.
-- Filter periode + search.
-- Tombol "Koreksi" → buka wizard.
+- **Beranda**: hero + tagline BUMDes, ringkasan unit usaha (card grid), CTA Login.
+- **Tentang**: visi, misi, struktur singkat.
+- **Unit Usaha**: card per unit (USP, dst.) dengan deskripsi.
+- **Transparansi**: ringkasan laporan publik. Versi awal statis/placeholder realistis. Tidak menyentuh tabel jurnal/laporan internal.
+- **Kontak**: alamat, email, form kontak (mailto, no backend).
 
-**Komponen:** `src/components/JournalCorrectionWizard.tsx` (Dialog multi-step)
-- Step 1: pilih tipe koreksi (4 kartu).
-- Step 2: form sesuai tipe:
-  - Reversal: konfirmasi + textarea alasan + tanggal.
-  - Adjust Amount: tampil nominal lama (readonly), input nominal seharusnya, alasan, tanggal.
-  - Reclass: pilih baris (radio list akun + nominal lama readonly), dropdown akun tujuan (dari `coa_accounts` non-Header), alasan, tanggal.
-  - Full Adjustment: prefill lines dari jurnal asli, editable account+debit+credit, validasi balanced, alasan, tanggal.
-- Submit → panggil service → toast → invalidate query.
+Visual mengikuti theme existing (`CinematicBackground`, neon cyan/green, glass-card) agar konsisten.
 
-**Sidebar (`src/components/AppSidebar.tsx`):** tambah item "Jurnal Koreksi" dengan icon `FileEdit`, link `/jurnal-koreksi`.
+## Performa Buka Halaman (CRITICAL)
 
-### 4. Tampilan link asli ↔ koreksi
-Pada baris jurnal asli yang `Corrected`: tampilkan badge + tombol "Lihat jurnal koreksi" yang menggulir ke baris koreksi (atau highlight baris dengan id tersebut).
-Pada baris jurnal koreksi: tampilkan badge tipe + chip "Mengoreksi: <ref>".
+Agar buka domain ringan & cepat:
 
-### Catatan teknis
-- Tidak menyentuh `usp-dialogs.tsx`, `general-activities.tsx`, atau modul jurnal otomatis existing.
-- Tidak ubah trigger / RLS existing — RLS `je_auth_*` & `jel_auth_*` sudah `true` untuk authenticated, jadi insert/update jalan.
-- Kolom `transaction_type` diisi `KOREKSI` agar mudah dibedakan di laporan.
-- Validasi: tidak boleh mengoreksi jurnal yang sudah `Corrected`.
+1. **Tidak memuat AuthProvider/Supabase pada layout publik.** Auth provider tetap di `__root.tsx`, tapi pemanggilan `supabase.auth.getSession()` sudah lazy. Layout `_public.tsx` tidak menunggu `initialized` — render langsung.
+2. **Preload via TanStack Router**: `<Link preload="intent">` antar halaman publik (sudah default `intent` di `router.tsx`).
+3. **Tidak import komponen berat** (chart, sheet, dialog) di route publik. Hanya komponen presentasi statis.
+4. **Gambar**: gunakan ukuran kecil + `loading="lazy"` untuk gambar non-hero.
+5. **SEO/SSR**: setiap route publik punya `head()` sendiri (title, description, og:title, og:description) — sudah didukung TanStack Start.
+6. **Tidak ada query React Query di landing** — murni statik agar TTFB cepat.
+
+## Yang TIDAK Diubah (jaminan)
+
+- Skema database, RLS, migrations.
+- Service layer: `journal-correction.ts`, `account-balances.ts`, `ledger.ts`, `report-cache.ts`, `users.functions.ts`.
+- Semua route `_app.*` (dashboard, USP, laporan, jurnal koreksi, pengaturan).
+- `AuthProvider`, `use-auth.ts`, `auth-middleware.ts`, `auth-attacher.ts`.
+- Role logic (`admin_pusat`, `admin_unit`).
+- Komponen internal: `AppSidebar`, `UspNav`, `usp-dialogs`, dst.
+
+## File yang Dibuat / Diedit
+
+**Baru:**
+- `src/routes/_public.tsx` (layout + header + footer publik)
+- `src/routes/_public.index.tsx` (Beranda)
+- `src/routes/_public.tentang.tsx`
+- `src/routes/_public.unit-usaha.tsx`
+- `src/routes/_public.transparansi.tsx`
+- `src/routes/_public.kontak.tsx`
+- `src/components/public/PublicHeader.tsx`
+- `src/components/public/PublicFooter.tsx`
+
+**Rename:**
+- `src/routes/_app.index.tsx` → `src/routes/_app.dashboard.tsx`
+
+**Edit minor (hanya path redirect):**
+- `src/routes/login.tsx`: `navigate({ to: "/" })` → `navigate({ to: "/dashboard" })` untuk admin_pusat.
+- `src/routes/_app.tsx`: update `PUSAT_ONLY_PREFIXES` (tambah `/dashboard`) dan redirect root admin_unit ke `/usp` (sudah ada).
+
+`routeTree.gen.ts` regen otomatis.
+
+## Hasil
+
+- Domain dibuka → langsung lihat website publik yang ringan & cepat.
+- Klik **Login** → halaman login existing → masuk ke dashboard sesuai role (tidak ada perubahan UX setelah login).
+- Arsitektur internal sistem akuntansi 100% tidak tersentuh.
