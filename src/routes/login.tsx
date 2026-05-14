@@ -1,7 +1,7 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useServerFn } from "@tanstack/react-start";
-import { Building2, Lock, Mail, Loader2, UserPlus, ArrowLeft, ShieldCheck, Sparkles } from "lucide-react";
+import { Building2, Lock, Mail, Loader2, UserPlus, ArrowLeft, ShieldCheck, Sparkles, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { loadUserRole, useAuthStore } from "@/hooks/use-auth";
