@@ -105,8 +105,8 @@ function JurnalKoreksiPageInner({ prefix, title, subtitle }: { prefix?: string; 
   return (
     <>
       <PageHeader
-        title="Jurnal Koreksi"
-        subtitle="Buat jurnal koreksi otomatis. Jurnal asli tetap tersimpan dan ditandai Corrected."
+        title={title ?? "Jurnal Koreksi"}
+        subtitle={subtitle ?? "Buat jurnal koreksi otomatis. Jurnal asli tetap tersimpan dan ditandai Corrected."}
         actions={
           <Button variant="outline" size="sm" onClick={() => void refetch()}>
             <RefreshCcw className="h-3.5 w-3.5 mr-1" /> Muat ulang
