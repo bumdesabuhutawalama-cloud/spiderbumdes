@@ -69,6 +69,12 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
             />
 
             <NavLink
+              item={{ to: "/jurnal-koreksi", label: "Jurnal Koreksi", icon: FileEdit }}
+              active={isActive("/jurnal-koreksi")}
+              onNavigate={onNavigate}
+            />
+
+            <NavLink
               item={{ to: "/usp", label: "Unit Simpan Pinjam", icon: HandCoins }}
               active={isActive("/usp")}
               onNavigate={onNavigate}
