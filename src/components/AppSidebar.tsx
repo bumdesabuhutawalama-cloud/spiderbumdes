@@ -23,15 +23,6 @@ const main: Item[] = [
   { to: "/coa", label: "Bagan Akun / COA", icon: BookOpenText },
 ];
 
-const reports: Item[] = [
-  { to: "/laporan/neraca-pusat", label: "Neraca Pusat", icon: Scale },
-  { to: "/laporan/neraca-konsolidasi", label: "Neraca Konsolidasi", icon: FileSpreadsheet },
-  { to: "/laporan/laba-rugi", label: "Laba Rugi", icon: TrendingUp },
-  { to: "/laporan/bagi-hasil", label: "Bagi Hasil", icon: PieChart },
-  { to: "/laporan/rekonsiliasi-rk", label: "Rekonsiliasi RK", icon: GitCompare },
-  { to: "/laporan/buku-besar-pusat", label: "Buku Besar Pusat", icon: BookOpen },
-  { to: "/laporan/buku-besar-konsolidasi", label: "Buku Besar Konsolidasi", icon: BookOpen },
-];
 
 function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
