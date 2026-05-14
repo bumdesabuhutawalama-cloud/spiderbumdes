@@ -15,7 +15,7 @@ export const Route = createFileRoute("/_app")({
   component: AppLayout,
 });
 
-const PUSAT_ONLY_PREFIXES = ["/coa", "/laporan", "/pengaturan", "/pusat"];
+const PUSAT_ONLY_PREFIXES = ["/dashboard", "/coa", "/laporan", "/pengaturan", "/pusat"];
 
 function AppLayout() {
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -42,8 +42,7 @@ function AppLayout() {
   // Authorization guards
   if (isUnit) {
     // admin_unit: redirect root & pusat-only paths to /usp
-    const isPusatRoute =
-      pathname === "/" || PUSAT_ONLY_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
+    const isPusatRoute = PUSAT_ONLY_PREFIXES.some((p) => pathname === p || pathname.startsWith(p + "/"));
     if (isPusatRoute) {
       return <Navigate to="/usp" />;
     }
