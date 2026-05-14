@@ -136,15 +136,22 @@ export function NeracaSheet({
 
     const neracaAccounts = accounts.filter((a) => ["ASET", "KEWAJIBAN", "EKUITAS"].includes(a.type));
 
+    // Pada laporan Pusat: akun RK antar unit tetap ditampilkan sebagai histori,
+    // namun nilainya dieliminasi dari total neraca (informational only).
+    const excludeRkFromTotals = mode === "pusat" && !!rkAccountIds;
+    const totalsAccounts = excludeRkFromTotals
+      ? accounts.filter((a) => !rkAccountIds!.has(a.id))
+      : accounts;
+
     // Validasi persamaan akuntansi: Aset = Kewajiban + Ekuitas (+ Laba berjalan)
-    const totAset = sumByType(accounts, signedCur, ["ASET"]);
-    const totKew = sumByType(accounts, signedCur, ["KEWAJIBAN"]);
-    const totEku = sumByType(accounts, signedCur, ["EKUITAS"]) + labaCur;
+    const totAset = sumByType(totalsAccounts, signedCur, ["ASET"]);
+    const totKew = sumByType(totalsAccounts, signedCur, ["KEWAJIBAN"]);
+    const totEku = sumByType(totalsAccounts, signedCur, ["EKUITAS"]) + labaCur;
     const diff = totAset - (totKew + totEku);
     const isBalanced = Math.abs(diff) < 0.5;
 
-    return { signedCur, signedPrev, labaCur, labaPrev, neracaAccounts, activeIds, totAset, totKew, totEku, diff, isBalanced };
-  }, [accounts, balCur, balPrev]);
+    return { signedCur, signedPrev, labaCur, labaPrev, neracaAccounts, activeIds, totalsAccounts, totAset, totKew, totEku, diff, isBalanced, isRk: (id: string) => excludeRkFromTotals && rkAccountIds!.has(id) };
+  }, [accounts, balCur, balPrev, mode, rkAccountIds]);
 
   return (
     <>
