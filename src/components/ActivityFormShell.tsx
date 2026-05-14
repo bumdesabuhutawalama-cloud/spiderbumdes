@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { ArrowLeft } from "lucide-react";
 import { PageHeader } from "@/components/DashboardLayout";
 
@@ -25,15 +25,7 @@ export function ActivityFormShell({
       <PageHeader
         title={title}
         subtitle={subtitle ?? "Sistem akan otomatis menyiapkan jurnal sesuai kaidah akuntansi."}
-        actions={
-          <Link
-            to="/usp/kegiatan"
-            className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-secondary/40 px-3 py-1.5 text-xs hover:bg-secondary transition"
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Kembali
-          </Link>
-        }
+        actions={<BackLink />}
       />
       <div className="glass-card relative w-full max-w-3xl mx-auto rounded-2xl border border-white/10 p-4 sm:p-5 shadow-[0_0_60px_rgba(34,211,238,0.15)]">
         <div className="mb-3 flex items-center gap-2">
@@ -49,5 +41,19 @@ export function ActivityFormShell({
         {children}
       </div>
     </>
+  );
+}
+
+function BackLink() {
+  const path = useRouterState({ select: (s) => s.location.pathname });
+  const to = path.startsWith("/dagang/") ? "/dagang/kegiatan" : "/usp/kegiatan";
+  return (
+    <Link
+      to={to}
+      className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-secondary/40 px-3 py-1.5 text-xs hover:bg-secondary transition"
+    >
+      <ArrowLeft className="h-3.5 w-3.5" />
+      Kembali
+    </Link>
   );
 }
