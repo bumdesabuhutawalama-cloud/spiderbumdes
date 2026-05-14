@@ -136,7 +136,7 @@ function UnitLoginPage() {
   );
 }
 
-const inputCls = "input-modern pl-10";
+const inputCls = "input-modern pl-10!";
 
 function Field({
   label,
