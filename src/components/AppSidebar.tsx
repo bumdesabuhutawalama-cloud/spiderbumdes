@@ -35,24 +35,24 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <>
       <div
-        className="flex items-center gap-3 px-5 py-5 border-b"
+        className="flex items-center gap-3 px-5 py-6 border-b"
         style={{ borderColor: "var(--border-soft)" }}
       >
         <div
-          className="grid h-11 w-11 place-items-center rounded-xl"
+          className="grid h-12 w-12 place-items-center rounded-xl"
           style={{ background: "var(--grad-navy)", boxShadow: "var(--shadow-btn)" }}
         >
-          <Building2 className="h-5 w-5 text-white" />
+          <Building2 className="h-6 w-6 text-white" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-brand">BUMDes</p>
+          <p className="text-base font-semibold text-brand">BUMDes</p>
           <p className="text-[11px] uppercase tracking-[0.18em] text-brand-muted">
             {isPusat ? "Unit Pusat" : role?.unitName ?? "Unit"}
           </p>
         </div>
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+      <nav className="flex-1 overflow-y-auto scroll-smooth sidebar-scroll px-3 py-4 space-y-1.5">
         {isPusat && (
           <>
             {main.map((item) => (
