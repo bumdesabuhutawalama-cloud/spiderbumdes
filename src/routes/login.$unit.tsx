@@ -21,6 +21,7 @@ function UnitLoginPage() {
   const [loading, setLoading] = useState(false);
   const [unit, setUnit] = useState<UnitInfo | null>(null);
   const [unitLoading, setUnitLoading] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
   const { setUser, setRole } = useAuthStore();
 
   useEffect(() => {
