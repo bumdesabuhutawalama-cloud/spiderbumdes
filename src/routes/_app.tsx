@@ -90,9 +90,9 @@ function Header({ onOpenMenu }: { onOpenMenu: () => void }) {
       <button
         onClick={onOpenMenu}
         aria-label="Buka menu"
-        className="md:hidden grid h-9 w-9 place-items-center rounded-lg border border-border/60 bg-secondary/50 text-muted-foreground hover:text-foreground transition"
+        className="md:hidden grid h-11 w-11 place-items-center rounded-xl border border-border/60 bg-secondary/50 text-muted-foreground hover:text-foreground active:scale-95 transition"
       >
-        <Menu className="h-4.5 w-4.5" />
+        <Menu className="h-6 w-6" />
       </button>
 
       <div className="md:hidden flex items-center gap-2">

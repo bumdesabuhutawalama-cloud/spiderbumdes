@@ -35,24 +35,24 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <>
       <div
-        className="flex items-center gap-3 px-5 py-5 border-b"
+        className="flex items-center gap-3 px-5 py-6 border-b"
         style={{ borderColor: "var(--border-soft)" }}
       >
         <div
-          className="grid h-11 w-11 place-items-center rounded-xl"
+          className="grid h-12 w-12 place-items-center rounded-xl"
           style={{ background: "var(--grad-navy)", boxShadow: "var(--shadow-btn)" }}
         >
-          <Building2 className="h-5 w-5 text-white" />
+          <Building2 className="h-6 w-6 text-white" />
         </div>
         <div>
-          <p className="text-sm font-semibold text-brand">BUMDes</p>
+          <p className="text-base font-semibold text-brand">BUMDes</p>
           <p className="text-[11px] uppercase tracking-[0.18em] text-brand-muted">
             {isPusat ? "Unit Pusat" : role?.unitName ?? "Unit"}
           </p>
         </div>
       </div>
 
-      <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-1">
+      <nav className="flex-1 overflow-y-auto scroll-smooth sidebar-scroll px-3 py-4 space-y-1.5">
         {isPusat && (
           <>
             {main.map((item) => (
@@ -99,9 +99,9 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
       <div className="border-t p-3" style={{ borderColor: "var(--border-soft)" }}>
         <button
           onClick={() => void signOut()}
-          className="group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm text-brand-muted transition-all hover:bg-red-50 hover:text-red-600"
+          className="group flex w-full items-center gap-3 rounded-xl px-3 py-3 text-[15px] font-medium text-brand-muted transition-all hover:bg-red-50 hover:text-red-600"
         >
-          <LogOut className="h-4 w-4" />
+          <LogOut className="h-5 w-5" />
           Logout
         </button>
       </div>
@@ -112,7 +112,7 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
 export function AppSidebar() {
   return (
     <aside
-      className="hidden md:flex sticky top-0 h-screen w-64 shrink-0 flex-col surface-glass"
+      className="hidden md:flex sticky top-0 h-screen w-72 shrink-0 flex-col surface-glass"
       style={{ borderRight: "1px solid var(--border-soft)" }}
     >
       <SidebarInner />
@@ -158,7 +158,7 @@ export function MobileSidebar({
       />
       <aside
         className={cn(
-          "absolute left-0 top-0 h-full w-[80vw] max-w-xs flex flex-col bg-white transition-transform duration-300 ease-out",
+          "absolute left-0 top-0 h-full w-[86vw] max-w-sm flex flex-col bg-white transition-transform duration-300 ease-out",
           open ? "translate-x-0" : "-translate-x-full",
         )}
         style={{ boxShadow: "var(--shadow-lg)", borderRight: "1px solid var(--border-soft)" }}
@@ -166,10 +166,10 @@ export function MobileSidebar({
         <button
           onClick={() => onOpenChange(false)}
           aria-label="Tutup menu"
-          className="absolute right-3 top-3 grid h-8 w-8 place-items-center rounded-lg border bg-white text-brand-muted hover:text-brand"
+          className="absolute right-3 top-3 grid h-10 w-10 place-items-center rounded-xl border bg-white text-brand-muted hover:text-brand transition"
           style={{ borderColor: "var(--border-soft)" }}
         >
-          <X className="h-4 w-4" />
+          <X className="h-5 w-5" />
         </button>
         <SidebarInner onNavigate={() => onOpenChange(false)} />
       </aside>
@@ -192,10 +192,10 @@ function NavLink({
       to={item.to}
       onClick={onNavigate}
       className={cn(
-        "group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all",
+        "group relative flex items-center gap-3 rounded-xl px-3.5 py-3 text-[15px] font-medium transition-all duration-200",
         active
-          ? "text-white"
-          : "text-brand-muted hover:bg-[var(--blue-50)] hover:text-brand",
+          ? "text-white scale-[1.01]"
+          : "text-brand-muted hover:bg-[var(--blue-50)] hover:text-brand hover:translate-x-0.5",
       )}
       style={
         active
@@ -205,11 +205,11 @@ function NavLink({
     >
       <Icon
         className={cn(
-          "h-4 w-4 transition-colors",
+          "h-5 w-5 shrink-0 transition-colors",
           active ? "text-white" : "group-hover:text-[var(--blue-500)]",
         )}
       />
-      <span>{item.label}</span>
+      <span className="truncate">{item.label}</span>
     </Link>
   );
 }
