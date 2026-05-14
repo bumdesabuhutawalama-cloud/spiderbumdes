@@ -36,7 +36,6 @@ const reports: Item[] = [
 function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
   const path = useRouterState({ select: (s) => s.location.pathname });
   const { isPusat, isUnit, role, signOut } = useAuth();
-  const [reportsOpen, setReportsOpen] = useState(path.startsWith("/laporan"));
 
   const isActive = (to: string) =>
     to === "/" ? path === "/" : path === to || path.startsWith(to + "/");
@@ -63,40 +62,11 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
               <NavLink key={item.to} item={item} active={isActive(item.to)} onNavigate={onNavigate} />
             ))}
 
-            <button
-              onClick={() => setReportsOpen((v) => !v)}
-              className={cn(
-                "group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm transition-all",
-                "hover:bg-secondary/60 hover:text-foreground",
-                path.startsWith("/laporan")
-                  ? "bg-secondary/70 text-foreground"
-                  : "text-muted-foreground",
-              )}
-            >
-              <FileBarChart className="h-4 w-4 transition-colors group-hover:text-[var(--neon-cyan)]" />
-              <span className="flex-1 text-left">Laporan Pusat</span>
-              <ChevronDown
-                className={cn(
-                  "h-4 w-4 transition-transform duration-300",
-                  reportsOpen && "rotate-180",
-                )}
-              />
-            </button>
-
-            <div
-              className={cn(
-                "grid overflow-hidden transition-all duration-300 ease-out",
-                reportsOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0",
-              )}
-            >
-              <div className="min-h-0">
-                <div className="ml-3 mt-1 space-y-0.5 border-l border-border/60 pl-3">
-                  {reports.map((r) => (
-                    <NavLink key={r.to} item={r} active={isActive(r.to)} dense onNavigate={onNavigate} />
-                  ))}
-                </div>
-              </div>
-            </div>
+            <NavLink
+              item={{ to: "/laporan-pusat", label: "Laporan Pusat", icon: FileBarChart }}
+              active={isActive("/laporan-pusat") || path.startsWith("/laporan/")}
+              onNavigate={onNavigate}
+            />
 
             <div className="my-2 border-t border-border/40" />
 
