@@ -111,7 +111,7 @@ export const createUser = createServerFn({ method: "POST" })
         password: z.string().min(8).max(72),
         fullName: z.string().min(1).max(100),
         jabatan: z.string().max(100).nullable().optional(),
-        username: z.string().min(3).max(50).regex(/^[a-zA-Z0-9_.-]+$/).nullable().optional(),
+        username: z.preprocess((v) => (v === "" || v == null ? null : v), z.string().min(3).max(50).regex(/^[a-zA-Z0-9_.-]+$/).nullable().optional()),
         role: z.enum(["admin_pusat", "admin_unit"]),
         unitId: z.string().uuid().nullable(),
       })
@@ -161,7 +161,7 @@ export const updateUser = createServerFn({ method: "POST" })
         userId: z.string().uuid(),
         fullName: z.string().min(1).max(100),
         jabatan: z.string().max(100).nullable().optional(),
-        username: z.string().min(3).max(50).regex(/^[a-zA-Z0-9_.-]+$/).nullable().optional(),
+        username: z.preprocess((v) => (v === "" || v == null ? null : v), z.string().min(3).max(50).regex(/^[a-zA-Z0-9_.-]+$/).nullable().optional()),
         role: z.enum(["admin_pusat", "admin_unit"]),
         unitId: z.string().uuid().nullable(),
       })
