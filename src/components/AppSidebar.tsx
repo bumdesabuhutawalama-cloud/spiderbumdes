@@ -11,6 +11,7 @@ import {
   GitCompare,
   ClipboardList,
   Users,
+  FileEdit,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
