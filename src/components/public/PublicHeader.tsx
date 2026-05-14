@@ -40,12 +40,22 @@ export function PublicHeader() {
     </Link>
   );
 
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
     <header
-      className="sticky top-0 z-30 border-b backdrop-blur-xl"
+      className="sticky top-0 z-40 border-b backdrop-blur-xl transition-shadow duration-200"
       style={{
-        background: "rgba(255,255,255,0.82)",
+        background: "rgba(255,255,255,0.92)",
         borderColor: "var(--border-soft)",
+        boxShadow: scrolled ? "0 6px 20px -10px rgba(11,31,68,0.18)" : "none",
+        WebkitBackdropFilter: "blur(14px)",
       }}
     >
       <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-4 px-4 sm:px-6">
