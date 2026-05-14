@@ -174,7 +174,10 @@ function LoginPage() {
                   <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="admin@bumdes.local" className={inputCls} />
                 </Field>
                 <Field label="Password" icon={<Lock className="h-4 w-4" />}>
-                  <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className={inputCls} />
+                  <input type={showPassword ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="••••••••" className={`${inputCls} pr-10`} />
+                  <button type="button" onClick={() => setShowPassword((v) => !v)} aria-label={showPassword ? "Sembunyikan password" : "Lihat password"} className="absolute right-3 top-1/2 -translate-y-1/2 text-brand-muted hover:text-brand">
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
                 </Field>
                 <button type="submit" disabled={loading} className="btn-primary w-full disabled:opacity-60">
                   {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
