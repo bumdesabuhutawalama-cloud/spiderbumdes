@@ -17,12 +17,10 @@ export function PublicHeader() {
   const [open, setOpen] = useState(false);
   const pathname = useRouterState({ select: (s) => s.location.pathname });
 
-  // Close mobile menu on route change
   useEffect(() => {
     setOpen(false);
   }, [pathname]);
 
-  // Lock scroll while menu open
   useEffect(() => {
     if (!open) return;
     const prev = document.body.style.overflow;
@@ -33,33 +31,34 @@ export function PublicHeader() {
   }, [open]);
 
   const LoginCta = isAuthenticated ? (
-    <Link
-      to={dashboardTo}
-      preload="intent"
-      className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-green)] px-3.5 py-2 text-sm font-semibold text-[oklch(0.15_0.03_250)] transition hover:opacity-90"
-    >
+    <Link to={dashboardTo} preload="intent" className="btn-primary">
       <LayoutDashboard className="h-4 w-4" /> Buka dashboard
     </Link>
   ) : (
-    <Link
-      to="/login"
-      preload="intent"
-      className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-green)] px-3.5 py-2 text-sm font-semibold text-[oklch(0.15_0.03_250)] shadow-[0_0_24px_-6px_var(--neon-cyan)] transition hover:opacity-90"
-    >
+    <Link to="/login" preload="intent" className="btn-primary">
       <LogIn className="h-4 w-4" /> Login
     </Link>
   );
 
   return (
-    <header className="sticky top-0 z-30 border-b border-border/60 bg-background/70 backdrop-blur-xl">
+    <header
+      className="sticky top-0 z-30 border-b backdrop-blur-xl"
+      style={{
+        background: "rgba(255,255,255,0.82)",
+        borderColor: "var(--border-soft)",
+      }}
+    >
       <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-4 px-4 sm:px-6">
-        <Link to="/" className="flex items-center gap-2" preload="intent">
-          <div className="grid h-9 w-9 place-items-center rounded-lg bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-green)]">
-            <Building2 className="h-5 w-5 text-[oklch(0.15_0.03_250)]" />
+        <Link to="/" className="flex items-center gap-2.5" preload="intent">
+          <div
+            className="grid h-10 w-10 place-items-center rounded-xl"
+            style={{ background: "var(--grad-navy)", boxShadow: "var(--shadow-btn)" }}
+          >
+            <Building2 className="h-5 w-5 text-white" />
           </div>
           <div className="leading-tight">
-            <p className="text-sm font-semibold tracking-wide">BUMDes</p>
-            <p className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+            <p className="text-sm font-semibold text-brand">BUMDes</p>
+            <p className="text-[10px] uppercase tracking-[0.2em] text-brand-muted">
               Inovasi desa
             </p>
           </div>
@@ -73,16 +72,20 @@ export function PublicHeader() {
               to={item.to}
               preload="intent"
               activeOptions={{ exact: item.to === "/" }}
-              activeProps={{ className: "text-foreground bg-secondary/60" }}
-              inactiveProps={{ className: "text-muted-foreground hover:text-foreground" }}
-              className="rounded-lg px-3 py-2 text-sm transition-colors"
+              activeProps={{
+                className: "text-[var(--navy-800)] bg-[var(--blue-50)]",
+              }}
+              inactiveProps={{
+                className: "text-brand-muted hover:text-brand hover:bg-[var(--blue-50)]/60",
+              }}
+              className="rounded-lg px-3 py-2 text-sm font-medium transition-colors"
             >
               {item.label}
             </Link>
           ))}
         </nav>
 
-        <div className="ml-auto hidden md:block">{LoginCta}</div>
+        <div className="hidden md:block">{LoginCta}</div>
 
         {/* Mobile hamburger */}
         <button
@@ -90,7 +93,8 @@ export function PublicHeader() {
           onClick={() => setOpen((v) => !v)}
           aria-label={open ? "Tutup menu" : "Buka menu"}
           aria-expanded={open}
-          className="ml-auto grid h-10 w-10 place-items-center rounded-lg border border-border/60 bg-secondary/40 text-foreground transition hover:border-[var(--neon-cyan)]/50 md:hidden"
+          className="ml-auto grid h-10 w-10 place-items-center rounded-xl border bg-white text-brand transition hover:border-[var(--blue-500)]/50 md:hidden"
+          style={{ borderColor: "var(--border-soft)", boxShadow: "var(--shadow-sm)" }}
         >
           <span className="relative grid h-5 w-5 place-items-center">
             <Menu
@@ -114,24 +118,24 @@ export function PublicHeader() {
         }`}
         aria-hidden={!open}
       >
-        {/* Backdrop */}
         <div
           onClick={() => setOpen(false)}
-          className={`absolute inset-0 bg-background/80 backdrop-blur-md transition-opacity duration-300 ${
+          className={`absolute inset-0 transition-opacity duration-300 ${
             open ? "opacity-100" : "opacity-0"
           }`}
+          style={{ background: "rgba(11,31,68,0.25)", backdropFilter: "blur(6px)" }}
         />
 
-        {/* Panel */}
         <div
-          className={`relative mx-4 mt-3 overflow-hidden rounded-2xl border border-border/60 bg-background/95 shadow-[0_20px_60px_-20px_var(--neon-cyan)] transition-all duration-300 ${
-            open
-              ? "translate-y-0 opacity-100"
-              : "-translate-y-4 opacity-0"
+          className={`relative mx-4 mt-3 overflow-hidden rounded-2xl bg-white transition-all duration-300 ${
+            open ? "translate-y-0 opacity-100" : "-translate-y-4 opacity-0"
           }`}
+          style={{
+            border: "1px solid var(--border-soft)",
+            boxShadow: "var(--shadow-lg)",
+          }}
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-[var(--neon-cyan)]/8 via-transparent to-[var(--neon-green)]/8" />
-          <nav className="relative flex flex-col p-2">
+          <nav className="flex flex-col p-2">
             {navItems.map((item, idx) => (
               <Link
                 key={item.to}
@@ -139,13 +143,12 @@ export function PublicHeader() {
                 preload="intent"
                 activeOptions={{ exact: item.to === "/" }}
                 activeProps={{
-                  className:
-                    "text-foreground bg-secondary/70 border-[var(--neon-cyan)]/40",
+                  className: "text-brand bg-[var(--blue-50)]",
                 }}
                 inactiveProps={{
-                  className: "text-muted-foreground hover:text-foreground border-transparent",
+                  className: "text-brand-muted hover:text-brand hover:bg-[var(--surface-2)]",
                 }}
-                className="rounded-xl border px-4 py-3 text-base font-medium transition-all duration-200"
+                className="rounded-xl px-4 py-3 text-base font-medium transition-all duration-200"
                 style={{
                   transitionDelay: open ? `${60 + idx * 40}ms` : "0ms",
                   transform: open ? "translateY(0)" : "translateY(-6px)",
@@ -166,19 +169,11 @@ export function PublicHeader() {
               }}
             >
               {isAuthenticated ? (
-                <Link
-                  to={dashboardTo}
-                  preload="intent"
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-green)] px-4 py-3 text-sm font-semibold text-[oklch(0.15_0.03_250)]"
-                >
+                <Link to={dashboardTo} preload="intent" className="btn-primary w-full">
                   <LayoutDashboard className="h-4 w-4" /> Buka dashboard
                 </Link>
               ) : (
-                <Link
-                  to="/login"
-                  preload="intent"
-                  className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-green)] px-4 py-3 text-sm font-semibold text-[oklch(0.15_0.03_250)] shadow-[0_0_24px_-6px_var(--neon-cyan)]"
-                >
+                <Link to="/login" preload="intent" className="btn-primary w-full">
                   <LogIn className="h-4 w-4" /> Login
                 </Link>
               )}
