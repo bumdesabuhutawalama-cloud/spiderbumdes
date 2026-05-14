@@ -19,6 +19,7 @@ function LoginPage() {
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
   const [bootstrapNeeded, setBootstrapNeeded] = useState<boolean | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
   const { setUser, setRole } = useAuthStore();
   const checkFn = useServerFn(checkBootstrapNeeded);
   const bootstrapFn = useServerFn(bootstrapAdminPusat);
