@@ -10,8 +10,14 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as PublicRouteImport } from './routes/_public'
 import { Route as AppRouteImport } from './routes/_app'
+import { Route as PublicIndexRouteImport } from './routes/_public.index'
 import { Route as LoginUnitRouteImport } from './routes/login.$unit'
+import { Route as PublicUnitUsahaRouteImport } from './routes/_public.unit-usaha'
+import { Route as PublicTransparansiRouteImport } from './routes/_public.transparansi'
+import { Route as PublicTentangRouteImport } from './routes/_public.tentang'
+import { Route as PublicKontakRouteImport } from './routes/_public.kontak'
 import { Route as AppUspRouteImport } from './routes/_app.usp'
 import { Route as AppTransferAntarEntitasRouteImport } from './routes/_app.transfer-antar-entitas'
 import { Route as AppPengaturanRouteImport } from './routes/_app.pengaturan'
@@ -55,14 +61,43 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PublicRoute = PublicRouteImport.update({
+  id: '/_public',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AppRoute = AppRouteImport.update({
   id: '/_app',
   getParentRoute: () => rootRouteImport,
+} as any)
+const PublicIndexRoute = PublicIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PublicRoute,
 } as any)
 const LoginUnitRoute = LoginUnitRouteImport.update({
   id: '/$unit',
   path: '/$unit',
   getParentRoute: () => LoginRoute,
+} as any)
+const PublicUnitUsahaRoute = PublicUnitUsahaRouteImport.update({
+  id: '/unit-usaha',
+  path: '/unit-usaha',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicTransparansiRoute = PublicTransparansiRouteImport.update({
+  id: '/transparansi',
+  path: '/transparansi',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicTentangRoute = PublicTentangRouteImport.update({
+  id: '/tentang',
+  path: '/tentang',
+  getParentRoute: () => PublicRoute,
+} as any)
+const PublicKontakRoute = PublicKontakRouteImport.update({
+  id: '/kontak',
+  path: '/kontak',
+  getParentRoute: () => PublicRoute,
 } as any)
 const AppUspRoute = AppUspRouteImport.update({
   id: '/usp',
@@ -260,7 +295,7 @@ const AppUspKegiatanAngsuranRoute = AppUspKegiatanAngsuranRouteImport.update({
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof AppRouteWithChildren
+  '/': typeof PublicIndexRoute
   '/login': typeof LoginRouteWithChildren
   '/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/coa': typeof AppCoaRoute
@@ -270,6 +305,10 @@ export interface FileRoutesByFullPath {
   '/pengaturan': typeof AppPengaturanRouteWithChildren
   '/transfer-antar-entitas': typeof AppTransferAntarEntitasRoute
   '/usp': typeof AppUspRouteWithChildren
+  '/kontak': typeof PublicKontakRoute
+  '/tentang': typeof PublicTentangRoute
+  '/transparansi': typeof PublicTransparansiRoute
+  '/unit-usaha': typeof PublicUnitUsahaRoute
   '/login/$unit': typeof LoginUnitRoute
   '/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
   '/laporan/buku-besar-konsolidasi': typeof AppLaporanBukuBesarKonsolidasiRoute
@@ -302,7 +341,7 @@ export interface FileRoutesByFullPath {
   '/usp/laporan/': typeof AppUspLaporanIndexRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof AppRouteWithChildren
+  '/': typeof PublicIndexRoute
   '/login': typeof LoginRouteWithChildren
   '/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/coa': typeof AppCoaRoute
@@ -310,6 +349,10 @@ export interface FileRoutesByTo {
   '/jurnal-koreksi': typeof AppJurnalKoreksiRoute
   '/laporan-pusat': typeof AppLaporanPusatRoute
   '/transfer-antar-entitas': typeof AppTransferAntarEntitasRoute
+  '/kontak': typeof PublicKontakRoute
+  '/tentang': typeof PublicTentangRoute
+  '/transparansi': typeof PublicTransparansiRoute
+  '/unit-usaha': typeof PublicUnitUsahaRoute
   '/login/$unit': typeof LoginUnitRoute
   '/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
   '/laporan/buku-besar-konsolidasi': typeof AppLaporanBukuBesarKonsolidasiRoute
@@ -342,6 +385,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_app': typeof AppRouteWithChildren
+  '/_public': typeof PublicRouteWithChildren
   '/login': typeof LoginRouteWithChildren
   '/_app/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/_app/coa': typeof AppCoaRoute
@@ -351,7 +395,12 @@ export interface FileRoutesById {
   '/_app/pengaturan': typeof AppPengaturanRouteWithChildren
   '/_app/transfer-antar-entitas': typeof AppTransferAntarEntitasRoute
   '/_app/usp': typeof AppUspRouteWithChildren
+  '/_public/kontak': typeof PublicKontakRoute
+  '/_public/tentang': typeof PublicTentangRoute
+  '/_public/transparansi': typeof PublicTransparansiRoute
+  '/_public/unit-usaha': typeof PublicUnitUsahaRoute
   '/login/$unit': typeof LoginUnitRoute
+  '/_public/': typeof PublicIndexRoute
   '/_app/laporan/bagi-hasil': typeof AppLaporanBagiHasilRoute
   '/_app/laporan/buku-besar-konsolidasi': typeof AppLaporanBukuBesarKonsolidasiRoute
   '/_app/laporan/buku-besar-pusat': typeof AppLaporanBukuBesarPusatRoute
@@ -395,6 +444,10 @@ export interface FileRouteTypes {
     | '/pengaturan'
     | '/transfer-antar-entitas'
     | '/usp'
+    | '/kontak'
+    | '/tentang'
+    | '/transparansi'
+    | '/unit-usaha'
     | '/login/$unit'
     | '/laporan/bagi-hasil'
     | '/laporan/buku-besar-konsolidasi'
@@ -435,6 +488,10 @@ export interface FileRouteTypes {
     | '/jurnal-koreksi'
     | '/laporan-pusat'
     | '/transfer-antar-entitas'
+    | '/kontak'
+    | '/tentang'
+    | '/transparansi'
+    | '/unit-usaha'
     | '/login/$unit'
     | '/laporan/bagi-hasil'
     | '/laporan/buku-besar-konsolidasi'
@@ -466,6 +523,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/_app'
+    | '/_public'
     | '/login'
     | '/_app/catat-kegiatan'
     | '/_app/coa'
@@ -475,7 +533,12 @@ export interface FileRouteTypes {
     | '/_app/pengaturan'
     | '/_app/transfer-antar-entitas'
     | '/_app/usp'
+    | '/_public/kontak'
+    | '/_public/tentang'
+    | '/_public/transparansi'
+    | '/_public/unit-usaha'
     | '/login/$unit'
+    | '/_public/'
     | '/_app/laporan/bagi-hasil'
     | '/_app/laporan/buku-besar-konsolidasi'
     | '/_app/laporan/buku-besar-pusat'
@@ -509,6 +572,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AppRoute: typeof AppRouteWithChildren
+  PublicRoute: typeof PublicRouteWithChildren
   LoginRoute: typeof LoginRouteWithChildren
 }
 
@@ -521,6 +585,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_public': {
+      id: '/_public'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof PublicRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_app': {
       id: '/_app'
       path: ''
@@ -528,12 +599,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_public/': {
+      id: '/_public/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof PublicIndexRouteImport
+      parentRoute: typeof PublicRoute
+    }
     '/login/$unit': {
       id: '/login/$unit'
       path: '/$unit'
       fullPath: '/login/$unit'
       preLoaderRoute: typeof LoginUnitRouteImport
       parentRoute: typeof LoginRoute
+    }
+    '/_public/unit-usaha': {
+      id: '/_public/unit-usaha'
+      path: '/unit-usaha'
+      fullPath: '/unit-usaha'
+      preLoaderRoute: typeof PublicUnitUsahaRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/transparansi': {
+      id: '/_public/transparansi'
+      path: '/transparansi'
+      fullPath: '/transparansi'
+      preLoaderRoute: typeof PublicTransparansiRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/tentang': {
+      id: '/_public/tentang'
+      path: '/tentang'
+      fullPath: '/tentang'
+      preLoaderRoute: typeof PublicTentangRouteImport
+      parentRoute: typeof PublicRoute
+    }
+    '/_public/kontak': {
+      id: '/_public/kontak'
+      path: '/kontak'
+      fullPath: '/kontak'
+      preLoaderRoute: typeof PublicKontakRouteImport
+      parentRoute: typeof PublicRoute
     }
     '/_app/usp': {
       id: '/_app/usp'
@@ -918,6 +1024,25 @@ const AppRouteChildren: AppRouteChildren = {
 
 const AppRouteWithChildren = AppRoute._addFileChildren(AppRouteChildren)
 
+interface PublicRouteChildren {
+  PublicKontakRoute: typeof PublicKontakRoute
+  PublicTentangRoute: typeof PublicTentangRoute
+  PublicTransparansiRoute: typeof PublicTransparansiRoute
+  PublicUnitUsahaRoute: typeof PublicUnitUsahaRoute
+  PublicIndexRoute: typeof PublicIndexRoute
+}
+
+const PublicRouteChildren: PublicRouteChildren = {
+  PublicKontakRoute: PublicKontakRoute,
+  PublicTentangRoute: PublicTentangRoute,
+  PublicTransparansiRoute: PublicTransparansiRoute,
+  PublicUnitUsahaRoute: PublicUnitUsahaRoute,
+  PublicIndexRoute: PublicIndexRoute,
+}
+
+const PublicRouteWithChildren =
+  PublicRoute._addFileChildren(PublicRouteChildren)
+
 interface LoginRouteChildren {
   LoginUnitRoute: typeof LoginUnitRoute
 }
@@ -930,6 +1055,7 @@ const LoginRouteWithChildren = LoginRoute._addFileChildren(LoginRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   AppRoute: AppRouteWithChildren,
+  PublicRoute: PublicRouteWithChildren,
   LoginRoute: LoginRouteWithChildren,
 }
 export const routeTree = rootRouteImport
