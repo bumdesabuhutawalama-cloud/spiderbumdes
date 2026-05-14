@@ -13,8 +13,6 @@ export const Route = createFileRoute("/_app/jurnal-koreksi")({
   component: () => <JurnalKoreksiPage />,
 });
 
-export function JurnalKoreksiPage({ prefix, title, subtitle }: { prefix?: string; title?: string; subtitle?: string } = {}) {
-
 type Row = {
   id: string;
   transaction_date: string;
