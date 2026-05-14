@@ -64,6 +64,8 @@ function LoginPage() {
       toast.success(`Selamat datang${role.unitName ? `, ${role.unitName}` : ""}!`);
       if (role.role === "admin_pusat") {
         navigate({ to: "/dashboard" });
+      } else if (role.unitCode === "DAGANG") {
+        navigate({ to: "/dagang" });
       } else {
         navigate({ to: "/usp" });
       }
