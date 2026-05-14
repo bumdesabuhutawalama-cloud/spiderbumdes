@@ -85,8 +85,23 @@ function Header({ onOpenMenu }: { onOpenMenu: () => void }) {
     .slice(0, 2)
     .toUpperCase();
 
+  const [scrolled, setScrolled] = useState(false);
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 4);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
   return (
-    <header className="sticky top-0 z-20 flex h-14 md:h-16 items-center gap-2 sm:gap-4 border-b border-border/60 bg-background/40 px-3 sm:px-5 md:px-8 backdrop-blur-xl">
+    <header
+      className="sticky top-0 z-40 flex h-14 md:h-16 items-center gap-2 sm:gap-4 border-b border-border/60 px-3 sm:px-5 md:px-8 backdrop-blur-xl transition-shadow duration-200"
+      style={{
+        background: "rgba(255,255,255,0.92)",
+        boxShadow: scrolled ? "0 6px 20px -10px rgba(11,31,68,0.18)" : "none",
+        WebkitBackdropFilter: "blur(14px)",
+      }}
+    >
       <button
         onClick={onOpenMenu}
         aria-label="Buka menu"
