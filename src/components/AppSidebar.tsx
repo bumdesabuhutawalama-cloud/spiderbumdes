@@ -80,7 +80,7 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
             <NavLink item={{ to: "/dagang/stok", label: "Stok Barang", icon: Store }} active={isActive("/dagang/stok")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/dagang/transfer", label: "Transfer Antar Unit", icon: GitCompare }} active={isActive("/dagang/transfer")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/dagang/laporan", label: "Laporan Dagang", icon: FileBarChart }} active={isActive("/dagang/laporan")} onNavigate={onNavigate} />
-            <NavLink item={{ to: "/jurnal-koreksi", label: "Jurnal Koreksi", icon: FileEdit }} active={isActive("/jurnal-koreksi")} onNavigate={onNavigate} />
+            <NavLink item={{ to: "/dagang/jurnal-koreksi", label: "Jurnal Koreksi", icon: FileEdit }} active={isActive("/dagang/jurnal-koreksi")} onNavigate={onNavigate} />
           </>
         )}
 
@@ -91,7 +91,7 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
             <NavLink item={{ to: "/usp/kegiatan", label: "Catat Kegiatan", icon: ClipboardList }} active={isActive("/usp/kegiatan")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/usp/transfer", label: "Transfer", icon: GitCompare }} active={isActive("/usp/transfer")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/usp/laporan", label: "Laporan USP", icon: FileBarChart }} active={isActive("/usp/laporan")} onNavigate={onNavigate} />
-            <NavLink item={{ to: "/jurnal-koreksi", label: "Jurnal Koreksi", icon: FileEdit }} active={isActive("/jurnal-koreksi")} onNavigate={onNavigate} />
+            <NavLink item={{ to: "/usp/jurnal-koreksi", label: "Jurnal Koreksi", icon: FileEdit }} active={isActive("/usp/jurnal-koreksi")} onNavigate={onNavigate} />
           </>
         )}
       </nav>

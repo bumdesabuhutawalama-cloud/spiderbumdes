@@ -10,8 +10,11 @@ import { Badge } from "@/components/ui/badge";
 import { JournalCorrectionWizard } from "@/components/JournalCorrectionWizard";
 
 export const Route = createFileRoute("/_app/jurnal-koreksi")({
-  component: JurnalKoreksiPage,
+  component: () => <JurnalKoreksiPageInner />,
 });
+
+export { JurnalKoreksiPageInner as JurnalKoreksiPage };
+
 
 type Row = {
   id: string;
@@ -57,14 +60,14 @@ function CorrectionTypeBadge({ type }: { type: string | null }) {
   );
 }
 
-function JurnalKoreksiPage() {
+function JurnalKoreksiPageInner({ prefix, title, subtitle }: { prefix?: string; title?: string; subtitle?: string }) {
   const [search, setSearch] = useState("");
   const [activeId, setActiveId] = useState<string | null>(null);
 
   const { data, isLoading, refetch } = useQuery({
-    queryKey: ["journals-correctable"],
+    queryKey: ["journals-correctable", prefix ?? "all"],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from("journal_entries")
         .select(
           "id,transaction_date,transaction_type,description,total_amount,status,original_journal_id,correction_type",
@@ -72,10 +75,13 @@ function JurnalKoreksiPage() {
         .order("transaction_date", { ascending: false })
         .order("created_at", { ascending: false })
         .limit(500);
+      if (prefix) q = q.like("transaction_type", `${prefix}%`);
+      const { data, error } = await q;
       if (error) throw error;
       return (data ?? []) as Row[];
     },
   });
+
 
   const correctionByOriginal = useMemo(() => {
     const map = new Map<string, Row>();
@@ -99,8 +105,8 @@ function JurnalKoreksiPage() {
   return (
     <>
       <PageHeader
-        title="Jurnal Koreksi"
-        subtitle="Buat jurnal koreksi otomatis. Jurnal asli tetap tersimpan dan ditandai Corrected."
+        title={title ?? "Jurnal Koreksi"}
+        subtitle={subtitle ?? "Buat jurnal koreksi otomatis. Jurnal asli tetap tersimpan dan ditandai Corrected."}
         actions={
           <Button variant="outline" size="sm" onClick={() => void refetch()}>
             <RefreshCcw className="h-3.5 w-3.5 mr-1" /> Muat ulang
