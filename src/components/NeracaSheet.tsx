@@ -83,7 +83,7 @@ export function NeracaSheet({
         .from("coa_accounts")
         .select("id,code,name,type,entry_type,normal_balance,status")
         .eq("status", "Aktif")
-        .in("type", ["ASET", "KEWAJIBAN", "EKUITAS", "PENDAPATAN", "BEBAN"])
+        .in("type", ["ASET", "KEWAJIBAN", "EKUITAS", "PENDAPATAN", "PENDAPATAN_LAIN", "BEBAN", "BEBAN_LAIN", "HPP"])
         .order("code", { ascending: true })
         .limit(2000);
       if (error) throw error;
