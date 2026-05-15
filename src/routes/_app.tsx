@@ -55,21 +55,24 @@ function AppLayout() {
   }
 
   return (
-    <div className="relative min-h-screen text-foreground">
+    <div className="relative h-screen overflow-hidden text-foreground">
       <CinematicBackground />
 
       <MobileSidebar open={mobileOpen} onOpenChange={setMobileOpen} />
 
-      <div className="flex">
+      <div className="flex h-screen">
         <AppSidebar />
 
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 flex flex-col h-screen">
           <Header onOpenMenu={() => setMobileOpen(true)} />
           <main
+            id="app-scroll"
             key={pathname}
-            className="px-4 sm:px-5 md:px-8 py-5 md:py-8 max-w-[1400px] mx-auto animate-fade-in-up"
+            className="flex-1 overflow-y-auto scroll-smooth"
           >
-            <Outlet />
+            <div className="px-4 sm:px-5 md:px-8 py-5 md:py-8 max-w-[1400px] mx-auto animate-fade-in-up">
+              <Outlet />
+            </div>
           </main>
         </div>
       </div>
