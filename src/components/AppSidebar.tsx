@@ -112,7 +112,7 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
 export function AppSidebar() {
   return (
     <aside
-      className="hidden md:flex sticky top-0 h-screen w-72 shrink-0 flex-col surface-glass"
+      className="hidden md:flex h-screen w-72 shrink-0 flex-col surface-glass"
       style={{ borderRight: "1px solid var(--border-soft)" }}
     >
       <SidebarInner />
