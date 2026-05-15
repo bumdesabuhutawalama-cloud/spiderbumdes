@@ -10,13 +10,17 @@ export const Route = createFileRoute("/_public")({
 function PublicLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   return (
-    <div className="relative flex min-h-screen flex-col text-foreground">
+    <div className="relative h-screen overflow-hidden flex flex-col text-foreground">
       <CinematicBackground />
       <PublicHeader />
-      <main key={pathname} className="flex-1 animate-fade-in-up">
+      <main
+        id="public-scroll"
+        key={pathname}
+        className="flex-1 overflow-y-auto scroll-smooth animate-fade-in-up"
+      >
         <Outlet />
+        <PublicFooter />
       </main>
-      <PublicFooter />
     </div>
   );
 }

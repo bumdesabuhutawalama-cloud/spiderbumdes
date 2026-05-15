@@ -42,10 +42,15 @@ export function PublicHeader() {
 
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 4);
+    const el = document.getElementById("public-scroll");
+    const target: HTMLElement | Window = el ?? window;
+    const onScroll = () => {
+      const top = el ? el.scrollTop : window.scrollY;
+      setScrolled(top > 4);
+    };
     onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    target.addEventListener("scroll", onScroll as EventListener, { passive: true });
+    return () => target.removeEventListener("scroll", onScroll as EventListener);
   }, []);
 
   return (
