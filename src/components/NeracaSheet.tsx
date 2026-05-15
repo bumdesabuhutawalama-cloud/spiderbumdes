@@ -130,9 +130,24 @@ export function NeracaSheet({
       [balCur, balPrev],
       [signedCur, signedPrev],
     );
-    // Laba tahun berjalan = pendapatan - beban
-    const labaCur = sumByType(accounts, signedCur, ["PENDAPATAN"]) - sumByType(accounts, signedCur, ["BEBAN"]);
-    const labaPrev = sumByType(accounts, signedPrev, ["PENDAPATAN"]) - sumByType(accounts, signedPrev, ["BEBAN"]);
+    // Laba tahun berjalan dihitung langsung dari saldo mentah jurnal per akun
+    // (income/expense), supaya tahan terhadap akun "Header" tanpa anak dan
+    // mencakup tipe HPP / BEBAN_LAIN / PENDAPATAN_LAIN.
+    const INCOME_TYPES = new Set(["PENDAPATAN", "PENDAPATAN_LAIN"]);
+    const EXPENSE_TYPES = new Set(["BEBAN", "BEBAN_LAIN", "HPP"]);
+    const calcLaba = (raw: typeof balCur) => {
+      let pendapatan = 0;
+      let beban = 0;
+      for (const a of accounts) {
+        const r = raw.get(a.id);
+        if (!r) continue;
+        if (INCOME_TYPES.has(a.type)) pendapatan += r.credit - r.debit;
+        else if (EXPENSE_TYPES.has(a.type)) beban += r.debit - r.credit;
+      }
+      return pendapatan - beban;
+    };
+    const labaCur = calcLaba(balCur);
+    const labaPrev = calcLaba(balPrev);
 
     const neracaAccounts = accounts.filter((a) => ["ASET", "KEWAJIBAN", "EKUITAS"].includes(a.type));
 
