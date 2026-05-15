@@ -90,10 +90,12 @@ function Header({ onOpenMenu }: { onOpenMenu: () => void }) {
 
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 4);
+    const el = document.getElementById("app-scroll");
+    if (!el) return;
+    const onScroll = () => setScrolled(el.scrollTop > 4);
     onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
   }, []);
 
   return (
