@@ -6,10 +6,11 @@ import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateFinancials } from "@/lib/query-invalidate";
 import { toast } from "sonner";
+import { useAccountBalances, useAccountBalancesPeriod } from "@/lib/account-balances";
 
 export const Route = createFileRoute("/_app/laporan/bagi-hasil")({
   head: () => ({ meta: [{ title: "Bagi Hasil · BUMDes" }] }),
-  component: BagiHasilPage,
+  component: () => <BagiHasilPage />,
 });
 
 const fmtRp = (n: number) =>
