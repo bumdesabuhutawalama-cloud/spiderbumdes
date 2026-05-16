@@ -481,7 +481,7 @@ export function BagiHasilPage({
           </div>
           <div className="ml-auto text-right">
             <div className="text-xs text-muted-foreground">Laba Bersih Periode</div>
-            <div className="text-2xl font-semibold">{np.isLoading ? "…" : fmtRp(netProfit)}</div>
+            <div className="text-2xl font-semibold">{netProfitLoading ? "…" : fmtRp(netProfit)}</div>
           </div>
         </div>
 
@@ -505,7 +505,7 @@ export function BagiHasilPage({
                   <td className="p-2 font-mono text-xs">{r.coa_account_code}</td>
                   <td className="p-2 text-right">{r.percentage}%</td>
                   <td className="p-2 text-right">{fmtRp(r.nominal)}</td>
-                  <td className="p-2 text-right">{fmtRp(liabBal.data?.[r.coa_account_code] ?? 0)}</td>
+                  <td className="p-2 text-right">{fmtRp(liabBalMap[r.coa_account_code] ?? 0)}</td>
                 </tr>
               ))}
               <tr className="border-t border-border bg-muted/30 font-semibold">
@@ -522,7 +522,14 @@ export function BagiHasilPage({
 
         <div className="flex flex-wrap gap-2">
           <button
-            onClick={() => np.refetch()}
+            onClick={() => {
+              if (isUnitMode) {
+                void balPeriod.refetch();
+                void balAsOf.refetch();
+              } else {
+                void npGlobal.refetch();
+              }
+            }}
             className="inline-flex items-center gap-2 h-9 px-4 rounded-md border border-input bg-background text-sm hover:bg-accent"
           >
             <Calculator className="h-4 w-4" /> Hitung Bagi Hasil
@@ -560,7 +567,7 @@ export function BagiHasilPage({
               <option value="">— pilih —</option>
               {(cfg.data ?? []).map((c) => (
                 <option key={c.code} value={c.coa_account_code}>
-                  {c.name} · saldo {fmtRp(liabBal.data?.[c.coa_account_code] ?? 0)}
+                  {c.name} · saldo {fmtRp(liabBalMap[c.coa_account_code] ?? 0)}
                 </option>
               ))}
             </select>
