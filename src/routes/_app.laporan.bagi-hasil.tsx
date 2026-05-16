@@ -6,10 +6,11 @@ import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateFinancials } from "@/lib/query-invalidate";
 import { toast } from "sonner";
+import { useAccountBalances, useAccountBalancesPeriod } from "@/lib/account-balances";
 
 export const Route = createFileRoute("/_app/laporan/bagi-hasil")({
   head: () => ({ meta: [{ title: "Bagi Hasil · BUMDes" }] }),
-  component: BagiHasilPage,
+  component: () => <BagiHasilPage />,
 });
 
 const fmtRp = (n: number) =>
@@ -139,22 +140,112 @@ function useCashAccounts() {
   });
 }
 
-function BagiHasilPage() {
+export function BagiHasilPage({
+  fixedUnitCode,
+  title = "Bagi Hasil",
+  subtitle = "Hitung, tetapkan, dan bayar distribusi laba berbasis jurnal.",
+}: {
+  fixedUnitCode?: string;
+  title?: string;
+  subtitle?: string;
+} = {}) {
   const qc = useQueryClient();
   const now = new Date();
   const [year, setYear] = useState<number>(now.getFullYear());
   const start = `${year}-01-01`;
   const end = `${year}-12-31`;
 
+  // Resolusi unit (kalau dipanggil dari halaman unit)
+  const unitQ = useQuery({
+    queryKey: ["unit-by-code", fixedUnitCode ?? ""],
+    enabled: !!fixedUnitCode,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("units")
+        .select("id,name,code")
+        .eq("code", fixedUnitCode!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+  const unitId = fixedUnitCode ? unitQ.data?.id ?? null : null;
+  const isUnitMode = !!fixedUnitCode;
+  const unitReady = !isUnitMode || !!unitQ.data;
+
   const cfg = useConfig();
   const runs = useRuns();
-  const np = useNetProfit(start, end);
+  // Net profit: dari jurnal global (pusat) atau scoped per-unit
+  const npGlobal = useNetProfit(start, end);
+  const balPeriod = useAccountBalancesPeriod(start, end, "unit", unitId);
+  const balAsOf = useAccountBalances(undefined, "unit", unitId);
+
   const codes = useMemo(() => (cfg.data ?? []).map((c) => c.coa_account_code), [cfg.data]);
-  const liabBal = useLiabilityBalances(codes);
+  const liabBalGlobal = useLiabilityBalances(codes);
   const cashAccs = useCashAccounts();
 
+  // Hitung net profit unit dari raw BalanceMap
+  const accountsQ = useQuery({
+    queryKey: ["coa-pl-types"],
+    enabled: isUnitMode,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("coa_accounts")
+        .select("id, type")
+        .in("type", ["PENDAPATAN", "PENDAPATAN_LAIN", "BEBAN", "BEBAN_LAIN", "HPP"]);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const netProfit = useMemo(() => {
+    if (!isUnitMode) return npGlobal.data ?? 0;
+    const accs = accountsQ.data ?? [];
+    const bm = balPeriod.data;
+    if (!bm) return 0;
+    let income = 0;
+    let expense = 0;
+    for (const a of accs) {
+      const r = bm.get(a.id);
+      if (!r) continue;
+      const credit = Number(r.credit || 0) - Number(r.debit || 0);
+      const debit = Number(r.debit || 0) - Number(r.credit || 0);
+      if (a.type === "PENDAPATAN" || a.type === "PENDAPATAN_LAIN") income += credit;
+      else expense += debit;
+    }
+    return income - expense;
+  }, [isUnitMode, npGlobal.data, accountsQ.data, balPeriod.data]);
+  const netProfitLoading = isUnitMode ? balPeriod.isLoading || accountsQ.isLoading || !unitReady : npGlobal.isLoading;
+
+  // Liability balance per-unit dari balAsOf
+  const liabAccountsQ = useQuery({
+    queryKey: ["coa-by-codes", codes.join(",")],
+    enabled: isUnitMode && codes.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("coa_accounts")
+        .select("id, code")
+        .in("code", codes);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const liabBalMap = useMemo<Record<string, number>>(() => {
+    if (!isUnitMode) return liabBalGlobal.data ?? {};
+    const bm = balAsOf.data;
+    const accs = liabAccountsQ.data ?? [];
+    const out: Record<string, number> = {};
+    for (const c of codes) out[c] = 0;
+    if (!bm) return out;
+    for (const a of accs) {
+      const r = bm.get(a.id);
+      if (!r) continue;
+      out[a.code] = Number(r.credit || 0) - Number(r.debit || 0);
+    }
+    return out;
+  }, [isUnitMode, liabBalGlobal.data, balAsOf.data, liabAccountsQ.data, codes]);
+
   const totalPct = (cfg.data ?? []).reduce((s, c) => s + Number(c.percentage), 0);
-  const netProfit = np.data ?? 0;
   const preview = (cfg.data ?? []).map((c) => ({
     ...c,
     nominal: Math.round((netProfit * Number(c.percentage)) / 100),
@@ -162,6 +253,7 @@ function BagiHasilPage() {
   const totalNominal = preview.reduce((s, r) => s + r.nominal, 0);
 
   const existingRun = (runs.data ?? []).find((r) => r.period_start === start && r.period_end === end);
+
 
   // === Mutations ===
   const tetapkan = useMutation({
@@ -369,10 +461,7 @@ function BagiHasilPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Bagi Hasil"
-        subtitle="Hitung, tetapkan, dan bayar distribusi laba berbasis jurnal."
-      />
+      <PageHeader title={title} subtitle={subtitle} />
 
       <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
         <div className="flex flex-wrap items-end gap-3">
@@ -392,7 +481,7 @@ function BagiHasilPage() {
           </div>
           <div className="ml-auto text-right">
             <div className="text-xs text-muted-foreground">Laba Bersih Periode</div>
-            <div className="text-2xl font-semibold">{np.isLoading ? "…" : fmtRp(netProfit)}</div>
+            <div className="text-2xl font-semibold">{netProfitLoading ? "…" : fmtRp(netProfit)}</div>
           </div>
         </div>
 
@@ -416,7 +505,7 @@ function BagiHasilPage() {
                   <td className="p-2 font-mono text-xs">{r.coa_account_code}</td>
                   <td className="p-2 text-right">{r.percentage}%</td>
                   <td className="p-2 text-right">{fmtRp(r.nominal)}</td>
-                  <td className="p-2 text-right">{fmtRp(liabBal.data?.[r.coa_account_code] ?? 0)}</td>
+                  <td className="p-2 text-right">{fmtRp(liabBalMap[r.coa_account_code] ?? 0)}</td>
                 </tr>
               ))}
               <tr className="border-t border-border bg-muted/30 font-semibold">
@@ -433,7 +522,14 @@ function BagiHasilPage() {
 
         <div className="flex flex-wrap gap-2">
           <button
-            onClick={() => np.refetch()}
+            onClick={() => {
+              if (isUnitMode) {
+                void balPeriod.refetch();
+                void balAsOf.refetch();
+              } else {
+                void npGlobal.refetch();
+              }
+            }}
             className="inline-flex items-center gap-2 h-9 px-4 rounded-md border border-input bg-background text-sm hover:bg-accent"
           >
             <Calculator className="h-4 w-4" /> Hitung Bagi Hasil
@@ -471,7 +567,7 @@ function BagiHasilPage() {
               <option value="">— pilih —</option>
               {(cfg.data ?? []).map((c) => (
                 <option key={c.code} value={c.coa_account_code}>
-                  {c.name} · saldo {fmtRp(liabBal.data?.[c.coa_account_code] ?? 0)}
+                  {c.name} · saldo {fmtRp(liabBalMap[c.coa_account_code] ?? 0)}
                 </option>
               ))}
             </select>

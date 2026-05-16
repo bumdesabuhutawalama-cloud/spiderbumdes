@@ -58,6 +58,7 @@ import { Route as AppUspLaporanRekonsiliasiRkRouteImport } from './routes/_app.u
 import { Route as AppUspLaporanNeracaRouteImport } from './routes/_app.usp.laporan.neraca'
 import { Route as AppUspLaporanLabaRugiRouteImport } from './routes/_app.usp.laporan.laba-rugi'
 import { Route as AppUspLaporanBukuBesarRouteImport } from './routes/_app.usp.laporan.buku-besar'
+import { Route as AppUspLaporanBagiHasilRouteImport } from './routes/_app.usp.laporan.bagi-hasil'
 import { Route as AppUspKegiatanPenyertaanModalRouteImport } from './routes/_app.usp.kegiatan.penyertaan-modal'
 import { Route as AppUspKegiatanPengeluaranRouteImport } from './routes/_app.usp.kegiatan.pengeluaran'
 import { Route as AppUspKegiatanPenerimaanKasRouteImport } from './routes/_app.usp.kegiatan.penerimaan-kas'
@@ -70,6 +71,7 @@ import { Route as AppDagangLaporanRekonsiliasiRkRouteImport } from './routes/_ap
 import { Route as AppDagangLaporanNeracaRouteImport } from './routes/_app.dagang.laporan.neraca'
 import { Route as AppDagangLaporanLabaRugiRouteImport } from './routes/_app.dagang.laporan.laba-rugi'
 import { Route as AppDagangLaporanBukuBesarRouteImport } from './routes/_app.dagang.laporan.buku-besar'
+import { Route as AppDagangLaporanBagiHasilRouteImport } from './routes/_app.dagang.laporan.bagi-hasil'
 import { Route as AppDagangKegiatanPenjualanTunaiRouteImport } from './routes/_app.dagang.kegiatan.penjualan-tunai'
 import { Route as AppDagangKegiatanPenjualanKreditRouteImport } from './routes/_app.dagang.kegiatan.penjualan-kredit'
 import { Route as AppDagangKegiatanPengeluaranRouteImport } from './routes/_app.dagang.kegiatan.pengeluaran'
@@ -329,6 +331,11 @@ const AppUspLaporanBukuBesarRoute = AppUspLaporanBukuBesarRouteImport.update({
   path: '/buku-besar',
   getParentRoute: () => AppUspLaporanRoute,
 } as any)
+const AppUspLaporanBagiHasilRoute = AppUspLaporanBagiHasilRouteImport.update({
+  id: '/bagi-hasil',
+  path: '/bagi-hasil',
+  getParentRoute: () => AppUspLaporanRoute,
+} as any)
 const AppUspKegiatanPenyertaanModalRoute =
   AppUspKegiatanPenyertaanModalRouteImport.update({
     id: '/penyertaan-modal',
@@ -394,6 +401,12 @@ const AppDagangLaporanBukuBesarRoute =
   AppDagangLaporanBukuBesarRouteImport.update({
     id: '/buku-besar',
     path: '/buku-besar',
+    getParentRoute: () => AppDagangLaporanRoute,
+  } as any)
+const AppDagangLaporanBagiHasilRoute =
+  AppDagangLaporanBagiHasilRouteImport.update({
+    id: '/bagi-hasil',
+    path: '/bagi-hasil',
     getParentRoute: () => AppDagangLaporanRoute,
   } as any)
 const AppDagangKegiatanPenjualanTunaiRoute =
@@ -506,6 +519,7 @@ export interface FileRoutesByFullPath {
   '/dagang/kegiatan/pengeluaran': typeof AppDagangKegiatanPengeluaranRoute
   '/dagang/kegiatan/penjualan-kredit': typeof AppDagangKegiatanPenjualanKreditRoute
   '/dagang/kegiatan/penjualan-tunai': typeof AppDagangKegiatanPenjualanTunaiRoute
+  '/dagang/laporan/bagi-hasil': typeof AppDagangLaporanBagiHasilRoute
   '/dagang/laporan/buku-besar': typeof AppDagangLaporanBukuBesarRoute
   '/dagang/laporan/laba-rugi': typeof AppDagangLaporanLabaRugiRoute
   '/dagang/laporan/neraca': typeof AppDagangLaporanNeracaRoute
@@ -518,6 +532,7 @@ export interface FileRoutesByFullPath {
   '/usp/kegiatan/penerimaan-kas': typeof AppUspKegiatanPenerimaanKasRoute
   '/usp/kegiatan/pengeluaran': typeof AppUspKegiatanPengeluaranRoute
   '/usp/kegiatan/penyertaan-modal': typeof AppUspKegiatanPenyertaanModalRoute
+  '/usp/laporan/bagi-hasil': typeof AppUspLaporanBagiHasilRoute
   '/usp/laporan/buku-besar': typeof AppUspLaporanBukuBesarRoute
   '/usp/laporan/laba-rugi': typeof AppUspLaporanLabaRugiRoute
   '/usp/laporan/neraca': typeof AppUspLaporanNeracaRoute
@@ -570,6 +585,7 @@ export interface FileRoutesByTo {
   '/dagang/kegiatan/pengeluaran': typeof AppDagangKegiatanPengeluaranRoute
   '/dagang/kegiatan/penjualan-kredit': typeof AppDagangKegiatanPenjualanKreditRoute
   '/dagang/kegiatan/penjualan-tunai': typeof AppDagangKegiatanPenjualanTunaiRoute
+  '/dagang/laporan/bagi-hasil': typeof AppDagangLaporanBagiHasilRoute
   '/dagang/laporan/buku-besar': typeof AppDagangLaporanBukuBesarRoute
   '/dagang/laporan/laba-rugi': typeof AppDagangLaporanLabaRugiRoute
   '/dagang/laporan/neraca': typeof AppDagangLaporanNeracaRoute
@@ -582,6 +598,7 @@ export interface FileRoutesByTo {
   '/usp/kegiatan/penerimaan-kas': typeof AppUspKegiatanPenerimaanKasRoute
   '/usp/kegiatan/pengeluaran': typeof AppUspKegiatanPengeluaranRoute
   '/usp/kegiatan/penyertaan-modal': typeof AppUspKegiatanPenyertaanModalRoute
+  '/usp/laporan/bagi-hasil': typeof AppUspLaporanBagiHasilRoute
   '/usp/laporan/buku-besar': typeof AppUspLaporanBukuBesarRoute
   '/usp/laporan/laba-rugi': typeof AppUspLaporanLabaRugiRoute
   '/usp/laporan/neraca': typeof AppUspLaporanNeracaRoute
@@ -644,6 +661,7 @@ export interface FileRoutesById {
   '/_app/dagang/kegiatan/pengeluaran': typeof AppDagangKegiatanPengeluaranRoute
   '/_app/dagang/kegiatan/penjualan-kredit': typeof AppDagangKegiatanPenjualanKreditRoute
   '/_app/dagang/kegiatan/penjualan-tunai': typeof AppDagangKegiatanPenjualanTunaiRoute
+  '/_app/dagang/laporan/bagi-hasil': typeof AppDagangLaporanBagiHasilRoute
   '/_app/dagang/laporan/buku-besar': typeof AppDagangLaporanBukuBesarRoute
   '/_app/dagang/laporan/laba-rugi': typeof AppDagangLaporanLabaRugiRoute
   '/_app/dagang/laporan/neraca': typeof AppDagangLaporanNeracaRoute
@@ -656,6 +674,7 @@ export interface FileRoutesById {
   '/_app/usp/kegiatan/penerimaan-kas': typeof AppUspKegiatanPenerimaanKasRoute
   '/_app/usp/kegiatan/pengeluaran': typeof AppUspKegiatanPengeluaranRoute
   '/_app/usp/kegiatan/penyertaan-modal': typeof AppUspKegiatanPenyertaanModalRoute
+  '/_app/usp/laporan/bagi-hasil': typeof AppUspLaporanBagiHasilRoute
   '/_app/usp/laporan/buku-besar': typeof AppUspLaporanBukuBesarRoute
   '/_app/usp/laporan/laba-rugi': typeof AppUspLaporanLabaRugiRoute
   '/_app/usp/laporan/neraca': typeof AppUspLaporanNeracaRoute
@@ -717,6 +736,7 @@ export interface FileRouteTypes {
     | '/dagang/kegiatan/pengeluaran'
     | '/dagang/kegiatan/penjualan-kredit'
     | '/dagang/kegiatan/penjualan-tunai'
+    | '/dagang/laporan/bagi-hasil'
     | '/dagang/laporan/buku-besar'
     | '/dagang/laporan/laba-rugi'
     | '/dagang/laporan/neraca'
@@ -729,6 +749,7 @@ export interface FileRouteTypes {
     | '/usp/kegiatan/penerimaan-kas'
     | '/usp/kegiatan/pengeluaran'
     | '/usp/kegiatan/penyertaan-modal'
+    | '/usp/laporan/bagi-hasil'
     | '/usp/laporan/buku-besar'
     | '/usp/laporan/laba-rugi'
     | '/usp/laporan/neraca'
@@ -781,6 +802,7 @@ export interface FileRouteTypes {
     | '/dagang/kegiatan/pengeluaran'
     | '/dagang/kegiatan/penjualan-kredit'
     | '/dagang/kegiatan/penjualan-tunai'
+    | '/dagang/laporan/bagi-hasil'
     | '/dagang/laporan/buku-besar'
     | '/dagang/laporan/laba-rugi'
     | '/dagang/laporan/neraca'
@@ -793,6 +815,7 @@ export interface FileRouteTypes {
     | '/usp/kegiatan/penerimaan-kas'
     | '/usp/kegiatan/pengeluaran'
     | '/usp/kegiatan/penyertaan-modal'
+    | '/usp/laporan/bagi-hasil'
     | '/usp/laporan/buku-besar'
     | '/usp/laporan/laba-rugi'
     | '/usp/laporan/neraca'
@@ -854,6 +877,7 @@ export interface FileRouteTypes {
     | '/_app/dagang/kegiatan/pengeluaran'
     | '/_app/dagang/kegiatan/penjualan-kredit'
     | '/_app/dagang/kegiatan/penjualan-tunai'
+    | '/_app/dagang/laporan/bagi-hasil'
     | '/_app/dagang/laporan/buku-besar'
     | '/_app/dagang/laporan/laba-rugi'
     | '/_app/dagang/laporan/neraca'
@@ -866,6 +890,7 @@ export interface FileRouteTypes {
     | '/_app/usp/kegiatan/penerimaan-kas'
     | '/_app/usp/kegiatan/pengeluaran'
     | '/_app/usp/kegiatan/penyertaan-modal'
+    | '/_app/usp/laporan/bagi-hasil'
     | '/_app/usp/laporan/buku-besar'
     | '/_app/usp/laporan/laba-rugi'
     | '/_app/usp/laporan/neraca'
@@ -1227,6 +1252,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppUspLaporanBukuBesarRouteImport
       parentRoute: typeof AppUspLaporanRoute
     }
+    '/_app/usp/laporan/bagi-hasil': {
+      id: '/_app/usp/laporan/bagi-hasil'
+      path: '/bagi-hasil'
+      fullPath: '/usp/laporan/bagi-hasil'
+      preLoaderRoute: typeof AppUspLaporanBagiHasilRouteImport
+      parentRoute: typeof AppUspLaporanRoute
+    }
     '/_app/usp/kegiatan/penyertaan-modal': {
       id: '/_app/usp/kegiatan/penyertaan-modal'
       path: '/penyertaan-modal'
@@ -1309,6 +1341,13 @@ declare module '@tanstack/react-router' {
       path: '/buku-besar'
       fullPath: '/dagang/laporan/buku-besar'
       preLoaderRoute: typeof AppDagangLaporanBukuBesarRouteImport
+      parentRoute: typeof AppDagangLaporanRoute
+    }
+    '/_app/dagang/laporan/bagi-hasil': {
+      id: '/_app/dagang/laporan/bagi-hasil'
+      path: '/bagi-hasil'
+      fullPath: '/dagang/laporan/bagi-hasil'
+      preLoaderRoute: typeof AppDagangLaporanBagiHasilRouteImport
       parentRoute: typeof AppDagangLaporanRoute
     }
     '/_app/dagang/kegiatan/penjualan-tunai': {
@@ -1417,6 +1456,7 @@ const AppDagangKegiatanRouteWithChildren =
   AppDagangKegiatanRoute._addFileChildren(AppDagangKegiatanRouteChildren)
 
 interface AppDagangLaporanRouteChildren {
+  AppDagangLaporanBagiHasilRoute: typeof AppDagangLaporanBagiHasilRoute
   AppDagangLaporanBukuBesarRoute: typeof AppDagangLaporanBukuBesarRoute
   AppDagangLaporanLabaRugiRoute: typeof AppDagangLaporanLabaRugiRoute
   AppDagangLaporanNeracaRoute: typeof AppDagangLaporanNeracaRoute
@@ -1425,6 +1465,7 @@ interface AppDagangLaporanRouteChildren {
 }
 
 const AppDagangLaporanRouteChildren: AppDagangLaporanRouteChildren = {
+  AppDagangLaporanBagiHasilRoute: AppDagangLaporanBagiHasilRoute,
   AppDagangLaporanBukuBesarRoute: AppDagangLaporanBukuBesarRoute,
   AppDagangLaporanLabaRugiRoute: AppDagangLaporanLabaRugiRoute,
   AppDagangLaporanNeracaRoute: AppDagangLaporanNeracaRoute,
@@ -1502,6 +1543,7 @@ const AppUspKegiatanRouteWithChildren = AppUspKegiatanRoute._addFileChildren(
 )
 
 interface AppUspLaporanRouteChildren {
+  AppUspLaporanBagiHasilRoute: typeof AppUspLaporanBagiHasilRoute
   AppUspLaporanBukuBesarRoute: typeof AppUspLaporanBukuBesarRoute
   AppUspLaporanLabaRugiRoute: typeof AppUspLaporanLabaRugiRoute
   AppUspLaporanNeracaRoute: typeof AppUspLaporanNeracaRoute
@@ -1510,6 +1552,7 @@ interface AppUspLaporanRouteChildren {
 }
 
 const AppUspLaporanRouteChildren: AppUspLaporanRouteChildren = {
+  AppUspLaporanBagiHasilRoute: AppUspLaporanBagiHasilRoute,
   AppUspLaporanBukuBesarRoute: AppUspLaporanBukuBesarRoute,
   AppUspLaporanLabaRugiRoute: AppUspLaporanLabaRugiRoute,
   AppUspLaporanNeracaRoute: AppUspLaporanNeracaRoute,
