@@ -64,7 +64,6 @@ function Card({
   return (
     <Link
       to={to as "/dagang/laporan/neraca"}
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       className="glass-card group rounded-2xl p-5 transition hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(34,211,238,0.15)]"
     >
       <div className="mb-3 inline-grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-green)] text-[oklch(0.15_0.03_250)]">
