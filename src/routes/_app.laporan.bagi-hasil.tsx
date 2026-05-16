@@ -461,10 +461,7 @@ export function BagiHasilPage({
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Bagi Hasil"
-        subtitle="Hitung, tetapkan, dan bayar distribusi laba berbasis jurnal."
-      />
+      <PageHeader title={title} subtitle={subtitle} />
 
       <div className="rounded-2xl border border-border bg-card p-5 space-y-4">
         <div className="flex flex-wrap items-end gap-3">
