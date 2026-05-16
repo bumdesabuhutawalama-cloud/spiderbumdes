@@ -81,7 +81,8 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
             <NavLink item={{ to: "/dagang/kegiatan", label: "Catat Kegiatan", icon: ClipboardList }} active={isActive("/dagang/kegiatan")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/dagang/stok", label: "Stok Barang", icon: Store }} active={isActive("/dagang/stok")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/dagang/transfer", label: "Transfer Antar Unit", icon: GitCompare }} active={isActive("/dagang/transfer")} onNavigate={onNavigate} />
-            <NavLink item={{ to: "/dagang/laporan", label: "Laporan Dagang", icon: FileBarChart }} active={isActive("/dagang/laporan")} onNavigate={onNavigate} />
+            <NavLink item={{ to: "/dagang/laporan", label: "Laporan Dagang", icon: FileBarChart }} active={isActive("/dagang/laporan") && !path.startsWith("/dagang/laporan/bagi-hasil")} onNavigate={onNavigate} />
+            <NavLink item={{ to: "/dagang/laporan/bagi-hasil", label: "Bagi Hasil Dagang", icon: PieChart }} active={isActive("/dagang/laporan/bagi-hasil")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/dagang/jurnal-koreksi", label: "Jurnal Koreksi", icon: FileEdit }} active={isActive("/dagang/jurnal-koreksi")} onNavigate={onNavigate} />
           </>
         )}
@@ -92,7 +93,8 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
             <NavLink item={{ to: "/usp/pinjaman", label: "Data Pinjaman", icon: HandCoins }} active={isActive("/usp/pinjaman")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/usp/kegiatan", label: "Catat Kegiatan", icon: ClipboardList }} active={isActive("/usp/kegiatan")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/usp/transfer", label: "Transfer", icon: GitCompare }} active={isActive("/usp/transfer")} onNavigate={onNavigate} />
-            <NavLink item={{ to: "/usp/laporan", label: "Laporan USP", icon: FileBarChart }} active={isActive("/usp/laporan")} onNavigate={onNavigate} />
+            <NavLink item={{ to: "/usp/laporan", label: "Laporan USP", icon: FileBarChart }} active={isActive("/usp/laporan") && !path.startsWith("/usp/laporan/bagi-hasil")} onNavigate={onNavigate} />
+            <NavLink item={{ to: "/usp/laporan/bagi-hasil", label: "Bagi Hasil USP", icon: PieChart }} active={isActive("/usp/laporan/bagi-hasil")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/usp/jurnal-koreksi", label: "Jurnal Koreksi", icon: FileEdit }} active={isActive("/usp/jurnal-koreksi")} onNavigate={onNavigate} />
           </>
         )}
