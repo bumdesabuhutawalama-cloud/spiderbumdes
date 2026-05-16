@@ -37,6 +37,7 @@ import { Route as AppUspKegiatanRouteImport } from './routes/_app.usp.kegiatan'
 import { Route as AppUspJurnalKoreksiRouteImport } from './routes/_app.usp.jurnal-koreksi'
 import { Route as AppPusatKegiatanRouteImport } from './routes/_app.pusat.kegiatan'
 import { Route as AppPengaturanUsersRouteImport } from './routes/_app.pengaturan.users'
+import { Route as AppPengaturanBagiHasilRouteImport } from './routes/_app.pengaturan.bagi-hasil'
 import { Route as AppLaporanRekonsiliasiRkRouteImport } from './routes/_app.laporan.rekonsiliasi-rk'
 import { Route as AppLaporanNeracaPusatRouteImport } from './routes/_app.laporan.neraca-pusat'
 import { Route as AppLaporanNeracaKonsolidasiRouteImport } from './routes/_app.laporan.neraca-konsolidasi'
@@ -216,6 +217,11 @@ const AppPusatKegiatanRoute = AppPusatKegiatanRouteImport.update({
 const AppPengaturanUsersRoute = AppPengaturanUsersRouteImport.update({
   id: '/users',
   path: '/users',
+  getParentRoute: () => AppPengaturanRoute,
+} as any)
+const AppPengaturanBagiHasilRoute = AppPengaturanBagiHasilRouteImport.update({
+  id: '/bagi-hasil',
+  path: '/bagi-hasil',
   getParentRoute: () => AppPengaturanRoute,
 } as any)
 const AppLaporanRekonsiliasiRkRoute =
@@ -479,6 +485,7 @@ export interface FileRoutesByFullPath {
   '/laporan/neraca-konsolidasi': typeof AppLaporanNeracaKonsolidasiRoute
   '/laporan/neraca-pusat': typeof AppLaporanNeracaPusatRoute
   '/laporan/rekonsiliasi-rk': typeof AppLaporanRekonsiliasiRkRoute
+  '/pengaturan/bagi-hasil': typeof AppPengaturanBagiHasilRoute
   '/pengaturan/users': typeof AppPengaturanUsersRoute
   '/pusat/kegiatan': typeof AppPusatKegiatanRoute
   '/usp/jurnal-koreksi': typeof AppUspJurnalKoreksiRoute
@@ -544,6 +551,7 @@ export interface FileRoutesByTo {
   '/laporan/neraca-konsolidasi': typeof AppLaporanNeracaKonsolidasiRoute
   '/laporan/neraca-pusat': typeof AppLaporanNeracaPusatRoute
   '/laporan/rekonsiliasi-rk': typeof AppLaporanRekonsiliasiRkRoute
+  '/pengaturan/bagi-hasil': typeof AppPengaturanBagiHasilRoute
   '/pengaturan/users': typeof AppPengaturanUsersRoute
   '/pusat/kegiatan': typeof AppPusatKegiatanRoute
   '/usp/jurnal-koreksi': typeof AppUspJurnalKoreksiRoute
@@ -615,6 +623,7 @@ export interface FileRoutesById {
   '/_app/laporan/neraca-konsolidasi': typeof AppLaporanNeracaKonsolidasiRoute
   '/_app/laporan/neraca-pusat': typeof AppLaporanNeracaPusatRoute
   '/_app/laporan/rekonsiliasi-rk': typeof AppLaporanRekonsiliasiRkRoute
+  '/_app/pengaturan/bagi-hasil': typeof AppPengaturanBagiHasilRoute
   '/_app/pengaturan/users': typeof AppPengaturanUsersRoute
   '/_app/pusat/kegiatan': typeof AppPusatKegiatanRoute
   '/_app/usp/jurnal-koreksi': typeof AppUspJurnalKoreksiRoute
@@ -687,6 +696,7 @@ export interface FileRouteTypes {
     | '/laporan/neraca-konsolidasi'
     | '/laporan/neraca-pusat'
     | '/laporan/rekonsiliasi-rk'
+    | '/pengaturan/bagi-hasil'
     | '/pengaturan/users'
     | '/pusat/kegiatan'
     | '/usp/jurnal-koreksi'
@@ -752,6 +762,7 @@ export interface FileRouteTypes {
     | '/laporan/neraca-konsolidasi'
     | '/laporan/neraca-pusat'
     | '/laporan/rekonsiliasi-rk'
+    | '/pengaturan/bagi-hasil'
     | '/pengaturan/users'
     | '/pusat/kegiatan'
     | '/usp/jurnal-koreksi'
@@ -822,6 +833,7 @@ export interface FileRouteTypes {
     | '/_app/laporan/neraca-konsolidasi'
     | '/_app/laporan/neraca-pusat'
     | '/_app/laporan/rekonsiliasi-rk'
+    | '/_app/pengaturan/bagi-hasil'
     | '/_app/pengaturan/users'
     | '/_app/pusat/kegiatan'
     | '/_app/usp/jurnal-koreksi'
@@ -1066,6 +1078,13 @@ declare module '@tanstack/react-router' {
       path: '/users'
       fullPath: '/pengaturan/users'
       preLoaderRoute: typeof AppPengaturanUsersRouteImport
+      parentRoute: typeof AppPengaturanRoute
+    }
+    '/_app/pengaturan/bagi-hasil': {
+      id: '/_app/pengaturan/bagi-hasil'
+      path: '/bagi-hasil'
+      fullPath: '/pengaturan/bagi-hasil'
+      preLoaderRoute: typeof AppPengaturanBagiHasilRouteImport
       parentRoute: typeof AppPengaturanRoute
     }
     '/_app/laporan/rekonsiliasi-rk': {
@@ -1439,11 +1458,13 @@ const AppDagangRouteWithChildren = AppDagangRoute._addFileChildren(
 )
 
 interface AppPengaturanRouteChildren {
+  AppPengaturanBagiHasilRoute: typeof AppPengaturanBagiHasilRoute
   AppPengaturanUsersRoute: typeof AppPengaturanUsersRoute
   AppPengaturanIndexRoute: typeof AppPengaturanIndexRoute
 }
 
 const AppPengaturanRouteChildren: AppPengaturanRouteChildren = {
+  AppPengaturanBagiHasilRoute: AppPengaturanBagiHasilRoute,
   AppPengaturanUsersRoute: AppPengaturanUsersRoute,
   AppPengaturanIndexRoute: AppPengaturanIndexRoute,
 }
