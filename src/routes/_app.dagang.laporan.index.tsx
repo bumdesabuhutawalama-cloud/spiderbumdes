@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Scale, GitCompare, FileBarChart, BookOpen } from "lucide-react";
+import { Scale, GitCompare, FileBarChart, BookOpen, PieChart } from "lucide-react";
 import { PageHeader } from "@/components/DashboardLayout";
 
 export const Route = createFileRoute("/_app/dagang/laporan/")({
@@ -39,6 +39,12 @@ function LaporanDagangIndex() {
           desc="Mutasi akun lengkap khusus entity Dagang dengan saldo berjalan."
           icon={<BookOpen className="h-5 w-5" />}
         />
+        <Card
+          to="/dagang/laporan/bagi-hasil"
+          title="Bagi Hasil Dagang"
+          desc="Distribusi laba unit Dagang mengacu Master Bagi Hasil Pusat."
+          icon={<PieChart className="h-5 w-5" />}
+        />
       </div>
     </>
   );
@@ -58,6 +64,7 @@ function Card({
   return (
     <Link
       to={to as "/dagang/laporan/neraca"}
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       className="glass-card group rounded-2xl p-5 transition hover:scale-[1.01] hover:shadow-[0_0_30px_rgba(34,211,238,0.15)]"
     >
       <div className="mb-3 inline-grid h-10 w-10 place-items-center rounded-xl bg-gradient-to-br from-[var(--neon-cyan)] to-[var(--neon-green)] text-[oklch(0.15_0.03_250)]">
