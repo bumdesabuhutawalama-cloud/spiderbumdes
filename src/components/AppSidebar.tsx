@@ -13,6 +13,7 @@ import {
   ClipboardList,
   Users,
   FileEdit,
+  PieChart,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -68,6 +69,7 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
             <NavLink item={{ to: "/jurnal-koreksi", label: "Jurnal Koreksi", icon: FileEdit }} active={isActive("/jurnal-koreksi")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/usp", label: "Unit Simpan Pinjam", icon: HandCoins }} active={isActive("/usp")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/dagang", label: "Unit Perdagangan", icon: Store }} active={isActive("/dagang")} onNavigate={onNavigate} />
+            <NavLink item={{ to: "/pengaturan/bagi-hasil", label: "Master Bagi Hasil", icon: PieChart }} active={isActive("/pengaturan/bagi-hasil")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/pengaturan/users", label: "Manajemen User", icon: Users }} active={isActive("/pengaturan/users")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/pengaturan", label: "Pengaturan", icon: Settings }} active={isActive("/pengaturan")} onNavigate={onNavigate} />
           </>
