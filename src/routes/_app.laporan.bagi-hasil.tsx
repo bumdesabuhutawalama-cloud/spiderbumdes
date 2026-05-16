@@ -140,22 +140,112 @@ function useCashAccounts() {
   });
 }
 
-function BagiHasilPage() {
+export function BagiHasilPage({
+  fixedUnitCode,
+  title = "Bagi Hasil",
+  subtitle = "Hitung, tetapkan, dan bayar distribusi laba berbasis jurnal.",
+}: {
+  fixedUnitCode?: string;
+  title?: string;
+  subtitle?: string;
+} = {}) {
   const qc = useQueryClient();
   const now = new Date();
   const [year, setYear] = useState<number>(now.getFullYear());
   const start = `${year}-01-01`;
   const end = `${year}-12-31`;
 
+  // Resolusi unit (kalau dipanggil dari halaman unit)
+  const unitQ = useQuery({
+    queryKey: ["unit-by-code", fixedUnitCode ?? ""],
+    enabled: !!fixedUnitCode,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("units")
+        .select("id,name,code")
+        .eq("code", fixedUnitCode!)
+        .maybeSingle();
+      if (error) throw error;
+      return data;
+    },
+  });
+  const unitId = fixedUnitCode ? unitQ.data?.id ?? null : null;
+  const isUnitMode = !!fixedUnitCode;
+  const unitReady = !isUnitMode || !!unitQ.data;
+
   const cfg = useConfig();
   const runs = useRuns();
-  const np = useNetProfit(start, end);
+  // Net profit: dari jurnal global (pusat) atau scoped per-unit
+  const npGlobal = useNetProfit(start, end);
+  const balPeriod = useAccountBalancesPeriod(start, end, "unit", unitId);
+  const balAsOf = useAccountBalances(undefined, "unit", unitId);
+
   const codes = useMemo(() => (cfg.data ?? []).map((c) => c.coa_account_code), [cfg.data]);
-  const liabBal = useLiabilityBalances(codes);
+  const liabBalGlobal = useLiabilityBalances(codes);
   const cashAccs = useCashAccounts();
 
+  // Hitung net profit unit dari raw BalanceMap
+  const accountsQ = useQuery({
+    queryKey: ["coa-pl-types"],
+    enabled: isUnitMode,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("coa_accounts")
+        .select("id, type")
+        .in("type", ["PENDAPATAN", "PENDAPATAN_LAIN", "BEBAN", "BEBAN_LAIN", "HPP"]);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+
+  const netProfit = useMemo(() => {
+    if (!isUnitMode) return npGlobal.data ?? 0;
+    const accs = accountsQ.data ?? [];
+    const bm = balPeriod.data;
+    if (!bm) return 0;
+    let income = 0;
+    let expense = 0;
+    for (const a of accs) {
+      const r = bm.get(a.id);
+      if (!r) continue;
+      const credit = Number(r.credit || 0) - Number(r.debit || 0);
+      const debit = Number(r.debit || 0) - Number(r.credit || 0);
+      if (a.type === "PENDAPATAN" || a.type === "PENDAPATAN_LAIN") income += credit;
+      else expense += debit;
+    }
+    return income - expense;
+  }, [isUnitMode, npGlobal.data, accountsQ.data, balPeriod.data]);
+  const netProfitLoading = isUnitMode ? balPeriod.isLoading || accountsQ.isLoading || !unitReady : npGlobal.isLoading;
+
+  // Liability balance per-unit dari balAsOf
+  const liabAccountsQ = useQuery({
+    queryKey: ["coa-by-codes", codes.join(",")],
+    enabled: isUnitMode && codes.length > 0,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("coa_accounts")
+        .select("id, code")
+        .in("code", codes);
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  const liabBalMap = useMemo<Record<string, number>>(() => {
+    if (!isUnitMode) return liabBalGlobal.data ?? {};
+    const bm = balAsOf.data;
+    const accs = liabAccountsQ.data ?? [];
+    const out: Record<string, number> = {};
+    for (const c of codes) out[c] = 0;
+    if (!bm) return out;
+    for (const a of accs) {
+      const r = bm.get(a.id);
+      if (!r) continue;
+      out[a.code] = Number(r.credit || 0) - Number(r.debit || 0);
+    }
+    return out;
+  }, [isUnitMode, liabBalGlobal.data, balAsOf.data, liabAccountsQ.data, codes]);
+
   const totalPct = (cfg.data ?? []).reduce((s, c) => s + Number(c.percentage), 0);
-  const netProfit = np.data ?? 0;
   const preview = (cfg.data ?? []).map((c) => ({
     ...c,
     nominal: Math.round((netProfit * Number(c.percentage)) / 100),
@@ -163,6 +253,7 @@ function BagiHasilPage() {
   const totalNominal = preview.reduce((s, r) => s + r.nominal, 0);
 
   const existingRun = (runs.data ?? []).find((r) => r.period_start === start && r.period_end === end);
+
 
   // === Mutations ===
   const tetapkan = useMutation({
