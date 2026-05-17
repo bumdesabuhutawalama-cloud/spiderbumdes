@@ -27,6 +27,7 @@ import { Route as AppDashboardRouteImport } from './routes/_app.dashboard'
 import { Route as AppDagangRouteImport } from './routes/_app.dagang'
 import { Route as AppCoaRouteImport } from './routes/_app.coa'
 import { Route as AppCatatKegiatanRouteImport } from './routes/_app.catat-kegiatan'
+import { Route as AppAsetRouteImport } from './routes/_app.aset'
 import { Route as AppUspIndexRouteImport } from './routes/_app.usp.index'
 import { Route as AppPengaturanIndexRouteImport } from './routes/_app.pengaturan.index'
 import { Route as AppDagangIndexRouteImport } from './routes/_app.dagang.index'
@@ -35,6 +36,7 @@ import { Route as AppUspPinjamanRouteImport } from './routes/_app.usp.pinjaman'
 import { Route as AppUspLaporanRouteImport } from './routes/_app.usp.laporan'
 import { Route as AppUspKegiatanRouteImport } from './routes/_app.usp.kegiatan'
 import { Route as AppUspJurnalKoreksiRouteImport } from './routes/_app.usp.jurnal-koreksi'
+import { Route as AppUspAsetRouteImport } from './routes/_app.usp.aset'
 import { Route as AppPusatKegiatanRouteImport } from './routes/_app.pusat.kegiatan'
 import { Route as AppPengaturanUsersRouteImport } from './routes/_app.pengaturan.users'
 import { Route as AppPengaturanBagiHasilRouteImport } from './routes/_app.pengaturan.bagi-hasil'
@@ -50,6 +52,7 @@ import { Route as AppDagangStokRouteImport } from './routes/_app.dagang.stok'
 import { Route as AppDagangLaporanRouteImport } from './routes/_app.dagang.laporan'
 import { Route as AppDagangKegiatanRouteImport } from './routes/_app.dagang.kegiatan'
 import { Route as AppDagangJurnalKoreksiRouteImport } from './routes/_app.dagang.jurnal-koreksi'
+import { Route as AppDagangAsetRouteImport } from './routes/_app.dagang.aset'
 import { Route as AppUspLaporanIndexRouteImport } from './routes/_app.usp.laporan.index'
 import { Route as AppUspKegiatanIndexRouteImport } from './routes/_app.usp.kegiatan.index'
 import { Route as AppDagangLaporanIndexRouteImport } from './routes/_app.dagang.laporan.index'
@@ -171,6 +174,11 @@ const AppCatatKegiatanRoute = AppCatatKegiatanRouteImport.update({
   path: '/catat-kegiatan',
   getParentRoute: () => AppRoute,
 } as any)
+const AppAsetRoute = AppAsetRouteImport.update({
+  id: '/aset',
+  path: '/aset',
+  getParentRoute: () => AppRoute,
+} as any)
 const AppUspIndexRoute = AppUspIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -209,6 +217,11 @@ const AppUspKegiatanRoute = AppUspKegiatanRouteImport.update({
 const AppUspJurnalKoreksiRoute = AppUspJurnalKoreksiRouteImport.update({
   id: '/jurnal-koreksi',
   path: '/jurnal-koreksi',
+  getParentRoute: () => AppUspRoute,
+} as any)
+const AppUspAsetRoute = AppUspAsetRouteImport.update({
+  id: '/aset',
+  path: '/aset',
   getParentRoute: () => AppUspRoute,
 } as any)
 const AppPusatKegiatanRoute = AppPusatKegiatanRouteImport.update({
@@ -288,6 +301,11 @@ const AppDagangKegiatanRoute = AppDagangKegiatanRouteImport.update({
 const AppDagangJurnalKoreksiRoute = AppDagangJurnalKoreksiRouteImport.update({
   id: '/jurnal-koreksi',
   path: '/jurnal-koreksi',
+  getParentRoute: () => AppDagangRoute,
+} as any)
+const AppDagangAsetRoute = AppDagangAsetRouteImport.update({
+  id: '/aset',
+  path: '/aset',
   getParentRoute: () => AppDagangRoute,
 } as any)
 const AppUspLaporanIndexRoute = AppUspLaporanIndexRouteImport.update({
@@ -472,6 +490,7 @@ const AppDagangKegiatanBebanRoute = AppDagangKegiatanBebanRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof PublicIndexRoute
   '/login': typeof LoginRouteWithChildren
+  '/aset': typeof AppAsetRoute
   '/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/coa': typeof AppCoaRoute
   '/dagang': typeof AppDagangRouteWithChildren
@@ -486,6 +505,7 @@ export interface FileRoutesByFullPath {
   '/transparansi': typeof PublicTransparansiRoute
   '/unit-usaha': typeof PublicUnitUsahaRoute
   '/login/$unit': typeof LoginUnitRoute
+  '/dagang/aset': typeof AppDagangAsetRoute
   '/dagang/jurnal-koreksi': typeof AppDagangJurnalKoreksiRoute
   '/dagang/kegiatan': typeof AppDagangKegiatanRouteWithChildren
   '/dagang/laporan': typeof AppDagangLaporanRouteWithChildren
@@ -501,6 +521,7 @@ export interface FileRoutesByFullPath {
   '/pengaturan/bagi-hasil': typeof AppPengaturanBagiHasilRoute
   '/pengaturan/users': typeof AppPengaturanUsersRoute
   '/pusat/kegiatan': typeof AppPusatKegiatanRoute
+  '/usp/aset': typeof AppUspAsetRoute
   '/usp/jurnal-koreksi': typeof AppUspJurnalKoreksiRoute
   '/usp/kegiatan': typeof AppUspKegiatanRouteWithChildren
   '/usp/laporan': typeof AppUspLaporanRouteWithChildren
@@ -545,6 +566,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof PublicIndexRoute
   '/login': typeof LoginRouteWithChildren
+  '/aset': typeof AppAsetRoute
   '/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/coa': typeof AppCoaRoute
   '/dashboard': typeof AppDashboardRoute
@@ -556,6 +578,7 @@ export interface FileRoutesByTo {
   '/transparansi': typeof PublicTransparansiRoute
   '/unit-usaha': typeof PublicUnitUsahaRoute
   '/login/$unit': typeof LoginUnitRoute
+  '/dagang/aset': typeof AppDagangAsetRoute
   '/dagang/jurnal-koreksi': typeof AppDagangJurnalKoreksiRoute
   '/dagang/stok': typeof AppDagangStokRoute
   '/dagang/transfer': typeof AppDagangTransferRoute
@@ -569,6 +592,7 @@ export interface FileRoutesByTo {
   '/pengaturan/bagi-hasil': typeof AppPengaturanBagiHasilRoute
   '/pengaturan/users': typeof AppPengaturanUsersRoute
   '/pusat/kegiatan': typeof AppPusatKegiatanRoute
+  '/usp/aset': typeof AppUspAsetRoute
   '/usp/jurnal-koreksi': typeof AppUspJurnalKoreksiRoute
   '/usp/pinjaman': typeof AppUspPinjamanRoute
   '/usp/transfer': typeof AppUspTransferRoute
@@ -613,6 +637,7 @@ export interface FileRoutesById {
   '/_app': typeof AppRouteWithChildren
   '/_public': typeof PublicRouteWithChildren
   '/login': typeof LoginRouteWithChildren
+  '/_app/aset': typeof AppAsetRoute
   '/_app/catat-kegiatan': typeof AppCatatKegiatanRoute
   '/_app/coa': typeof AppCoaRoute
   '/_app/dagang': typeof AppDagangRouteWithChildren
@@ -628,6 +653,7 @@ export interface FileRoutesById {
   '/_public/unit-usaha': typeof PublicUnitUsahaRoute
   '/login/$unit': typeof LoginUnitRoute
   '/_public/': typeof PublicIndexRoute
+  '/_app/dagang/aset': typeof AppDagangAsetRoute
   '/_app/dagang/jurnal-koreksi': typeof AppDagangJurnalKoreksiRoute
   '/_app/dagang/kegiatan': typeof AppDagangKegiatanRouteWithChildren
   '/_app/dagang/laporan': typeof AppDagangLaporanRouteWithChildren
@@ -643,6 +669,7 @@ export interface FileRoutesById {
   '/_app/pengaturan/bagi-hasil': typeof AppPengaturanBagiHasilRoute
   '/_app/pengaturan/users': typeof AppPengaturanUsersRoute
   '/_app/pusat/kegiatan': typeof AppPusatKegiatanRoute
+  '/_app/usp/aset': typeof AppUspAsetRoute
   '/_app/usp/jurnal-koreksi': typeof AppUspJurnalKoreksiRoute
   '/_app/usp/kegiatan': typeof AppUspKegiatanRouteWithChildren
   '/_app/usp/laporan': typeof AppUspLaporanRouteWithChildren
@@ -689,6 +716,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/login'
+    | '/aset'
     | '/catat-kegiatan'
     | '/coa'
     | '/dagang'
@@ -703,6 +731,7 @@ export interface FileRouteTypes {
     | '/transparansi'
     | '/unit-usaha'
     | '/login/$unit'
+    | '/dagang/aset'
     | '/dagang/jurnal-koreksi'
     | '/dagang/kegiatan'
     | '/dagang/laporan'
@@ -718,6 +747,7 @@ export interface FileRouteTypes {
     | '/pengaturan/bagi-hasil'
     | '/pengaturan/users'
     | '/pusat/kegiatan'
+    | '/usp/aset'
     | '/usp/jurnal-koreksi'
     | '/usp/kegiatan'
     | '/usp/laporan'
@@ -762,6 +792,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/login'
+    | '/aset'
     | '/catat-kegiatan'
     | '/coa'
     | '/dashboard'
@@ -773,6 +804,7 @@ export interface FileRouteTypes {
     | '/transparansi'
     | '/unit-usaha'
     | '/login/$unit'
+    | '/dagang/aset'
     | '/dagang/jurnal-koreksi'
     | '/dagang/stok'
     | '/dagang/transfer'
@@ -786,6 +818,7 @@ export interface FileRouteTypes {
     | '/pengaturan/bagi-hasil'
     | '/pengaturan/users'
     | '/pusat/kegiatan'
+    | '/usp/aset'
     | '/usp/jurnal-koreksi'
     | '/usp/pinjaman'
     | '/usp/transfer'
@@ -829,6 +862,7 @@ export interface FileRouteTypes {
     | '/_app'
     | '/_public'
     | '/login'
+    | '/_app/aset'
     | '/_app/catat-kegiatan'
     | '/_app/coa'
     | '/_app/dagang'
@@ -844,6 +878,7 @@ export interface FileRouteTypes {
     | '/_public/unit-usaha'
     | '/login/$unit'
     | '/_public/'
+    | '/_app/dagang/aset'
     | '/_app/dagang/jurnal-koreksi'
     | '/_app/dagang/kegiatan'
     | '/_app/dagang/laporan'
@@ -859,6 +894,7 @@ export interface FileRouteTypes {
     | '/_app/pengaturan/bagi-hasil'
     | '/_app/pengaturan/users'
     | '/_app/pusat/kegiatan'
+    | '/_app/usp/aset'
     | '/_app/usp/jurnal-koreksi'
     | '/_app/usp/kegiatan'
     | '/_app/usp/laporan'
@@ -1035,6 +1071,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCatatKegiatanRouteImport
       parentRoute: typeof AppRoute
     }
+    '/_app/aset': {
+      id: '/_app/aset'
+      path: '/aset'
+      fullPath: '/aset'
+      preLoaderRoute: typeof AppAsetRouteImport
+      parentRoute: typeof AppRoute
+    }
     '/_app/usp/': {
       id: '/_app/usp/'
       path: '/'
@@ -1089,6 +1132,13 @@ declare module '@tanstack/react-router' {
       path: '/jurnal-koreksi'
       fullPath: '/usp/jurnal-koreksi'
       preLoaderRoute: typeof AppUspJurnalKoreksiRouteImport
+      parentRoute: typeof AppUspRoute
+    }
+    '/_app/usp/aset': {
+      id: '/_app/usp/aset'
+      path: '/aset'
+      fullPath: '/usp/aset'
+      preLoaderRoute: typeof AppUspAsetRouteImport
       parentRoute: typeof AppUspRoute
     }
     '/_app/pusat/kegiatan': {
@@ -1194,6 +1244,13 @@ declare module '@tanstack/react-router' {
       path: '/jurnal-koreksi'
       fullPath: '/dagang/jurnal-koreksi'
       preLoaderRoute: typeof AppDagangJurnalKoreksiRouteImport
+      parentRoute: typeof AppDagangRoute
+    }
+    '/_app/dagang/aset': {
+      id: '/_app/dagang/aset'
+      path: '/aset'
+      fullPath: '/dagang/aset'
+      preLoaderRoute: typeof AppDagangAsetRouteImport
       parentRoute: typeof AppDagangRoute
     }
     '/_app/usp/laporan/': {
@@ -1477,6 +1534,7 @@ const AppDagangLaporanRouteWithChildren =
   AppDagangLaporanRoute._addFileChildren(AppDagangLaporanRouteChildren)
 
 interface AppDagangRouteChildren {
+  AppDagangAsetRoute: typeof AppDagangAsetRoute
   AppDagangJurnalKoreksiRoute: typeof AppDagangJurnalKoreksiRoute
   AppDagangKegiatanRoute: typeof AppDagangKegiatanRouteWithChildren
   AppDagangLaporanRoute: typeof AppDagangLaporanRouteWithChildren
@@ -1486,6 +1544,7 @@ interface AppDagangRouteChildren {
 }
 
 const AppDagangRouteChildren: AppDagangRouteChildren = {
+  AppDagangAsetRoute: AppDagangAsetRoute,
   AppDagangJurnalKoreksiRoute: AppDagangJurnalKoreksiRoute,
   AppDagangKegiatanRoute: AppDagangKegiatanRouteWithChildren,
   AppDagangLaporanRoute: AppDagangLaporanRouteWithChildren,
@@ -1565,6 +1624,7 @@ const AppUspLaporanRouteWithChildren = AppUspLaporanRoute._addFileChildren(
 )
 
 interface AppUspRouteChildren {
+  AppUspAsetRoute: typeof AppUspAsetRoute
   AppUspJurnalKoreksiRoute: typeof AppUspJurnalKoreksiRoute
   AppUspKegiatanRoute: typeof AppUspKegiatanRouteWithChildren
   AppUspLaporanRoute: typeof AppUspLaporanRouteWithChildren
@@ -1574,6 +1634,7 @@ interface AppUspRouteChildren {
 }
 
 const AppUspRouteChildren: AppUspRouteChildren = {
+  AppUspAsetRoute: AppUspAsetRoute,
   AppUspJurnalKoreksiRoute: AppUspJurnalKoreksiRoute,
   AppUspKegiatanRoute: AppUspKegiatanRouteWithChildren,
   AppUspLaporanRoute: AppUspLaporanRouteWithChildren,
@@ -1586,6 +1647,7 @@ const AppUspRouteWithChildren =
   AppUspRoute._addFileChildren(AppUspRouteChildren)
 
 interface AppRouteChildren {
+  AppAsetRoute: typeof AppAsetRoute
   AppCatatKegiatanRoute: typeof AppCatatKegiatanRoute
   AppCoaRoute: typeof AppCoaRoute
   AppDagangRoute: typeof AppDagangRouteWithChildren
@@ -1606,6 +1668,7 @@ interface AppRouteChildren {
 }
 
 const AppRouteChildren: AppRouteChildren = {
+  AppAsetRoute: AppAsetRoute,
   AppCatatKegiatanRoute: AppCatatKegiatanRoute,
   AppCoaRoute: AppCoaRoute,
   AppDagangRoute: AppDagangRouteWithChildren,
