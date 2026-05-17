@@ -53,6 +53,9 @@ export type Database = {
           created_at: string
           entry_type: string
           id: string
+          is_accumulated_depreciation: boolean
+          is_depreciation_expense: boolean
+          is_fixed_asset: boolean
           name: string
           normal_balance: string
           status: string
@@ -64,6 +67,9 @@ export type Database = {
           created_at?: string
           entry_type: string
           id?: string
+          is_accumulated_depreciation?: boolean
+          is_depreciation_expense?: boolean
+          is_fixed_asset?: boolean
           name: string
           normal_balance: string
           status?: string
@@ -75,6 +81,9 @@ export type Database = {
           created_at?: string
           entry_type?: string
           id?: string
+          is_accumulated_depreciation?: boolean
+          is_depreciation_expense?: boolean
+          is_fixed_asset?: boolean
           name?: string
           normal_balance?: string
           status?: string
@@ -182,6 +191,137 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      fixed_asset_coa_mapping: {
+        Row: {
+          coa_accumulated_depr_id: string | null
+          coa_asset_id: string
+          coa_depr_expense_id: string | null
+          created_at: string
+          default_useful_life_years: number
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          coa_accumulated_depr_id?: string | null
+          coa_asset_id: string
+          coa_depr_expense_id?: string | null
+          created_at?: string
+          default_useful_life_years?: number
+          id?: string
+          updated_at?: string
+        }
+        Update: {
+          coa_accumulated_depr_id?: string | null
+          coa_asset_id?: string
+          coa_depr_expense_id?: string | null
+          created_at?: string
+          default_useful_life_years?: number
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      fixed_asset_depreciation_history: {
+        Row: {
+          asset_id: string
+          created_at: string
+          depreciation_amount: number
+          id: string
+          journal_id: string | null
+          period_month: number
+          period_year: number
+        }
+        Insert: {
+          asset_id: string
+          created_at?: string
+          depreciation_amount?: number
+          id?: string
+          journal_id?: string | null
+          period_month: number
+          period_year: number
+        }
+        Update: {
+          asset_id?: string
+          created_at?: string
+          depreciation_amount?: number
+          id?: string
+          journal_id?: string | null
+          period_month?: number
+          period_year?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fixed_asset_depreciation_history_asset_id_fkey"
+            columns: ["asset_id"]
+            isOneToOne: false
+            referencedRelation: "fixed_assets"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      fixed_assets: {
+        Row: {
+          accumulated_depreciation: number
+          acquisition_cost: number
+          acquisition_date: string
+          asset_name: string
+          book_value: number
+          coa_accumulated_depr_id: string | null
+          coa_asset_id: string
+          coa_depr_expense_id: string | null
+          created_at: string
+          created_from_journal_id: string | null
+          depreciation_method: string
+          id: string
+          last_depreciation_date: string | null
+          notes: string | null
+          status: string
+          unit_id: string | null
+          updated_at: string
+          useful_life_years: number
+        }
+        Insert: {
+          accumulated_depreciation?: number
+          acquisition_cost?: number
+          acquisition_date: string
+          asset_name: string
+          book_value?: number
+          coa_accumulated_depr_id?: string | null
+          coa_asset_id: string
+          coa_depr_expense_id?: string | null
+          created_at?: string
+          created_from_journal_id?: string | null
+          depreciation_method?: string
+          id?: string
+          last_depreciation_date?: string | null
+          notes?: string | null
+          status?: string
+          unit_id?: string | null
+          updated_at?: string
+          useful_life_years?: number
+        }
+        Update: {
+          accumulated_depreciation?: number
+          acquisition_cost?: number
+          acquisition_date?: string
+          asset_name?: string
+          book_value?: number
+          coa_accumulated_depr_id?: string | null
+          coa_asset_id?: string
+          coa_depr_expense_id?: string | null
+          created_at?: string
+          created_from_journal_id?: string | null
+          depreciation_method?: string
+          id?: string
+          last_depreciation_date?: string | null
+          notes?: string | null
+          status?: string
+          unit_id?: string | null
+          updated_at?: string
+          useful_life_years?: number
+        }
+        Relationships: []
       }
       journal_entries: {
         Row: {
