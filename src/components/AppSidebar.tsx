@@ -14,6 +14,7 @@ import {
   Users,
   FileEdit,
   PieChart,
+  Boxes,
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -69,6 +70,7 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
             <NavLink item={{ to: "/jurnal-koreksi", label: "Jurnal Koreksi", icon: FileEdit }} active={isActive("/jurnal-koreksi")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/usp", label: "Unit Simpan Pinjam", icon: HandCoins }} active={isActive("/usp")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/dagang", label: "Unit Perdagangan", icon: Store }} active={isActive("/dagang")} onNavigate={onNavigate} />
+            <NavLink item={{ to: "/aset", label: "Aset Tetap", icon: Boxes }} active={isActive("/aset")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/pengaturan/bagi-hasil", label: "Master Bagi Hasil", icon: PieChart }} active={isActive("/pengaturan/bagi-hasil")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/pengaturan/users", label: "Manajemen User", icon: Users }} active={isActive("/pengaturan/users")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/pengaturan", label: "Pengaturan", icon: Settings }} active={isActive("/pengaturan")} onNavigate={onNavigate} />
@@ -83,6 +85,7 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
             <NavLink item={{ to: "/dagang/transfer", label: "Transfer Antar Unit", icon: GitCompare }} active={isActive("/dagang/transfer")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/dagang/laporan", label: "Laporan Dagang", icon: FileBarChart }} active={isActive("/dagang/laporan") && !path.startsWith("/dagang/laporan/bagi-hasil")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/dagang/laporan/bagi-hasil", label: "Bagi Hasil Dagang", icon: PieChart }} active={isActive("/dagang/laporan/bagi-hasil")} onNavigate={onNavigate} />
+            <NavLink item={{ to: "/dagang/aset", label: "Aset Tetap", icon: Boxes }} active={isActive("/dagang/aset")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/dagang/jurnal-koreksi", label: "Jurnal Koreksi", icon: FileEdit }} active={isActive("/dagang/jurnal-koreksi")} onNavigate={onNavigate} />
           </>
         )}
@@ -95,6 +98,7 @@ function SidebarInner({ onNavigate }: { onNavigate?: () => void }) {
             <NavLink item={{ to: "/usp/transfer", label: "Transfer", icon: GitCompare }} active={isActive("/usp/transfer")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/usp/laporan", label: "Laporan USP", icon: FileBarChart }} active={isActive("/usp/laporan") && !path.startsWith("/usp/laporan/bagi-hasil")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/usp/laporan/bagi-hasil", label: "Bagi Hasil USP", icon: PieChart }} active={isActive("/usp/laporan/bagi-hasil")} onNavigate={onNavigate} />
+            <NavLink item={{ to: "/usp/aset", label: "Aset Tetap", icon: Boxes }} active={isActive("/usp/aset")} onNavigate={onNavigate} />
             <NavLink item={{ to: "/usp/jurnal-koreksi", label: "Jurnal Koreksi", icon: FileEdit }} active={isActive("/usp/jurnal-koreksi")} onNavigate={onNavigate} />
           </>
         )}

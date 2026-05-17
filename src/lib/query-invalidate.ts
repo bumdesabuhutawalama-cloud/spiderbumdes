@@ -30,6 +30,9 @@ const FINANCIAL_KEYS = [
   "usp_recent_activity",
   "pdc",
   "pdr",
+  "fixed_assets",
+  "fixed_asset_depreciation_history",
+  "fa-history",
 ];
 
 /**
