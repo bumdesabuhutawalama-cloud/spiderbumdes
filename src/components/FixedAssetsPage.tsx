@@ -396,7 +396,130 @@ export function FixedAssetsPage({
 
       {editing && <EditAssetDialog asset={editing} onClose={() => setEditing(null)} />}
       {historyFor && <HistoryDialog asset={historyFor} onClose={() => setHistoryFor(null)} />}
+      {previewOpen && (
+        <PreviewDialog
+          start={periodRange.start}
+          end={periodRange.end}
+          rows={preview.data ?? []}
+          loading={preview.isLoading}
+          error={preview.error as Error | null}
+          running={runDepr.isPending}
+          onClose={() => setPreviewOpen(false)}
+          onConfirm={() => runDepr.mutate()}
+        />
+      )}
     </>
+  );
+}
+
+function PreviewDialog({
+  start,
+  end,
+  rows,
+  loading,
+  error,
+  running,
+  onClose,
+  onConfirm,
+}: {
+  start: string;
+  end: string;
+  rows: Array<{ period: string; asset_count: number; total_amount: number }>;
+  loading: boolean;
+  error: Error | null;
+  running: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  const totalAssets = rows.reduce((a, r) => Math.max(a, Number(r.asset_count)), 0);
+  const totalAmount = rows.reduce((a, r) => a + Number(r.total_amount), 0);
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4" onClick={onClose}>
+      <div
+        className="glass-card w-full max-w-lg rounded-2xl border border-border/60 p-5"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="mb-1 text-lg font-semibold">Pratinjau Penyusutan</h3>
+        <p className="mb-4 text-xs text-muted-foreground">
+          Periode {start} s/d {end}. Periode yang sudah pernah diproses otomatis dilewati.
+        </p>
+
+        {loading && (
+          <div className="py-8 text-center text-muted-foreground">
+            <Loader2 className="inline h-4 w-4 animate-spin" /> Menghitung...
+          </div>
+        )}
+        {error && (
+          <div className="rounded-lg border border-rose-500/40 bg-rose-500/10 p-3 text-sm text-rose-300">
+            {error.message}
+          </div>
+        )}
+        {!loading && !error && (
+          <>
+            <div className="mb-3 grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-lg border border-border/40 bg-secondary/40 p-3">
+                <div className="text-[10px] uppercase text-muted-foreground">Periode</div>
+                <div className="text-lg font-bold text-[var(--neon-cyan)]">{rows.length}</div>
+              </div>
+              <div className="rounded-lg border border-border/40 bg-secondary/40 p-3">
+                <div className="text-[10px] uppercase text-muted-foreground">Aset (max/bln)</div>
+                <div className="text-lg font-bold">{totalAssets}</div>
+              </div>
+              <div className="rounded-lg border border-border/40 bg-secondary/40 p-3">
+                <div className="text-[10px] uppercase text-muted-foreground">Total</div>
+                <div className="text-sm font-bold text-[var(--neon-green)]">{formatRp(totalAmount)}</div>
+              </div>
+            </div>
+            <div className="max-h-64 overflow-y-auto rounded-lg border border-border/40">
+              <table className="w-full text-sm">
+                <thead className="bg-secondary/60 text-[11px] uppercase tracking-wide text-muted-foreground">
+                  <tr>
+                    <th className="px-3 py-2 text-left">Periode</th>
+                    <th className="px-3 py-2 text-right">Aset</th>
+                    <th className="px-3 py-2 text-right">Nilai Penyusutan</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.length === 0 && (
+                    <tr>
+                      <td colSpan={3} className="px-3 py-6 text-center text-muted-foreground">
+                        Tidak ada periode yang perlu diproses (semua sudah dijurnal atau belum
+                        ada aset aktif).
+                      </td>
+                    </tr>
+                  )}
+                  {rows.map((r) => (
+                    <tr key={r.period} className="border-t border-border/40">
+                      <td className="px-3 py-2">{r.period}</td>
+                      <td className="px-3 py-2 text-right tabular-nums">{r.asset_count}</td>
+                      <td className="px-3 py-2 text-right font-mono tabular-nums">
+                        {formatRp(Number(r.total_amount))}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+
+        <div className="mt-5 flex justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="rounded-lg border border-border/60 bg-secondary px-4 py-2 text-sm"
+          >
+            Batal
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={running || loading || rows.length === 0}
+            className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-green)] px-4 py-2 text-sm font-semibold text-[oklch(0.15_0.03_250)] disabled:opacity-50"
+          >
+            {running && <Loader2 className="h-4 w-4 animate-spin" />} Proses Sekarang
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
