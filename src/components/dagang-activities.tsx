@@ -328,6 +328,7 @@ function PenjualanForm({ kredit, onClose }: { kredit: boolean; onClose: () => vo
   const { data: accs } = useAccountsByCodes([
     ACC.KAS_DAGANG,
     ACC.PIUTANG,
+    ACC.PIUTANG_KREDIT,
     ACC.PERSEDIAAN,
     ACC.PENDAPATAN,
     ACC.HPP,
@@ -355,7 +356,7 @@ function PenjualanForm({ kredit, onClose }: { kredit: boolean; onClose: () => vo
       if (Number(product.stock_qty) < qtyN)
         throw new Error(`Stok tidak cukup. Tersedia: ${product.stock_qty} ${product.uom}`);
 
-      const kasOrPiutang = kredit ? accs?.get(ACC.PIUTANG) : accs?.get(ACC.KAS_DAGANG);
+      const kasOrPiutang = kredit ? accs?.get(ACC.PIUTANG_KREDIT) : accs?.get(ACC.KAS_DAGANG);
       const pendapatan = accs?.get(ACC.PENDAPATAN);
       const hpp = accs?.get(ACC.HPP);
       const persediaan = accs?.get(ACC.PERSEDIAAN);
