@@ -36,6 +36,7 @@ type Product = {
 const ACC = {
   KAS_DAGANG: "1.1.01.99",
   PIUTANG: "1.1.03.01",
+  PIUTANG_KREDIT: "1.1.03.05",
   PERSEDIAAN: "1.1.05.01",
   UTANG: "2.1.01.01",
   PENDAPATAN: "4.2.01.00",
@@ -327,6 +328,7 @@ function PenjualanForm({ kredit, onClose }: { kredit: boolean; onClose: () => vo
   const { data: accs } = useAccountsByCodes([
     ACC.KAS_DAGANG,
     ACC.PIUTANG,
+    ACC.PIUTANG_KREDIT,
     ACC.PERSEDIAAN,
     ACC.PENDAPATAN,
     ACC.HPP,
@@ -354,7 +356,7 @@ function PenjualanForm({ kredit, onClose }: { kredit: boolean; onClose: () => vo
       if (Number(product.stock_qty) < qtyN)
         throw new Error(`Stok tidak cukup. Tersedia: ${product.stock_qty} ${product.uom}`);
 
-      const kasOrPiutang = kredit ? accs?.get(ACC.PIUTANG) : accs?.get(ACC.KAS_DAGANG);
+      const kasOrPiutang = kredit ? accs?.get(ACC.PIUTANG_KREDIT) : accs?.get(ACC.KAS_DAGANG);
       const pendapatan = accs?.get(ACC.PENDAPATAN);
       const hpp = accs?.get(ACC.HPP);
       const persediaan = accs?.get(ACC.PERSEDIAAN);
@@ -512,7 +514,7 @@ function PenjualanForm({ kredit, onClose }: { kredit: boolean; onClose: () => vo
             Pratinjau Jurnal Otomatis
           </div>
           <p>
-            Dr {kredit ? "Piutang Usaha" : "Kas Unit Perdagangan"}{" "}
+            Dr {kredit ? "Piutang Usaha Penjualan Kredit" : "Kas Unit Perdagangan"}{" "}
             <span className="font-mono text-[var(--neon-green)]">{fmtRp(totalJual)}</span>
           </p>
           <p>
@@ -569,30 +571,42 @@ function SimpleCashForm({
   const [tanggal, setTanggal] = useState(today);
   const [jumlah, setJumlah] = useState("");
   const [keterangan, setKeterangan] = useState("");
+  const [piutangType, setPiutangType] = useState<"USAHA" | "KREDIT">("USAHA");
 
-  const { data: accs } = useAccountsByCodes([ACC.KAS_DAGANG, ACC.PIUTANG, ACC.UTANG]);
+  const { data: accs } = useAccountsByCodes([
+    ACC.KAS_DAGANG,
+    ACC.PIUTANG,
+    ACC.PIUTANG_KREDIT,
+    ACC.UTANG,
+  ]);
   const nominal = Number(jumlah.replace(/[^\d]/g, "")) || 0;
 
   const isTerima = mode === "TERIMA_PIUTANG";
   const title = isTerima ? "Penerimaan Piutang" : "Pembayaran Utang";
   const Icon = isTerima ? HandCoins : CreditCard;
+  const piutangAcc = piutangType === "KREDIT" ? accs?.get(ACC.PIUTANG_KREDIT) : accs?.get(ACC.PIUTANG);
+  const piutangLabel = piutangType === "KREDIT" ? "Piutang Usaha Penjualan Kredit" : "Piutang Usaha";
 
   const submit = useMutation({
     mutationFn: async () => {
       if (nominal <= 0) throw new Error("Jumlah harus > 0");
       const kas = accs?.get(ACC.KAS_DAGANG);
-      const lawan = isTerima ? accs?.get(ACC.PIUTANG) : accs?.get(ACC.UTANG);
+      const lawan = isTerima ? piutangAcc : accs?.get(ACC.UTANG);
       if (!kas || !lawan) throw new Error("Akun COA tidak lengkap");
 
       const dr = isTerima ? kas : lawan;
       const cr = isTerima ? lawan : kas;
-      const desc = keterangan || (isTerima ? "Penerimaan pelunasan piutang" : "Pembayaran utang ke supplier");
+      const desc =
+        keterangan ||
+        (isTerima
+          ? `Penerimaan pelunasan ${piutangLabel.toLowerCase()}`
+          : "Pembayaran utang ke supplier");
 
       const { data: je, error: jeErr } = await supabase
         .from("journal_entries")
         .insert({
           transaction_date: tanggal,
-          transaction_type: `DAGANG_${mode}`,
+          transaction_type: `DAGANG_${mode}${isTerima ? `_${piutangType}` : ""}`,
           description: desc,
           total_amount: nominal,
         })
@@ -652,6 +666,18 @@ function SimpleCashForm({
             />
           </div>
         </Field>
+        {isTerima && (
+          <Field label="Jenis Piutang" className="sm:col-span-2">
+            <select
+              value={piutangType}
+              onChange={(e) => setPiutangType(e.target.value as "USAHA" | "KREDIT")}
+              className="input-glass"
+            >
+              <option value="USAHA">Piutang Usaha (1.1.03.01)</option>
+              <option value="KREDIT">Piutang Usaha Penjualan Kredit (1.1.03.05)</option>
+            </select>
+          </Field>
+        )}
         <Field label="Keterangan" className="sm:col-span-2">
           <input
             type="text"
@@ -668,7 +694,7 @@ function SimpleCashForm({
           {isTerima ? (
             <>
               <p>Dr Kas Unit Perdagangan <span className="font-mono text-[var(--neon-green)]">{fmtRp(nominal)}</span></p>
-              <p>Cr Piutang Usaha <span className="font-mono text-[var(--neon-green)]">{fmtRp(nominal)}</span></p>
+              <p>Cr {piutangLabel} <span className="font-mono text-[var(--neon-green)]">{fmtRp(nominal)}</span></p>
             </>
           ) : (
             <>
@@ -681,7 +707,7 @@ function SimpleCashForm({
           onClose={onClose}
           onSubmit={() => submit.mutate()}
           pending={submit.isPending}
-          disabled={nominal <= 0}
+          disabled={nominal <= 0 || (isTerima && !piutangAcc)}
           accent={isTerima ? "from-emerald-400 to-[var(--neon-cyan)]" : "from-rose-400 to-amber-300"}
         />
       </div>
