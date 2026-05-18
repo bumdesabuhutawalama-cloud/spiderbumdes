@@ -854,9 +854,33 @@ export type Database = {
         Returns: boolean
       }
       is_pusat: { Args: { _user_id: string }; Returns: boolean }
+      preview_fixed_asset_depreciation: {
+        Args: {
+          p_end_period: string
+          p_start_period: string
+          p_unit_id?: string
+        }
+        Returns: {
+          asset_count: number
+          period: string
+          total_amount: number
+        }[]
+      }
       recalc_account_balance: {
         Args: { p_account_id: string; p_period: string }
         Returns: undefined
+      }
+      run_fixed_asset_depreciation: {
+        Args: {
+          p_end_period: string
+          p_start_period: string
+          p_unit_id?: string
+        }
+        Returns: {
+          processed: number
+          skipped: number
+          total_amount: number
+        }[]
       }
     }
     Enums: {
