@@ -41,22 +41,34 @@ export type UnitMode = "pusat" | "unit" | "konsolidasi";
  */
 async function fetchUnitJournalIds(unitId: string): Promise<string[]> {
   // Akun "milik" unit: kas_account_id pada units + akun RK yang owner-nya unit ini.
-  const [{ data: unit }, { data: rk }] = await Promise.all([
+  const [{ data: unit }, { data: rk }, { data: faHist }] = await Promise.all([
     supabase.from("units").select("kas_account_id").eq("id", unitId).maybeSingle(),
     supabase.from("entity_rk_accounts").select("account_id").eq("owner_entity_id", unitId),
+    // Jurnal penyusutan tidak menyentuh kas unit; ambil via fixed_assets→history.
+    supabase
+      .from("fixed_asset_depreciation_history" as never)
+      .select("journal_id, fixed_assets!inner(unit_id)")
+      .eq("fixed_assets.unit_id", unitId)
+      .limit(50000),
   ]);
+  const ids = new Set<string>();
   const ownedIds = new Set<string>();
   if (unit?.kas_account_id) ownedIds.add(unit.kas_account_id as string);
   for (const r of rk ?? []) ownedIds.add((r as { account_id: string }).account_id);
-  if (ownedIds.size === 0) return [];
-  // Jurnal yang menyentuh salah satu akun milik unit → seluruh sisi jurnal itu
-  // ikut dihitung sebagai aktivitas unit (menjaga keseimbangan double-entry).
-  const { data: lines } = await supabase
-    .from("journal_entry_lines")
-    .select("journal_entry_id")
-    .in("account_id", Array.from(ownedIds))
-    .limit(50000);
-  return Array.from(new Set((lines ?? []).map((l) => (l as { journal_entry_id: string }).journal_entry_id)));
+  for (const h of (faHist ?? []) as unknown as { journal_id: string | null }[]) {
+    if (h.journal_id) ids.add(h.journal_id);
+  }
+  if (ownedIds.size > 0) {
+    // Jurnal yang menyentuh salah satu akun milik unit → seluruh sisi jurnal itu
+    // ikut dihitung sebagai aktivitas unit (menjaga keseimbangan double-entry).
+    const { data: lines } = await supabase
+      .from("journal_entry_lines")
+      .select("journal_entry_id")
+      .in("account_id", Array.from(ownedIds))
+      .limit(50000);
+    for (const l of lines ?? []) ids.add((l as { journal_entry_id: string }).journal_entry_id);
+  }
+  return Array.from(ids);
 }
 
 async function fetchBalances(

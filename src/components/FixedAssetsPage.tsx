@@ -1,6 +1,14 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, PlayCircle, Pencil, Sparkles, History, AlertTriangle } from "lucide-react";
+import {
+  Loader2,
+  PlayCircle,
+  Pencil,
+  Sparkles,
+  History,
+  AlertTriangle,
+  CalendarRange,
+} from "lucide-react";
 import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateFinancials } from "@/lib/query-invalidate";
@@ -60,12 +68,15 @@ export function FixedAssetsPage({
 }: {
   title: string;
   subtitle: string;
-  fixedUnitCode?: "DAGANG" | "USP";
+  fixedUnitCode?: string;
 }) {
   const qc = useQueryClient();
+  const [mode, setMode] = useState<"monthly" | "backfill">("monthly");
   const [period, setPeriod] = useState<string>(currentPeriod());
+  const [backfillEnd, setBackfillEnd] = useState<string>(`${new Date().getFullYear()}-12-31`);
   const [editing, setEditing] = useState<AssetRow | null>(null);
   const [historyFor, setHistoryFor] = useState<AssetRow | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const unit = useQuery({
     queryKey: ["unit-by-code-aset", fixedUnitCode ?? ""],
@@ -132,114 +143,70 @@ export function FixedAssetsPage({
     });
   }, [assets.data, today]);
 
-  const runDepr = useMutation({
-    mutationFn: async (p: string) => {
-      const [yStr, mStr] = p.split("-");
-      const year = Number(yStr);
-      const month = Number(mStr);
-      if (!year || !month) throw new Error("Periode tidak valid");
-      const periodEnd = new Date(year, month, 0).toISOString().slice(0, 10);
+  // Hitung rentang periode yang akan diproses berdasarkan mode terpilih.
+  const periodRange = useMemo(() => {
+    if (mode === "monthly") return { start: period, end: period };
+    // Backfill: mulai dari bulan akuisisi aset paling awal milik unit/global,
+    // sampai bulan akhir yang dipilih user.
+    const list = assets.data ?? [];
+    if (!list.length) return { start: period, end: period };
+    const earliest = list
+      .filter((a) => a.status === "ACTIVE" && a.useful_life_years > 0)
+      .map((a) => a.acquisition_date.slice(0, 7))
+      .sort()[0];
+    return {
+      start: earliest ?? period,
+      end: backfillEnd.slice(0, 7),
+    };
+  }, [mode, period, backfillEnd, assets.data]);
 
-      const list = (assets.data ?? []).filter(
-        (a) =>
-          a.status === "ACTIVE" &&
-          a.useful_life_years > 0 &&
-          a.coa_accumulated_depr_id &&
-          a.coa_depr_expense_id,
+  const preview = useQuery({
+    queryKey: ["fa-preview", periodRange.start, periodRange.end, unitId ?? "all", previewOpen],
+    enabled: previewOpen,
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc(
+        "preview_fixed_asset_depreciation" as never,
+        {
+          p_start_period: periodRange.start,
+          p_end_period: periodRange.end,
+          p_unit_id: unitId,
+        } as never,
       );
-      if (list.length === 0) throw new Error("Tidak ada aset yang dapat disusutkan periode ini.");
-
-      let processed = 0;
-      let skipped = 0;
-      for (const a of list) {
-        // Skip if already depreciated this period
-        const { data: exists } = await supabase
-          .from("fixed_asset_depreciation_history" as never)
-          .select("id")
-          .eq("asset_id", a.id)
-          .eq("period_year", year)
-          .eq("period_month", month)
-          .maybeSingle();
-        if (exists) {
-          skipped += 1;
-          continue;
-        }
-
-        const monthly = a.acquisition_cost / (a.useful_life_years * 12);
-        const remaining = Math.max(0, a.acquisition_cost - Number(a.accumulated_depreciation || 0));
-        const amount = Math.min(monthly, remaining);
-        if (amount <= 0.5) {
-          skipped += 1;
-          continue;
-        }
-
-        const expAcc = coaById.get(a.coa_depr_expense_id!);
-        const accAcc = coaById.get(a.coa_accumulated_depr_id!);
-        if (!expAcc || !accAcc) {
-          skipped += 1;
-          continue;
-        }
-
-        const { data: je, error: jeErr } = await supabase
-          .from("journal_entries")
-          .insert({
-            transaction_date: periodEnd,
-            transaction_type: "PENYUSUTAN",
-            description: `Penyusutan ${a.asset_name} periode ${p}`,
-            total_amount: amount,
-          })
-          .select("id")
-          .single();
-        if (jeErr || !je) throw jeErr ?? new Error("Gagal membuat jurnal");
-
-        const { error: lErr } = await supabase.from("journal_entry_lines").insert([
-          {
-            journal_entry_id: je.id,
-            account_id: expAcc.id,
-            account_code: expAcc.code,
-            account_name: expAcc.name,
-            debit: amount,
-            credit: 0,
-            line_order: 1,
-          },
-          {
-            journal_entry_id: je.id,
-            account_id: accAcc.id,
-            account_code: accAcc.code,
-            account_name: accAcc.name,
-            debit: 0,
-            credit: amount,
-            line_order: 2,
-          },
-        ]);
-        if (lErr) throw lErr;
-
-        await supabase.from("fixed_asset_depreciation_history" as never).insert({
-          asset_id: a.id,
-          period_year: year,
-          period_month: month,
-          depreciation_amount: amount,
-          journal_id: je.id,
-        } as never);
-
-        const newAcc = Number(a.accumulated_depreciation || 0) + amount;
-        const newBook = a.acquisition_cost - newAcc;
-        await supabase
-          .from("fixed_assets" as never)
-          .update({
-            accumulated_depreciation: newAcc,
-            book_value: newBook,
-            last_depreciation_date: periodEnd,
-            status: newBook <= 0.5 ? "FULLY_DEPRECIATED" : "ACTIVE",
-          } as never)
-          .eq("id", a.id);
-        processed += 1;
-      }
-
-      return { processed, skipped };
+      if (error) throw error;
+      return (data ?? []) as unknown as Array<{
+        period: string;
+        asset_count: number;
+        total_amount: number;
+      }>;
     },
-    onSuccess: ({ processed, skipped }) => {
-      toast.success(`Penyusutan selesai: ${processed} aset diproses, ${skipped} dilewati.`);
+  });
+
+  const runDepr = useMutation({
+    mutationFn: async () => {
+      if (!periodRange.start || !periodRange.end) throw new Error("Periode tidak valid");
+      if (periodRange.start > periodRange.end)
+        throw new Error("Periode awal harus <= periode akhir.");
+      const { data, error } = await supabase.rpc(
+        "run_fixed_asset_depreciation" as never,
+        {
+          p_start_period: periodRange.start,
+          p_end_period: periodRange.end,
+          p_unit_id: unitId,
+        } as never,
+      );
+      if (error) throw error;
+      const row = (data as unknown as Array<{
+        processed: number;
+        skipped: number;
+        total_amount: number;
+      }>)?.[0];
+      return row ?? { processed: 0, skipped: 0, total_amount: 0 };
+    },
+    onSuccess: ({ processed, skipped, total_amount }) => {
+      toast.success(
+        `Penyusutan selesai: ${processed} jurnal dibuat, ${skipped} dilewati. Total ${formatRp(Number(total_amount))}.`,
+      );
+      setPreviewOpen(false);
       void invalidateFinancials(qc);
     },
     onError: (e: unknown) =>
@@ -253,14 +220,49 @@ export function FixedAssetsPage({
         subtitle={subtitle}
         actions={
           <div className="flex flex-wrap items-center gap-2">
-            <input
-              type="month"
-              value={period}
-              onChange={(e) => setPeriod(e.target.value)}
-              className="rounded-lg border border-border/60 bg-secondary/60 px-3 py-2 text-sm outline-none [color-scheme:dark]"
-            />
+            <div className="inline-flex rounded-lg border border-border/60 bg-secondary/60 p-0.5 text-xs">
+              <button
+                onClick={() => setMode("monthly")}
+                className={`rounded-md px-3 py-1.5 transition ${
+                  mode === "monthly"
+                    ? "bg-[var(--neon-cyan)]/20 text-[var(--neon-cyan)] font-semibold"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Bulanan
+              </button>
+              <button
+                onClick={() => setMode("backfill")}
+                className={`rounded-md px-3 py-1.5 transition ${
+                  mode === "backfill"
+                    ? "bg-[var(--neon-cyan)]/20 text-[var(--neon-cyan)] font-semibold"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Backfill / Akhir Tahun
+              </button>
+            </div>
+            {mode === "monthly" ? (
+              <input
+                type="month"
+                value={period}
+                onChange={(e) => setPeriod(e.target.value)}
+                className="rounded-lg border border-border/60 bg-secondary/60 px-3 py-2 text-sm outline-none [color-scheme:dark]"
+              />
+            ) : (
+              <div className="inline-flex items-center gap-2 rounded-lg border border-border/60 bg-secondary/60 px-3 py-2 text-sm">
+                <CalendarRange className="h-4 w-4 text-muted-foreground" />
+                <span className="text-muted-foreground">s/d</span>
+                <input
+                  type="date"
+                  value={backfillEnd}
+                  onChange={(e) => setBackfillEnd(e.target.value)}
+                  className="bg-transparent text-sm outline-none [color-scheme:dark]"
+                />
+              </div>
+            )}
             <button
-              onClick={() => runDepr.mutate(period)}
+              onClick={() => setPreviewOpen(true)}
               disabled={runDepr.isPending || !computed.length}
               className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-green)] px-4 py-2 text-sm font-semibold text-[oklch(0.15_0.03_250)] glow-cyan hover:opacity-90 transition disabled:opacity-50"
             >
@@ -394,7 +396,130 @@ export function FixedAssetsPage({
 
       {editing && <EditAssetDialog asset={editing} onClose={() => setEditing(null)} />}
       {historyFor && <HistoryDialog asset={historyFor} onClose={() => setHistoryFor(null)} />}
+      {previewOpen && (
+        <PreviewDialog
+          start={periodRange.start}
+          end={periodRange.end}
+          rows={preview.data ?? []}
+          loading={preview.isLoading}
+          error={preview.error as Error | null}
+          running={runDepr.isPending}
+          onClose={() => setPreviewOpen(false)}
+          onConfirm={() => runDepr.mutate()}
+        />
+      )}
     </>
+  );
+}
+
+function PreviewDialog({
+  start,
+  end,
+  rows,
+  loading,
+  error,
+  running,
+  onClose,
+  onConfirm,
+}: {
+  start: string;
+  end: string;
+  rows: Array<{ period: string; asset_count: number; total_amount: number }>;
+  loading: boolean;
+  error: Error | null;
+  running: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  const totalAssets = rows.reduce((a, r) => Math.max(a, Number(r.asset_count)), 0);
+  const totalAmount = rows.reduce((a, r) => a + Number(r.total_amount), 0);
+  return (
+    <div className="fixed inset-0 z-50 grid place-items-center bg-black/60 p-4" onClick={onClose}>
+      <div
+        className="glass-card w-full max-w-lg rounded-2xl border border-border/60 p-5"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <h3 className="mb-1 text-lg font-semibold">Pratinjau Penyusutan</h3>
+        <p className="mb-4 text-xs text-muted-foreground">
+          Periode {start} s/d {end}. Periode yang sudah pernah diproses otomatis dilewati.
+        </p>
+
+        {loading && (
+          <div className="py-8 text-center text-muted-foreground">
+            <Loader2 className="inline h-4 w-4 animate-spin" /> Menghitung...
+          </div>
+        )}
+        {error && (
+          <div className="rounded-lg border border-rose-500/40 bg-rose-500/10 p-3 text-sm text-rose-300">
+            {error.message}
+          </div>
+        )}
+        {!loading && !error && (
+          <>
+            <div className="mb-3 grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-lg border border-border/40 bg-secondary/40 p-3">
+                <div className="text-[10px] uppercase text-muted-foreground">Periode</div>
+                <div className="text-lg font-bold text-[var(--neon-cyan)]">{rows.length}</div>
+              </div>
+              <div className="rounded-lg border border-border/40 bg-secondary/40 p-3">
+                <div className="text-[10px] uppercase text-muted-foreground">Aset (max/bln)</div>
+                <div className="text-lg font-bold">{totalAssets}</div>
+              </div>
+              <div className="rounded-lg border border-border/40 bg-secondary/40 p-3">
+                <div className="text-[10px] uppercase text-muted-foreground">Total</div>
+                <div className="text-sm font-bold text-[var(--neon-green)]">{formatRp(totalAmount)}</div>
+              </div>
+            </div>
+            <div className="max-h-64 overflow-y-auto rounded-lg border border-border/40">
+              <table className="w-full text-sm">
+                <thead className="bg-secondary/60 text-[11px] uppercase tracking-wide text-muted-foreground">
+                  <tr>
+                    <th className="px-3 py-2 text-left">Periode</th>
+                    <th className="px-3 py-2 text-right">Aset</th>
+                    <th className="px-3 py-2 text-right">Nilai Penyusutan</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.length === 0 && (
+                    <tr>
+                      <td colSpan={3} className="px-3 py-6 text-center text-muted-foreground">
+                        Tidak ada periode yang perlu diproses (semua sudah dijurnal atau belum
+                        ada aset aktif).
+                      </td>
+                    </tr>
+                  )}
+                  {rows.map((r) => (
+                    <tr key={r.period} className="border-t border-border/40">
+                      <td className="px-3 py-2">{r.period}</td>
+                      <td className="px-3 py-2 text-right tabular-nums">{r.asset_count}</td>
+                      <td className="px-3 py-2 text-right font-mono tabular-nums">
+                        {formatRp(Number(r.total_amount))}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
+
+        <div className="mt-5 flex justify-end gap-2">
+          <button
+            onClick={onClose}
+            className="rounded-lg border border-border/60 bg-secondary px-4 py-2 text-sm"
+          >
+            Batal
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={running || loading || rows.length === 0}
+            className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-[var(--neon-cyan)] to-[var(--neon-green)] px-4 py-2 text-sm font-semibold text-[oklch(0.15_0.03_250)] disabled:opacity-50"
+          >
+            {running && <Loader2 className="h-4 w-4 animate-spin" />} Proses Sekarang
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 
