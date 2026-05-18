@@ -68,12 +68,15 @@ export function FixedAssetsPage({
 }: {
   title: string;
   subtitle: string;
-  fixedUnitCode?: "DAGANG" | "USP";
+  fixedUnitCode?: string;
 }) {
   const qc = useQueryClient();
+  const [mode, setMode] = useState<"monthly" | "backfill">("monthly");
   const [period, setPeriod] = useState<string>(currentPeriod());
+  const [backfillEnd, setBackfillEnd] = useState<string>(`${new Date().getFullYear()}-12-31`);
   const [editing, setEditing] = useState<AssetRow | null>(null);
   const [historyFor, setHistoryFor] = useState<AssetRow | null>(null);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const unit = useQuery({
     queryKey: ["unit-by-code-aset", fixedUnitCode ?? ""],
