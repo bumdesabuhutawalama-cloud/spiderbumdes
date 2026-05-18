@@ -514,7 +514,7 @@ function PenjualanForm({ kredit, onClose }: { kredit: boolean; onClose: () => vo
             Pratinjau Jurnal Otomatis
           </div>
           <p>
-            Dr {kredit ? "Piutang Usaha" : "Kas Unit Perdagangan"}{" "}
+            Dr {kredit ? "Piutang Usaha Penjualan Kredit" : "Kas Unit Perdagangan"}{" "}
             <span className="font-mono text-[var(--neon-green)]">{fmtRp(totalJual)}</span>
           </p>
           <p>
