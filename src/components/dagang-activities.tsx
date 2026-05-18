@@ -36,6 +36,7 @@ type Product = {
 const ACC = {
   KAS_DAGANG: "1.1.01.99",
   PIUTANG: "1.1.03.01",
+  PIUTANG_KREDIT: "1.1.03.05",
   PERSEDIAAN: "1.1.05.01",
   UTANG: "2.1.01.01",
   PENDAPATAN: "4.2.01.00",
