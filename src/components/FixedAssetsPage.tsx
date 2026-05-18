@@ -1,6 +1,14 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Loader2, PlayCircle, Pencil, Sparkles, History, AlertTriangle } from "lucide-react";
+import {
+  Loader2,
+  PlayCircle,
+  Pencil,
+  Sparkles,
+  History,
+  AlertTriangle,
+  CalendarRange,
+} from "lucide-react";
 import { PageHeader } from "@/components/DashboardLayout";
 import { supabase } from "@/integrations/supabase/client";
 import { invalidateFinancials } from "@/lib/query-invalidate";
