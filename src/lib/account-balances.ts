@@ -51,8 +51,15 @@ async function fetchUnitJournalIds(unitId: string): Promise<string[]> {
       .eq("fixed_assets.unit_id", unitId)
       .limit(50000),
   ]);
+  const ids = new Set<string>();
+  const ownedIds = new Set<string>();
+  if (unit?.kas_account_id) ownedIds.add(unit.kas_account_id as string);
+  for (const r of rk ?? []) ownedIds.add((r as { account_id: string }).account_id);
+  for (const h of (faHist ?? []) as unknown as { journal_id: string | null }[]) {
+    if (h.journal_id) ids.add(h.journal_id);
+  }
   // Jurnal yang transaction_type-nya diawali kode unit (mis. DAGANG_*, USP_*)
-  // ikut diklaim sebagai aktivitas unit, walau tidak menyentuh kas unit
+  // ikut diklaim sebagai aktivitas unit walau tidak menyentuh kas unit
   // (mis. penjualan kredit: Dr Piutang / Cr Pendapatan / Dr HPP / Cr Persediaan).
   const unitCode = (unit as { code?: string } | null)?.code;
   if (unitCode) {
@@ -61,18 +68,7 @@ async function fetchUnitJournalIds(unitId: string): Promise<string[]> {
       .select("id")
       .like("transaction_type", `${unitCode}_%`)
       .limit(50000);
-    for (const j of typedJe ?? []) {
-      (j as { id: string }).id && void 0;
-    }
-    // merge below
-    (faHist as unknown as { __typed?: { id: string }[] }).__typed = (typedJe ?? []) as { id: string }[];
-  }
-  const ids = new Set<string>();
-  const ownedIds = new Set<string>();
-  if (unit?.kas_account_id) ownedIds.add(unit.kas_account_id as string);
-  for (const r of rk ?? []) ownedIds.add((r as { account_id: string }).account_id);
-  for (const h of (faHist ?? []) as unknown as { journal_id: string | null }[]) {
-    if (h.journal_id) ids.add(h.journal_id);
+    for (const j of typedJe ?? []) ids.add((j as { id: string }).id);
   }
   if (ownedIds.size > 0) {
     // Jurnal yang menyentuh salah satu akun milik unit → seluruh sisi jurnal itu
