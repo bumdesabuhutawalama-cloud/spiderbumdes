@@ -42,7 +42,7 @@ export type UnitMode = "pusat" | "unit" | "konsolidasi";
 async function fetchUnitJournalIds(unitId: string): Promise<string[]> {
   // Akun "milik" unit: kas_account_id pada units + akun RK yang owner-nya unit ini.
   const [{ data: unit }, { data: rk }, { data: faHist }] = await Promise.all([
-    supabase.from("units").select("kas_account_id").eq("id", unitId).maybeSingle(),
+    supabase.from("units").select("kas_account_id,code").eq("id", unitId).maybeSingle(),
     supabase.from("entity_rk_accounts").select("account_id").eq("owner_entity_id", unitId),
     // Jurnal penyusutan tidak menyentuh kas unit; ambil via fixed_assets→history.
     supabase
@@ -51,6 +51,22 @@ async function fetchUnitJournalIds(unitId: string): Promise<string[]> {
       .eq("fixed_assets.unit_id", unitId)
       .limit(50000),
   ]);
+  // Jurnal yang transaction_type-nya diawali kode unit (mis. DAGANG_*, USP_*)
+  // ikut diklaim sebagai aktivitas unit, walau tidak menyentuh kas unit
+  // (mis. penjualan kredit: Dr Piutang / Cr Pendapatan / Dr HPP / Cr Persediaan).
+  const unitCode = (unit as { code?: string } | null)?.code;
+  if (unitCode) {
+    const { data: typedJe } = await supabase
+      .from("journal_entries")
+      .select("id")
+      .like("transaction_type", `${unitCode}_%`)
+      .limit(50000);
+    for (const j of typedJe ?? []) {
+      (j as { id: string }).id && void 0;
+    }
+    // merge below
+    (faHist as unknown as { __typed?: { id: string }[] }).__typed = (typedJe ?? []) as { id: string }[];
+  }
   const ids = new Set<string>();
   const ownedIds = new Set<string>();
   if (unit?.kas_account_id) ownedIds.add(unit.kas_account_id as string);
